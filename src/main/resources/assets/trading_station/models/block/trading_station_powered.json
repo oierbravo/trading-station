@@ -1,0 +1,7 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "trading_station:block/trading_station",
+	"textures": {
+		"3": "trading_station:block/trading_station_powered"
+	}
+}

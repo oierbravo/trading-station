@@ -1,0 +1,63 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "minecraft/block",
+	"render_type": "minecraft:translucent",
+	"textures": {
+		"3": "trading_station:block/trading_station"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 17],
+			"faces": {
+				"north": {"uv": [0, 0, 8, 8], "texture": "#3"},
+				"east": {"uv": [0, 8, 8, 16], "texture": "#3"},
+				"south": {"uv": [0, 8, 8, 16], "texture": "#3"},
+				"west": {"uv": [0, 8, 8, 16], "texture": "#3"},
+				"up": {"uv": [8, 0, 16, 8], "texture": "#3"},
+				"down": {"uv": [8, 8, 16, 16], "texture": "#3"}
+			}
+		},
+		{
+			"from": [3, 16, 4],
+			"to": [13, 18, 13],
+			"faces": {
+				"north": {"uv": [9.5, 5, 14.5, 6], "texture": "#3"},
+				"east": {"uv": [9.5, 5, 14.5, 6], "texture": "#3"},
+				"south": {"uv": [9.5, 5, 14.5, 6], "texture": "#3"},
+				"west": {"uv": [9.5, 5, 14.5, 6], "texture": "#3"},
+				"up": {"uv": [9.5, 2, 14.5, 6], "texture": "#3"},
+				"down": {"uv": [0, 0, 0, 0], "texture": "#3"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"thirdperson_lefthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"firstperson_righthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"firstperson_lefthand": {
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"ground": {
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [23, 135, 0],
+			"scale": [0.61, 0.61, 0.61]
+		},
+		"head": {
+			"scale": [0.89, 0.89, 0.89]
+		},
+		"fixed": {
+			"rotation": [0, -45, 0],
+			"translation": [0, 0, -2.5],
+			"scale": [0.72, 0.72, 0.72]
+		}
+	}
+}

@@ -1,0 +1,321 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public' }
+        maven { url = 'https://maven.parchmentmc.org' }
+
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${forgegradle_version}", changing: false
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
+        classpath "org.parchmentmc:librarian:1.+"
+    }
+}
+
+plugins {
+    id 'maven-publish'
+    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
+    id "com.modrinth.minotaur" version "2.+"
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+apply plugin: 'com.matthewprenger.cursegradle'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+
+jarJar.enable()
+
+group = "com.${author}.${modid}"
+version = "${mod_version}"
+archivesBaseName = "${modid}-${minecraft_version}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+minecraft {
+    if (Boolean.parseBoolean(project.use_parchment)) {
+        mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
+    } else {
+        mappings channel: 'official', version: "${minecraft_version}"
+    }
+
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', 'trading_station'
+
+            mods {
+                trading_station {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', 'trading_station'
+
+            mods {
+                trading_station {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', 'trading_station'
+
+            mods {
+                trading_station {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'trading_station', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                trading_station {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    maven {
+        // Location of the maven that hosts JEI files (and TiC)
+        name 'Progwml6 maven'
+        url 'https://dvs1.progwml6.com/files/maven'
+    }
+    maven {
+        name = 'tterrag maven'
+        url = 'https://maven.tterrag.com/'
+    }
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        url "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+            includeGroup "dev.ftb.mods"
+        }
+    }
+    maven {
+        url "https://maven.architectury.dev/"
+        content {
+            includeGroup "dev.architectury"
+        }
+    }
+    maven {
+        url "https://maven.blamejared.com"
+    }
+}
+
+
+dependencies {
+    implementation 'org.jetbrains:annotations:22.0.0'
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.19,MC1.20)")
+
+    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: '[MC1.19-1.1.5,)') {
+        jarJar.pin(it, project.registrate_version)
+    }
+    implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
+
+    compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge-api:${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge:${jei_version}")
+
+    if (kubejs_enabled.toBoolean()) {
+        implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
+        implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
+        implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+    }
+    implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
+
+    if (create_enabled.toBoolean()) {
+        implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
+        implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+    }
+
+    if (ct_enabled.toBoolean()) {
+        def minecraftVersion= "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+        def ctDep = "com.blamejared.crafttweaker:CraftTweaker-forge-${ct_minecraft_version}:${ct_version}"
+        compileOnly(ctDep)
+        runtimeOnly(fg.deobf(ctDep))
+
+        annotationProcessor "com.blamejared.crafttweaker:Crafttweaker_Annotation_Processors:${ct_annotation_processor_version}"
+        annotationProcessor minecraftVersion
+        annotationProcessor ctDep
+    }
+
+    //annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileJava {
+    options.compilerArgs = ['-Xdiags:verbose']
+}
+tasks.withType(Jar) {
+    //from tasks.createChangelog.outputFile
+    archiveClassifier = 'slim'
+    manifest {
+        attributes([
+                "Specification-Title"     : modid,
+                "Specification-Vendor"    : author,
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.version,
+                "Implementation-Vendor"   : author,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs"            : "${modid}.mixins.json"
+        ])
+    }
+
+    if(file("./src/main/resources/${modid}.mixins.json").exists()) {
+        manifest {
+            attributes 'MixinConfigs': "${modid}.mixins.json"
+        }
+    }
+}
+task jarJarRelease {
+    group = 'jarjar'
+    doLast {
+        tasks.jarJar {
+            archiveClassifier = ''
+        }
+    }
+    finalizedBy tasks.jarJar
+}
+tasks.jarJar {
+    archiveClassifier = ''
+}
+void addLicense(jarTask) {
+    jarTask.from('LICENSE.txt') {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
+addLicense(jar)
+addLicense(tasks.jarJar)
+
+mixin {
+    add sourceSets.main, "${modid}.refmap.json"
+}
+afterEvaluate {
+    tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
+    tasks.configureReobfTaskForReobfJarJar.mustRunAfter(tasks.compileJava)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+compileJava {
+    options.compilerArgs = ['-Xdiags:verbose']
+}
+reobf {
+    jarJar { }
+}
+
+
+jar.finalizedBy('reobfJar')
+tasks.jarJar.finalizedBy('reobfJarJar')
+
+//from components.java
+//def getArtifact = {  ->
+//    from components.java
+//    return jarJar.component(it)
+    // Method body here
+//}
+if(System.getenv('MODRINTH_TOKEN') != null) {
+
+    modrinth {
+        token = System.getenv("MODRINTH_TOKEN")
+        projectId = "trading_station"
+        versionNumber = "${mod_version}"
+        versionName = "${display_name} - v${mod_version} for Minecraft ${minecraft_version}"
+        versionType = "release" // This is the default -- can also be `beta` or `alpha`
+        uploadFile = tasks.jarJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
+        gameVersions = ["${minecraft_version}"] // Must be an array, even with only one version
+        loaders = ["forge"] // Must also be an array - no need to specify this if you're using Loom or ForgeGradle
+        dependencies { // A special DSL for creating dependencies
+            optional.project "create"
+            optional.project "jei"
+            optional.project "crafttweaker"
+        }
+        syncBodyFrom = rootProject.file("README.md").text
+    }
+    tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
+
+}
+
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+// publish.dependsOn('reobfJar')
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

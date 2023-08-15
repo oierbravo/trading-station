@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+issueTrackerURL="https://github.com/oierbravo/trading-station-mod/issues"
+license="MIT"
+
+[[mods]] 
+modId="trading_station"
+version="${file.jarVersion}" 
+displayName="Trading Station"
+logoFile="logo.png"
+credits="Code inspirtation from the amazing Create mod"
+authors="oierbravo"
+description='''
+Trading made simple
+'''
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+[[dependencies.trading_station]] #optional
+    modId="forge"
+    mandatory=true
+    versionRange="[43.2.3,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.trading_station]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19.2,1.20)"
+    ordering="NONE"
+    side="BOTH"

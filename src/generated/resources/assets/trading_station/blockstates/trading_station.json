@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,powered=false": {
+      "model": "trading_station:block/trading_station",
+      "y": 90
+    },
+    "facing=east,powered=true": {
+      "model": "trading_station:block/trading_station_powered",
+      "y": 90
+    },
+    "facing=north,powered=false": {
+      "model": "trading_station:block/trading_station"
+    },
+    "facing=north,powered=true": {
+      "model": "trading_station:block/trading_station_powered"
+    },
+    "facing=south,powered=false": {
+      "model": "trading_station:block/trading_station",
+      "y": 180
+    },
+    "facing=south,powered=true": {
+      "model": "trading_station:block/trading_station_powered",
+      "y": 180
+    },
+    "facing=west,powered=false": {
+      "model": "trading_station:block/trading_station",
+      "y": 270
+    },
+    "facing=west,powered=true": {
+      "model": "trading_station:block/trading_station_powered",
+      "y": 270
+    }
+  }
+}

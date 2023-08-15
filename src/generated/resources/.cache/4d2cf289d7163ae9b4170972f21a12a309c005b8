@@ -1,0 +1,9 @@
+// 1.19.2	2023-08-15T19:12:23.552338231	Registrate Provider for trading_station [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+ac427e21e7a0915809800ce83800780c045678c6 assets/trading_station/blockstates/powered_trading_station.json
+391b0f87f6c9bd80e20dfc8b949e7dd99cd16fe9 assets/trading_station/blockstates/trading_station.json
+59d487ef1d18c0234dbb7c4b7a99eb0a8bf30520 assets/trading_station/lang/en_ud.json
+fcd793fe1e0ddcc1d5cc535bda29fe37fee4c1a2 assets/trading_station/lang/en_us.json
+373be6ce42eee460888161c967f098e5943e3778 assets/trading_station/models/item/powered_trading_station.json
+7ddda578b6d6072db924599a9959579470354897 assets/trading_station/models/item/trading_station.json
+c3b4c04c1cecdc5001fcddda7b30b11b15f0b2b2 data/trading_station/loot_tables/blocks/powered_trading_station.json
+4c82f05fb35c8b26972d5fd3abf4bb5da6cba466 data/trading_station/loot_tables/blocks/trading_station.json
