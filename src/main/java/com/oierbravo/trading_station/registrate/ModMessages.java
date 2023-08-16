@@ -3,8 +3,6 @@ package com.oierbravo.trading_station.registrate;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
-import com.oierbravo.trading_station.network.packets.OpenTargetSelectPacket;
-import com.oierbravo.trading_station.network.packets.OpenTradingMenuPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -43,17 +41,6 @@ public class ModMessages {
                 .consumerMainThread(GhostItemSyncC2SPacket::handle)
                 .add();
 
-        net.messageBuilder(OpenTradingMenuPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(OpenTradingMenuPacket::new)
-                .encoder(OpenTradingMenuPacket::toBytes)
-                .consumerMainThread(OpenTradingMenuPacket::handle)
-                .add();
-
-        net.messageBuilder(OpenTargetSelectPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(OpenTargetSelectPacket::new)
-                .encoder(OpenTargetSelectPacket::toBytes)
-                .consumerMainThread(OpenTargetSelectPacket::handle)
-                .add();
     }
 
     public static <MSG> void sendToServer(MSG message) {

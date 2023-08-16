@@ -1,9 +1,9 @@
-package com.oierbravo.trading_station.content.trading_station;
+package com.oierbravo.trading_station.content.trading_recipe;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.oierbravo.trading_station.TradingStation;
-import com.oierbravo.trading_station.content.trading_station.TradingRecipeBuilder.TradingRecipeParams;
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipeBuilder.TradingRecipeParams;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;

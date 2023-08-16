@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station;
 
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
@@ -22,7 +23,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,15 +39,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider {
+public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider, ITradingStationBlockEntity {
 
 
-    //private final int FLUID_CAPACITY = TradingStationConfig.trading_station_CAPACITY.get();
-    //private static final int FLIUD_PER_TICK = TradingStationConfig.trading_statio_FLUID_PER_TICK.get();
     private CompoundTag updateTag;
     public final ItemStackHandler inputItems = createInputItemHandler();
     public final ItemStackHandler outputItems = createOutputItemHandler();
@@ -139,12 +136,10 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
                 if(!level.isClientSide()) {
                     level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
                 }
-                // clientSync();
             }
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
                 return true;
-                //return canProcess(stack) && super.isItemValid(slot, stack);
             }
         };
     }
@@ -254,32 +249,32 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return getRecipe(pBlockEntity).map(TradingRecipe::getProcessingTime).orElse(1);
     }
 
-    public static void tick(Level pLevel, BlockPos pPos, BlockState pState, TradingStationBlockEntity pBlockEntity) {
+    public void tick(Level pLevel, BlockPos pPos, BlockState pState) {
 
         if(pLevel.isClientSide()) {
             return;
         }
-        if(!isPowered(pBlockEntity))
+        if(!isPowered(this))
             return;
 
-        if (canCraftItem(pBlockEntity)) {
-            pBlockEntity.progress += 1;
+        if (canCraftItem()) {
+            this.updateProgress();
             BlockEntity.setChanged(pLevel, pPos, pState);
-            pBlockEntity.maxProgress = pBlockEntity.getProcessingTime(pBlockEntity);
-            if (pBlockEntity.progress > pBlockEntity.maxProgress) {
-                TradingStationBlockEntity.craftItem(pBlockEntity);
+            this.maxProgress = this.getProcessingTime(this);
+            if (this.progress > this.maxProgress) {
+                craftItem();
             }
             BlockEntity.setChanged(pLevel, pPos, pState);
 
         } else {
-            pBlockEntity.resetProgress();
+            this.resetProgress();
             BlockEntity.setChanged(pLevel, pPos, pState);
         }
 
 
     }
-    protected static void updateProgress(TradingStationBlockEntity pBlockEntity){
-        pBlockEntity.progress += 1;
+    protected void updateProgress(){
+        this.progress += 1;
 
     }
     private static boolean isPowered(TradingStationBlockEntity pBlockEntity){
@@ -303,40 +298,40 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         });
         return inputInventory;
     }
-    private static void craftItem(TradingStationBlockEntity pBlockEntity) {
-        Level level = pBlockEntity.getLevel();
-        SimpleContainer inputInventory = getInputInventory(pBlockEntity);
+    private void craftItem() {
+        Level level = this.getLevel();
+        SimpleContainer inputInventory = getInputInventory(this);
 
-        Optional<TradingRecipe> recipe = getRecipe(pBlockEntity);
+        Optional<TradingRecipe> recipe = getRecipe(this);
 
         if(recipe.isPresent()){
             for (int i = 0; i < recipe.get().getIngredients().size(); i++) {
                 Ingredient ingredient = recipe.get().getIngredients().get(i);
 
-                for (int slot = 0; slot < pBlockEntity.inputItems.getSlots(); slot++) {
-                    ItemStack itemStack = pBlockEntity.inputItems.getStackInSlot(slot);
+                for (int slot = 0; slot < this.inputItems.getSlots(); slot++) {
+                    ItemStack itemStack = this.inputItems.getStackInSlot(slot);
                     if(ingredient.test(itemStack)){
-                        pBlockEntity.inputItems.extractItem(slot,ingredient.getItems()[0].getCount(),false);
+                        this.inputItems.extractItem(slot,ingredient.getItems()[0].getCount(),false);
                         inputInventory.setChanged();
                     }
                 }
             }
-            pBlockEntity.outputItems.insertItem(0, recipe.get().getResultItem(), false);
+            this.outputItems.insertItem(0, recipe.get().getResultItem(), false);
         }
 
-        pBlockEntity.resetProgress();
-        pBlockEntity.setChanged();
+        this.resetProgress();
+        this.setChanged();
     }
 
 
-    static boolean canCraftItem(TradingStationBlockEntity pBlockEntity) {
-        Level level = pBlockEntity.getLevel();
+    protected boolean canCraftItem() {
+        Level level = this.getLevel();
         if(level == null)
             return false;
 
-        SimpleContainer inputInventory = getInputInventory(pBlockEntity);
+        SimpleContainer inputInventory = getInputInventory(this);
 
-        Optional<TradingRecipe> match = getRecipe(pBlockEntity);
+        Optional<TradingRecipe> match = getRecipe(this);
 
         if(match.isEmpty()) {
             return false;
@@ -344,7 +339,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         //return false;
         return match.isPresent()
                 && TradingStationBlockEntity.hasEnoughInputItems(inputInventory,match.get().getIngredients())
-                && TradingStationBlockEntity.hasEnoughOutputSpace(pBlockEntity.outputItems,match.get().getResultItem());
+                && TradingStationBlockEntity.hasEnoughOutputSpace(this.outputItems,match.get().getResultItem());
     }
 
     private boolean canProcess(ItemStack stack) {
@@ -409,6 +404,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
 
     @Override
+    public IEnergyStorage getEnergyStorage() {
+        return null;
+    }
+
+    @Override
     public Component getDisplayName() {
         return ModLang.translate("block.display");
     }
@@ -424,11 +424,8 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
 
 
-    public ItemStack getPreferedItemStack() {
+    public ItemStack getTargetItemStack() {
         return targetItemHandler.getStackInSlot(0);
     }
-    public ItemStackHandler getTargetItemHandler(){
-        return targetItemHandler;
-
-    }
+    public ItemStackHandler getTargetItemHandler(){ return targetItemHandler;}
 }

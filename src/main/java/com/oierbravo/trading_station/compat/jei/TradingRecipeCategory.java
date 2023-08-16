@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.oierbravo.trading_station.TradingStation;
-import com.oierbravo.trading_station.content.trading_station.TradingRecipe;
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.registrate.ModBlocks;
 import mezz.jei.api.constants.VanillaTypes;
@@ -29,7 +29,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 
 public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
     public final static ResourceLocation UID = new ResourceLocation(TradingStation.MODID, "trading");

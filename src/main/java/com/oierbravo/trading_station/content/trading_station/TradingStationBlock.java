@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -91,8 +92,11 @@ public class TradingStationBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+        if(pLevel.isClientSide()) {
+            return null;
+        }
         return createTickerHelper(pBlockEntityType, ModBlockEntities.TRADING_STATION.get(),
-                TradingStationBlockEntity::tick);
+                (pLevel1, pPos, pState1, pBlockEntity) -> pBlockEntity.tick(pLevel1, pPos, pState1));
     }
 
     @Override
@@ -119,11 +123,10 @@ public class TradingStationBlock extends BaseEntityBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand handIn, BlockHitResult hit) {
-
         if (!pLevel.isClientSide()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
             if(blockEntity instanceof TradingStationBlockEntity) {
-                NetworkHooks.openScreen(((ServerPlayer)pPlayer), (TradingStationBlockEntity)blockEntity, pPos);
+                NetworkHooks.openScreen(((ServerPlayer)pPlayer), (TradingStationBlockEntity) blockEntity, pPos);
             } else {
                 throw new IllegalStateException("Our Container provider is missing!");
             }
@@ -131,5 +134,7 @@ public class TradingStationBlock extends BaseEntityBlock {
 
         return InteractionResult.sidedSuccess(pLevel.isClientSide());
     }
+
+
 
 }

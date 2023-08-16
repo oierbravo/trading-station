@@ -1,4 +1,4 @@
-package com.oierbravo.trading_station.content.trading_station;
+package com.oierbravo.trading_station.content.trading_recipe;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;

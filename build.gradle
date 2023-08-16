@@ -195,6 +195,10 @@ dependencies {
         implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     }
     implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
+    if(generators_enabled.toBoolean()){
+        runtimeOnly fg.deobf("curse.maven:generatorgalore-${generators_id}:${generators_file_id}")
+    }
+
 
     if (create_enabled.toBoolean()) {
         implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }

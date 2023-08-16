@@ -1,4 +1,4 @@
-package com.oierbravo.trading_station.content.trading_station;
+package com.oierbravo.trading_station.foundation.render;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
@@ -16,6 +16,14 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+/*
+ *  smashingmods
+ *
+ *  This code is licensed under "GNU Lesser General Public License"
+ *  https://github.com/SmashingMods/AlchemyLib/blob/1.19.x/src/main/java/com/smashingmods/alchemylib/api/blockentity/container/FakeItemRenderer.java
+ *
+ *  Slightly Modified Version by: oierbravo
+ */
 
 /**
  * This class can be used to render a 2D ItemStack to the screen with optional transparency. The item being rendered

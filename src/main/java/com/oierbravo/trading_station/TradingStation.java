@@ -53,8 +53,9 @@ public class TradingStation
         Config.register();
 
         registrate().addRawLang("itemGroup.trading_station:main", "Trading Station");
-        registrate().addRawLang(ModLang.key("block.display"), "Trading Station");
-        registrate().addRawLang(ModLang.key("recipe"), "Trading recipe");
+        registrate().addRawLang(ModLang.key("trading_station.block.display"), "Trading Station");
+        registrate().addRawLang(ModLang.key("powered_trading_station.block.display"), "Powered Trading Station");
+        registrate().addRawLang(ModLang.key("trading.recipe"), "Trading recipe");
         registrate().addRawLang(ModLang.key("tooltip.progress"), "Progress: %d%%");
         registrate().addRawLang(ModLang.key("select_target.title"), "Select an output target");
         registrate().addRawLang(ModLang.key("select_target.button"), "Select target");

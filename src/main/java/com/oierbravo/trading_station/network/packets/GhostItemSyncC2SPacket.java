@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.network.packets;
 
+import com.oierbravo.trading_station.content.trading_station.ITradingStationBlockEntity;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -45,7 +46,7 @@ public class GhostItemSyncC2SPacket {
             if (container == null)
                 return;
 
-            if(sender.getLevel().getBlockEntity(message.pos) instanceof TradingStationBlockEntity blockEntity) {
+            if(sender.getLevel().getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
                 blockEntity.setPreferedItem(message.itemStack);
                 //blockEntity.setChanged();
 

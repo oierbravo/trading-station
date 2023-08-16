@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.network.packets;
 
+import com.oierbravo.trading_station.content.trading_station.ITradingStationBlockEntity;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -44,7 +45,7 @@ public class ItemStackSyncS2CPacket {
     public static boolean handle(ItemStackSyncS2CPacket message, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
-            if(Minecraft.getInstance().level.getBlockEntity(message.pos) instanceof TradingStationBlockEntity blockEntity) {
+            if(Minecraft.getInstance().level.getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
                 blockEntity.setItemStack(message.slot,message.itemStack,message.slotType);
 
             }

@@ -8,19 +8,23 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class TradingStationBlockRenderer implements BlockEntityRenderer<TradingStationBlockEntity> {
+public class  TradingStationBlockRenderer<TSBE extends BlockEntity> implements BlockEntityRenderer<TSBE> {
     public TradingStationBlockRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override
-    public void render(TradingStationBlockEntity pBlockEntity, float pPartialTick, @NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
-        if(!pBlockEntity.getPreferedItemStack().isEmpty()){
-            pPoseStack.pushPose();
-            pPoseStack.translate(0.5d,  1.1d, 0.5d);
-            renderBlock(pPoseStack,pBufferSource, LightTexture.FULL_BRIGHT,pPackedOverlay,pBlockEntity.getPreferedItemStack());
-            pPoseStack.popPose();
+    public void render(BlockEntity pBlockEntity, float pPartialTick, @NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
+        if(pBlockEntity instanceof ITradingStationBlockEntity) {
+            ITradingStationBlockEntity blockEntity = (ITradingStationBlockEntity) pBlockEntity;
+            if (!blockEntity.getTargetItemStack().isEmpty()) {
+                pPoseStack.pushPose();
+                pPoseStack.translate(0.5d, 1.1d, 0.5d);
+                renderBlock(pPoseStack, pBufferSource, LightTexture.FULL_BRIGHT, pPackedOverlay, blockEntity.getTargetItemStack());
+                pPoseStack.popPose();
+            }
         }
     }
     protected void renderBlock(PoseStack ms, MultiBufferSource buffer, int light, int overlay, ItemStack stack) {

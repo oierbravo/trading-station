@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class TradingStationTargetSelectScreen extends Screen {
     private static final ResourceLocation TEXTURE = TradingStation.asResource("textures/gui/trade_select.png");
-    private TradingStationBlockEntity blockEntity;
+    private ITradingStationBlockEntity blockEntity;
     private List<ItemStack> allPossibleOutputs;
     private LinkedList<ItemStack>  displayedItemStacks = new LinkedList<>();
 
@@ -54,7 +54,7 @@ public class TradingStationTargetSelectScreen extends Screen {
     protected TradingStationTargetSelectScreen(Component pTitle) {
         super(pTitle);
     }
-    public TradingStationTargetSelectScreen(TradingStationBlockEntity pBlockEntity) {
+    public TradingStationTargetSelectScreen(ITradingStationBlockEntity pBlockEntity) {
         this(ModLang.translate("select_target.title"));
         this.blockEntity = pBlockEntity;
         this.allPossibleOutputs = ModRecipes.getAllOutputs(pBlockEntity.getLevel());
