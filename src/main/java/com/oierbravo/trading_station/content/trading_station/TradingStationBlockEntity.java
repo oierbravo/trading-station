@@ -57,13 +57,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     private BlockState lastBlockState;
 
     protected final ContainerData containerData;
-    private Item preferedItem;
 
     public TradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
         updateTag = getPersistentData();
         lastBlockState = this.getBlockState();
-        preferedItem = ItemStack.EMPTY.getItem();
         containerData = TradingStationBlockEntity.createContainerData(this);
     }
     public static ContainerData createContainerData(TradingStationBlockEntity pBlockEntity){
@@ -99,6 +97,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
+                resetProgress();
                 if(!level.isClientSide()) {
                     ModMessages.sendToClients(new ItemStackSyncS2CPacket(slot,this.getStackInSlot(0), worldPosition, ItemStackSyncS2CPacket.SlotType.TARGET));
                 }
@@ -127,9 +126,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     private ItemStackHandler createInputItemHandler() {
         return new ItemStackHandler(2) {
+
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
+                resetProgress();
                 if(!level.isClientSide()) {
                     ModMessages.sendToClients(new ItemStackSyncS2CPacket(slot,this.getStackInSlot(0), worldPosition, ItemStackSyncS2CPacket.SlotType.INPUT));
                 }
@@ -206,7 +207,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         tag.put("target", targetItemHandler.serializeNBT());
         tag.putInt("trading_station.progress", progress);
         tag.putInt("trading_station.maxProgress", maxProgress);
-        String preferedItemString = ForgeRegistries.ITEMS.getKey(preferedItem).toString();
     }
 
     @Override
@@ -217,8 +217,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         targetItemHandler.deserializeNBT(tag.getCompound("target"));
         progress = tag.getInt("trading_station.progress");
         maxProgress = tag.getInt("trading_station.maxProgress");
-        String preferedItemString = tag.getString("trading_station.preferedItem");
-        preferedItem = ForgeRegistries.ITEMS.getValue( ResourceLocation.tryParse(preferedItemString));
     }
 
     public void drops() {
@@ -256,25 +254,20 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         }
         if(!isPowered(this))
             return;
+        if(!canCraftItem())
+            return;
 
-        if (canCraftItem()) {
-            this.updateProgress();
-            BlockEntity.setChanged(pLevel, pPos, pState);
-            this.maxProgress = this.getProcessingTime(this);
-            if (this.progress > this.maxProgress) {
-                craftItem();
-            }
-            BlockEntity.setChanged(pLevel, pPos, pState);
-
-        } else {
-            this.resetProgress();
-            BlockEntity.setChanged(pLevel, pPos, pState);
+        this.updateProgress();
+        BlockEntity.setChanged(pLevel, pPos, pState);
+        this.maxProgress = this.getProcessingTime(this);
+        if (this.progress > this.maxProgress) {
+            craftItem();
         }
-
-
+        BlockEntity.setChanged(pLevel, pPos, pState);
     }
+
     protected void updateProgress(){
-        this.progress += 1;
+        this.progress += TradingStationConfig.PROGRESS_PER_TICK.get();
 
     }
     private static boolean isPowered(TradingStationBlockEntity pBlockEntity){
@@ -299,7 +292,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return inputInventory;
     }
     private void craftItem() {
-        Level level = this.getLevel();
         SimpleContainer inputInventory = getInputInventory(this);
 
         Optional<TradingRecipe> recipe = getRecipe(this);
@@ -320,33 +312,25 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         }
 
         this.resetProgress();
-        this.setChanged();
     }
 
 
     protected boolean canCraftItem() {
-        Level level = this.getLevel();
-        if(level == null)
-            return false;
-
         SimpleContainer inputInventory = getInputInventory(this);
-
         Optional<TradingRecipe> match = getRecipe(this);
 
-        if(match.isEmpty()) {
+        if(!match.isPresent()) {
             return false;
         }
-        //return false;
-        return match.isPresent()
-                && TradingStationBlockEntity.hasEnoughInputItems(inputInventory,match.get().getIngredients())
-                && TradingStationBlockEntity.hasEnoughOutputSpace(this.outputItems,match.get().getResultItem());
+        return hasEnoughInputItems(inputInventory, match.get().getIngredients())
+                && hasEnoughOutputSpace(this.outputItems, match.get().getResultItem());
     }
 
     private boolean canProcess(ItemStack stack) {
 
         return getRecipe(this).isPresent();
     }
-    protected static boolean hasEnoughInputItems(SimpleContainer inventory, NonNullList<Ingredient> ingredients){
+    protected boolean hasEnoughInputItems(SimpleContainer inventory, NonNullList<Ingredient> ingredients){
         int enough = 0;
         for(int ingredientIndex = 0; ingredientIndex < ingredients.size();ingredientIndex ++){
             Ingredient ingredient = ingredients.get(ingredientIndex);
@@ -360,7 +344,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return ingredients.size() == enough;
     }
 
-    protected static boolean hasEnoughOutputSpace(ItemStackHandler stackHandler,ItemStack resultItemStack){
+    protected boolean hasEnoughOutputSpace(ItemStackHandler stackHandler,ItemStack resultItemStack){
         return stackHandler.getStackInSlot(0).isEmpty() || stackHandler.getStackInSlot(0).is(resultItemStack.getItem()) &&  stackHandler.getStackInSlot(0).getMaxStackSize() - stackHandler.getStackInSlot(0).getCount()  >= resultItemStack.getCount() ;
     }
 

@@ -1,12 +1,6 @@
 package com.oierbravo.trading_station.foundation.gui;
 
 import com.oierbravo.trading_station.content.trading_station.ITradingStationBlockEntity;
-import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
-import com.oierbravo.trading_station.content.trading_station.TradingStationScreen;
-import com.oierbravo.trading_station.registrate.ModBlocks;
-import com.oierbravo.trading_station.registrate.ModMenus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

@@ -3,14 +3,17 @@ package com.oierbravo.trading_station;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
+import com.oierbravo.trading_station.compat.Mods;
+import com.oierbravo.trading_station.content.trading_station.TradingStationConfig;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.registrate.*;
 import com.tterrag.registrate.Registrate;
+import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -44,15 +47,29 @@ public class TradingStation
         MinecraftForge.EVENT_BUS.register(this);
 
         ModCreativeTab modTab = new ModCreativeTab();
-
-        ModBlocks.register();
-        ModBlockEntities.register();
-        ModRecipes.register(modEventBus);
-        ModMessages.register();
-        ModMenus.register();
         Config.register();
 
-        registrate().addRawLang("itemGroup.trading_station:main", "Trading Station");
+        TradingStationRegistrate.register();
+        PoweredTradingStationRegistrate.register();
+
+        ModRecipes.register(modEventBus);
+        ModMessages.register();
+
+        modEventBus.addListener(EventPriority.LOWEST, TradingStation::gatherData);
+
+        Mods.CREATE.executeIfInstalled(() -> MechanicalTradingStationRegistrate::register);
+    }
+    public static void gatherData(GatherDataEvent event) {
+        DataGenerator gen = event.getGenerator();
+        if (event.includeClient()) {
+            registerLanguageKeys();
+        }
+        if (event.includeServer()) {
+
+        }
+    }
+    private static void registerLanguageKeys(){
+        registrate().addRawLang("itemGroup.trading_station", "Trading Station");
         registrate().addRawLang(ModLang.key("trading_station.block.display"), "Trading Station");
         registrate().addRawLang(ModLang.key("powered_trading_station.block.display"), "Powered Trading Station");
         registrate().addRawLang(ModLang.key("trading.recipe"), "Trading recipe");
@@ -61,10 +78,7 @@ public class TradingStation
         registrate().addRawLang(ModLang.key("select_target.button"), "Select target");
         registrate().addRawLang(ModLang.key("select_target.clear"), "Clear");
         registrate().addRawLang("config.jade.plugin_trading_station.trading_station_data", "Trading Station data");
-
     }
-
-
     public static Registrate registrate() {
         return REGISTRATE.get();
     }

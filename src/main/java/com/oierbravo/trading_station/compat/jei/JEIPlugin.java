@@ -2,7 +2,9 @@ package com.oierbravo.trading_station.compat.jei;
 
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.registrate.ModBlocks;
+import com.oierbravo.trading_station.content.trading_station.TradingStationConfig;
+import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
+import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
@@ -33,8 +35,8 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(ModBlocks.TRADING_STATION.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
-        registration.addRecipeCatalyst(new ItemStack(ModBlocks.POWERED_TRADING_STATION.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
+        registration.addRecipeCatalyst(new ItemStack(TradingStationRegistrate.TRADING_STATION_BLOCK.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
+        registration.addRecipeCatalyst(new ItemStack(PoweredTradingStationRegistrate.POWERED_TRADING_STATION_BLOCK.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
     }
 
     @Override

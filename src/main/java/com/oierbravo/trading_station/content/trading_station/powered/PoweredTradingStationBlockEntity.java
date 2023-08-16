@@ -1,6 +1,7 @@
 package com.oierbravo.trading_station.content.trading_station.powered;
 
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
+import com.oierbravo.trading_station.content.trading_station.TradingStationConfig;
 import com.oierbravo.trading_station.foundation.util.ModEnergyStorage;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,7 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
         super(pType, pWorldPosition, pBlockState);
     }
     private ModEnergyStorage createEnergyStorage() {
-        return new ModEnergyStorage(64000, 200) {
+        return new ModEnergyStorage(PoweredTradingStationConfig.ENERGY_CAPACITY.get(), PoweredTradingStationConfig.ENERGY_TRANSFER.get()) {
             @Override
             public void onEnergyChanged() {
                 setChanged();
@@ -94,11 +95,11 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
 
     @Override
     protected void updateProgress() {
-        super.updateProgress();
+        this.progress += PoweredTradingStationConfig.PROGRESS_PER_TICK.get();
         extractEnergy();
     }
     private void extractEnergy() {
-        this.energyStorage.extractEnergy(1000, false);
+        this.energyStorage.extractEnergy(PoweredTradingStationConfig.ENERGY_PER_TICK.get(), false);
     }
 
     @Override
@@ -107,7 +108,7 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
         if(level == null)
             return false;
 
-        if(this.energyStorage.getEnergyStored() < 1000){
+        if(this.energyStorage.getEnergyStored() < PoweredTradingStationConfig.ENERGY_PER_TICK.get()){
             return false;
         }
         return super.canCraftItem();

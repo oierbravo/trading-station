@@ -1,6 +1,7 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.trading_station.registrate.ModBlockEntities;
+import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
+import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -8,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -79,7 +79,7 @@ public class TradingStationBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return ModBlockEntities.TRADING_STATION.create(pPos, pState);
+        return TradingStationRegistrate.TRADING_STATION_BLOCK_ENTITY.create(pPos, pState);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class TradingStationBlock extends BaseEntityBlock {
         if(pLevel.isClientSide()) {
             return null;
         }
-        return createTickerHelper(pBlockEntityType, ModBlockEntities.TRADING_STATION.get(),
+        return createTickerHelper(pBlockEntityType, TradingStationRegistrate.TRADING_STATION_BLOCK_ENTITY.get(),
                 (pLevel1, pPos, pState1, pBlockEntity) -> pBlockEntity.tick(pLevel1, pPos, pState1));
     }
 
