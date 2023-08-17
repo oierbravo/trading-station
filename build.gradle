@@ -298,7 +298,7 @@ if(System.getenv('MODRINTH_TOKEN') != null) {
 
     modrinth {
         token = System.getenv("MODRINTH_TOKEN")
-        projectId = "trading_station"
+        projectId = "mechanical_trading_station"
         versionNumber = "${mod_version}"
         versionName = "${display_name} - v${mod_version} for Minecraft ${minecraft_version}"
         versionType = "release" // This is the default -- can also be `beta` or `alpha`
@@ -322,4 +322,16 @@ if(System.getenv('MODRINTH_TOKEN') != null) {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
 }
