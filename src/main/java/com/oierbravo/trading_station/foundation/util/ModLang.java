@@ -1,7 +1,6 @@
 package com.oierbravo.trading_station.foundation.util;
 
 import com.oierbravo.trading_station.TradingStation;
-import com.simibubi.create.foundation.utility.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -19,9 +18,9 @@ public class ModLang {
     }
 
     public static Object[] resolveBuilders(Object[] args) {
-        for (int i = 0; i < args.length; i++)
-            if (args[i]instanceof LangBuilder cb)
-                args[i] = cb.component();
+        //      for (int i = 0; i < args.length; i++)
+        //    if (args[i]instanceof LangBuilder cb)
+        //        args[i] = cb.component();
         return args;
     }
 }

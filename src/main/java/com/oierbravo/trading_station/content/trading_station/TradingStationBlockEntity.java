@@ -1,7 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station;
 
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
@@ -64,11 +62,14 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     byte currentRedstoneMode = 0;
 
+    Optional<TradingRecipe> targetedRecipe;
+
     public TradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
         updateTag = getPersistentData();
         lastBlockState = this.getBlockState();
         containerData = createContainerData();
+        targetedRecipe = Optional.empty();
     }
     public ContainerData createContainerData(){
         return new ContainerData(){
@@ -223,6 +224,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         tag.putInt("trading_station.progress", progress);
         tag.putInt("trading_station.maxProgress", maxProgress);
         tag.putByte("redstoneMode", currentRedstoneMode);
+        String targetedRecipeId = "";
+        if(targetedRecipe.isPresent()){
+            targetedRecipeId = targetedRecipe.get().getId().toString();
+        }
+        tag.putString("targetedRecipeId", targetedRecipeId);
     }
 
     @Override
@@ -234,6 +240,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         progress = tag.getInt("trading_station.progress");
         maxProgress = tag.getInt("trading_station.maxProgress");
         currentRedstoneMode = tag.getByte("redstoneMode");
+        setTargetedRecipeById(tag.getString("targetedRecipeId"));
     }
 
     public void drops() {
@@ -421,6 +428,8 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return "basic";
     }
 
+
+
     @Override
     public Component getDisplayName() {
         return Component.translatable("block.trading_station.trading_station");
@@ -441,4 +450,34 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return targetItemHandler.getStackInSlot(0);
     }
     public ItemStackHandler getTargetItemHandler(){ return targetItemHandler;}
+
+    @Override
+    public void setTargetedRecipeById(ResourceLocation recipeId){
+        Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(),recipeId);
+        targetedRecipe = recipe;
+        if(recipe.isPresent()) {
+            targetItemHandler.setStackInSlot(0,recipe.get().getResultItem());
+        }
+
+    }
+    public void setTargetedRecipeById(String recipeId){
+        Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(), recipeId);
+        targetedRecipe = recipe;
+        if(recipe.isPresent()) {
+            targetItemHandler.setStackInSlot(0,recipe.get().getResultItem());
+        }
+        setChanged();
+
+    }
+    @Nullable
+    public Optional<TradingRecipe> getTargetedRecipe(){
+        return targetedRecipe;
+    }
+    @Override
+    public String getTargetedRecipeId() {
+        if(!targetedRecipe.isPresent()){
+            return "";
+        }
+        return targetedRecipe.get().getId().toString();
+    }
 }

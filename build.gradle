@@ -200,10 +200,10 @@ dependencies {
     }
 
 
-    //if (create_enabled.toBoolean()) {
+    if (create_enabled.toBoolean()) {
         implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
         implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
-    //}
+    }
 
     if (ct_enabled.toBoolean()) {
         def minecraftVersion= "net.minecraftforge:forge:${minecraft_version}-${forge_version}"

@@ -57,7 +57,6 @@ public class TradingStation
 
         modEventBus.addListener(EventPriority.LOWEST, TradingStation::gatherData);
 
-        Mods.CREATE.executeIfInstalled(() -> MechanicalTradingStationRegistrate::register);
     }
     public static void gatherData(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();

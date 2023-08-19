@@ -1,6 +1,8 @@
 {
   "block.trading_station.powered_trading_station": "uoıʇɐʇS buıpɐɹ⟘ pǝɹǝʍoԀ",
+  "block.trading_station.powered_trading_station_unbreakable": "uoıʇɐʇS buıpɐɹ⟘ pǝɹǝʍoԀ ǝןqɐʞɐǝɹqu∩",
   "block.trading_station.trading_station": "uoıʇɐʇS buıpɐɹ⟘",
+  "block.trading_station.trading_station_unbreakable": "uoıʇɐʇS buıpɐɹ⟘",
   "config.jade.plugin_trading_station.trading_station_data": "ɐʇɐp uoıʇɐʇS buıpɐɹ⟘",
   "itemGroup.trading_station": "uoıʇɐʇS buıpɐɹ⟘",
   "trading_station.screen.redstone.high": "ɥbıH",

@@ -4,12 +4,12 @@ import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
@@ -45,6 +45,11 @@ public interface ITradingStationBlockEntity {
 
     String getTraderType();
 
+
+    String getTargetedRecipeId();
+
+    void setTargetedRecipeById(ResourceLocation recipeId);
+
     enum REDSTONE_MODES {
         IGNORE,
         LOW,
@@ -69,7 +74,7 @@ public interface ITradingStationBlockEntity {
         SimpleContainer inputInventory = getInputInventory();
         if(!getTargetItemHandler().getStackInSlot(0).isEmpty())
             return ModRecipes.findByOutput(level,getTargetItemHandler().getStackInSlot(0));
-        return ModRecipes.find(inputInventory,level, getBiome());
+        return ModRecipes.find(inputInventory,level, getBiome(), getTraderType());
     };
     default SimpleContainer getInputInventory(){
         int containerSize = 0;

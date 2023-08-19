@@ -43,7 +43,9 @@ public class JEIPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(new ItemStack(TradingStationRegistrate.BLOCK.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
+        registration.addRecipeCatalyst(new ItemStack(TradingStationRegistrate.BLOCK_UNBREAKABLE.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
         registration.addRecipeCatalyst(new ItemStack(PoweredTradingStationRegistrate.BLOCK.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
+        registration.addRecipeCatalyst(new ItemStack(PoweredTradingStationRegistrate.BLOCK_UNBREAKABLE.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
     }
 
     @Override
@@ -57,7 +59,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
-        registration.addRecipeTransferHandler(new TradingRecipeHandler(), TRAING_RECIPE);
+        //registration.addRecipeTransferHandler(new TradingRecipeHandler(), TRAING_RECIPE);
         //registration.addRecipeTransferHandler(TradingStationMenu.class, TradingStationRegistrate.MENU.get(), new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class), 36, 2, 0, 36);
 
     }

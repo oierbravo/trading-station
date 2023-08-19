@@ -4,30 +4,24 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.content.trading_station.TradingStationScreen;
 import com.oierbravo.trading_station.content.trading_station.TradingStationTargetSelectScreen;
 import com.oierbravo.trading_station.foundation.render.FakeItemRenderer;
-import com.oierbravo.trading_station.foundation.render.LaserIOItemRenderer;
 import com.oierbravo.trading_station.foundation.util.MiscTools;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.foundation.util.MouseUtil;
-import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
 import com.oierbravo.trading_station.network.packets.RedstoneModeSyncC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 import java.util.HashMap;
@@ -101,14 +95,20 @@ public abstract class AbstractTradingScreen<MENU extends AbstractTradingMenu> ex
         this.blit(pPoseStack, pX , pY , 0, 164,18, 18);
 
     }
+
+    private void renderInputRecipePlaceholder(PoseStack pPoseStack, int pX, int pY){
+        this.blit(pPoseStack, pX , pY , 18, 146,18, 23);
+
+    }
     private void renderFakeRecipe(TradingRecipe recipe, PoseStack pPoseStack){
         for(int index = 0; index < recipe.getIngredients().size(); index++){
             Ingredient ingredient = recipe.getIngredients().get(index);
 
             if(!ingredient.isEmpty())
-                renderItem(ingredient.getItems()[0],getGuiLeft() + this.menu.getInputSlotCoords()[index].x,getGuiTop() + this.menu.getInputSlotCoords()[index].y);
+                renderInputRecipePlaceholder(pPoseStack, getGuiLeft() + this.menu.getInputRecipeCoords()[index].x, getGuiTop() + this.menu.getInputRecipeCoords()[index].y);
+                renderItem(ingredient.getItems()[0],getGuiLeft() + this.menu.getInputRecipeCoords()[index].x +  1,getGuiTop() + this.menu.getInputRecipeCoords()[index].y + 1);
         }
-        renderItem(recipe.getResultItem(),getGuiLeft() +  this.menu.getOutputSlotCoords().x,getGuiTop() +  this.menu.getOutputSlotCoords().y);
+        //renderItem(recipe.getResultItem(),getGuiLeft() +  this.menu.getOutputSlotCoords().x,getGuiTop() +  this.menu.getOutputSlotCoords().y);
     }
 
 

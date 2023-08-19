@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=east,lit=false,powered=false": {
+      "model": "trading_station:block/trading_station",
+      "y": 90
+    },
+    "facing=east,lit=false,powered=true": {
+      "model": "trading_station:block/trading_station_powered",
+      "y": 90
+    },
+    "facing=east,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit",
+      "y": 90
+    },
+    "facing=north,lit=false,powered=false": {
+      "model": "trading_station:block/trading_station"
+    },
+    "facing=north,lit=false,powered=true": {
+      "model": "trading_station:block/trading_station_powered"
+    },
+    "facing=north,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit"
+    },
+    "facing=north,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit"
+    },
+    "facing=south,lit=false,powered=false": {
+      "model": "trading_station:block/trading_station",
+      "y": 180
+    },
+    "facing=south,lit=false,powered=true": {
+      "model": "trading_station:block/trading_station_powered",
+      "y": 180
+    },
+    "facing=south,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit",
+      "y": 180
+    },
+    "facing=west,lit=false,powered=false": {
+      "model": "trading_station:block/trading_station",
+      "y": 270
+    },
+    "facing=west,lit=false,powered=true": {
+      "model": "trading_station:block/trading_station_powered",
+      "y": 270
+    },
+    "facing=west,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit",
+      "y": 270
+    }
+  }
+}

@@ -3,11 +3,12 @@ package com.oierbravo.trading_station.content.trading_station;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.oierbravo.trading_station.TradingStation;
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
+import com.oierbravo.trading_station.network.packets.RecipeSelectC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -29,8 +30,8 @@ import java.util.List;
 public class TradingStationTargetSelectScreen extends Screen {
     private static final ResourceLocation TEXTURE = TradingStation.asResource("textures/gui/trade_select.png");
     private ITradingStationBlockEntity blockEntity;
-    private List<ItemStack> allPossibleOutputs;
-    private LinkedList<ItemStack>  displayedItemStacks = new LinkedList<>();
+    private List<TradingRecipe> allPossibleRecipes;
+    private LinkedList<TradingRecipe> displayedRecipes = new LinkedList<>();
 
 
     private float scrollOffset;
@@ -61,7 +62,8 @@ public class TradingStationTargetSelectScreen extends Screen {
         this(ModLang.translate("select_target.title"));
         this.blockEntity = pBlockEntity;
         this.blockPos = pBlockPos;
-        this.allPossibleOutputs = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
+        //this.allPossibleRecipes = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
+        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
         resetDisplayedTargets();
 
     }
@@ -91,11 +93,11 @@ public class TradingStationTargetSelectScreen extends Screen {
     public int getGuiTop() { return topPos; }
     @Override
     public void tick() {
-            if (displayedItemStacks.size() < MAX_DISPLAYED_RECIPES) {
+            if (displayedRecipes.size() < MAX_DISPLAYED_RECIPES) {
                 mouseScrolled(0, 0, 0);
                 scrollOffset = 0.0f;
             }
-            if (displayedItemStacks.size() <= MAX_DISPLAYED_RECIPES) {
+            if (displayedRecipes.size() <= MAX_DISPLAYED_RECIPES) {
                 startIndex = 0;
                 scrollOffset = 0;
             }
@@ -109,8 +111,8 @@ public class TradingStationTargetSelectScreen extends Screen {
         int lastDisplayedIndex = startIndex + MAX_DISPLAYED_RECIPES;
 
         renderScrollbar(pPoseStack);
-        renderSelectedTarget(pPoseStack, pMouseX, pMouseY, lastDisplayedIndex);
-        renderTargetItems(pPoseStack, pMouseX, pMouseY, lastDisplayedIndex);
+        renderSelectedRecipe(pPoseStack, pMouseX, pMouseY, lastDisplayedIndex);
+        renderRecipe(pPoseStack, pMouseX, pMouseY, lastDisplayedIndex);
         renderLabels(pPoseStack, pMouseX, pMouseY);
 
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
@@ -118,39 +120,40 @@ public class TradingStationTargetSelectScreen extends Screen {
     protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
         this.font.draw(pPoseStack, this.title, (float)this.titleLabelX + getGuiLeft(), (float)this.titleLabelY + getGuiTop(), 4210752);
     }
-    private void renderSelectedTarget(PoseStack pPoseStack, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
-        LinkedList<ItemStack> displayedRecipes = getDisplayedItemStacks();
-        ItemStack selectedTarget = this.blockEntity.getTargetItemHandler().getStackInSlot(0);
+    private void renderSelectedRecipe(PoseStack pPoseStack, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
+        LinkedList<TradingRecipe> displayedRecipes = getDisplayedRecipes();
         for (int index = startIndex; index >= 0 && index < pLastDisplayedIndex && index < displayedRecipes.size(); index++) {
 
             int firstDisplayedIndex = index - startIndex;
-            ItemStack target = allPossibleOutputs.get(index);
+            TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-            if(ItemStack.isSameItemSameTags(selectedTarget, target ))
+            if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId()))
                 blit(pPoseStack, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
         }
     }
-    private void renderTargetItems(PoseStack pPoseStack, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
-        LinkedList<ItemStack> displayedRecipes = getDisplayedItemStacks();
+    private void renderRecipe(PoseStack pPoseStack, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
+        LinkedList<TradingRecipe> displayedRecipes = getDisplayedRecipes();
 
         for (int index = startIndex; index >= 0 && index < pLastDisplayedIndex && index < displayedRecipes.size(); index++) {
 
             int firstDisplayedIndex = index - startIndex;
-            ItemStack target = allPossibleOutputs.get(index);
+            TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-
-            renderFloatingItem(target, xStart, yStart );
+           // if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId())){
+           //     blit(pPoseStack, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
+           // }
+            renderFloatingItem(target.getResultItem(), xStart, yStart );
 
             if (pMouseX >= xStart - 1 && pMouseX <= xStart + 16 && pMouseY >= yStart - 1 && pMouseY <= yStart + 16) {
-                renderTooltip(pPoseStack, target, pMouseX, pMouseY);
+                renderTooltip(pPoseStack, target.getResultItem(), pMouseX, pMouseY);
             }
         }
     }
 
-    private LinkedList<ItemStack> getDisplayedItemStacks() {
-        return displayedItemStacks;
+    private LinkedList<TradingRecipe> getDisplayedRecipes() {
+        return displayedRecipes;
     }
 
     private void renderFloatingItem(ItemStack pItemStack, int pX, int pY) {
@@ -192,8 +195,9 @@ public class TradingStationTargetSelectScreen extends Screen {
             double boxY = pMouseY - (double)(getGuiTop() + targetBoxTopPosOffset + currentIndex / COLUMNS * TARGET_BOX_SIZE);
 
             if (boxX > 0 && boxX <= TARGET_BOX_SIZE + 1 && boxY > 0 && boxY <= TARGET_BOX_SIZE + 1 && isValidRecipeIndex(index)) {
-                ItemStack itemStack = getDisplayedItemStacks().get(index);
-                ModMessages.sendToServer(new GhostItemSyncC2SPacket(itemStack,getBlockPos()));
+                TradingRecipe recipe = getDisplayedRecipes().get(index);
+                //ModMessages.sendToServer(new GhostItemSyncC2SPacket(itemStack,getBlockPos()));
+                ModMessages.sendToServer(new RecipeSelectC2SPacket(recipe.getId(),getBlockPos()));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
                 Minecraft.getInstance().popGuiLayer();
                 return true;
@@ -211,15 +215,15 @@ public class TradingStationTargetSelectScreen extends Screen {
         return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
     private boolean isValidRecipeIndex(int pSlot) {
-        return pSlot >= 0 && pSlot < getDisplayedItemStacks().size();
+        return pSlot >= 0 && pSlot < getDisplayedRecipes().size();
     }
     @Override
     public boolean isPauseScreen() {
         return false;
     }
     public void resetDisplayedTargets() {
-        this.displayedItemStacks.clear();
-        this.displayedItemStacks.addAll(allPossibleOutputs);
+        this.displayedRecipes.clear();
+        this.displayedRecipes.addAll(allPossibleRecipes);
     }
 
     @Override
@@ -245,10 +249,10 @@ public class TradingStationTargetSelectScreen extends Screen {
         return true;
     }
     private int getOffscreenRows() {
-        return (displayedItemStacks.size() + 6 - 1) / 6 - 3;
+        return (displayedRecipes.size() + 6 - 1) / 6 - 3;
     }
     private boolean isScrollBarActive() {
-        return displayedItemStacks.size() > MAX_DISPLAYED_RECIPES;
+        return displayedRecipes.size() > MAX_DISPLAYED_RECIPES;
     }
 
 }

@@ -33,9 +33,29 @@ public class TradingStationRegistrate {
             .blockEntity(TradingStationBlockEntity::new)
             .build()
             .register();
+    public static final BlockEntry<TradingStationBlock> BLOCK_UNBREAKABLE = TradingStation.registrate()
+            .block("trading_station_unbreakable", TradingStationBlock::new)
+            .lang("Trading Station (Unbreakable)")
+            .properties((ctx)-> ctx.strength(-1.0f, 3_600_000.0f))
+            .blockstate((ctx, prov) ->
+                    prov.getVariantBuilder(ctx.getEntry()).forAllStates(state -> {
+                        String modelFileName = "trading_station:block/trading_station";
+                        if(state.getValue(BlockStateProperties.POWERED))
+                            modelFileName += "_powered";
+                        if(state.getValue(BlockStateProperties.LIT))
+                            modelFileName += "_lit";
+                        return ConfiguredModel.builder().modelFile(prov.models().getExistingFile(ResourceLocation.tryParse(modelFileName)))
+                                .rotationY(((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + 180) % 360).build();
+
+                    })
+            )
+            .simpleItem()
+            .blockEntity(TradingStationBlockEntity::new)
+            .build()
+            .register();
     public static final BlockEntityEntry<TradingStationBlockEntity> BLOCK_ENTITY = REGISTRATE
             .blockEntity("trading_station", TradingStationBlockEntity::new)
-            .validBlocks(BLOCK)
+            .validBlocks(BLOCK, BLOCK_UNBREAKABLE)
             .renderer(() -> TradingStationBlockRenderer::new)
             .register();
 

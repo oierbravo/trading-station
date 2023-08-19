@@ -55,6 +55,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
     public abstract Coords2D getOutputSlotCoords();
     public abstract  Coords2D getTargetSlotCoords();
 
+    public abstract  Coords2D[] getInputRecipeCoords();
     @Override
     public abstract boolean stillValid(Player pPlayer);
 

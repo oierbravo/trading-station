@@ -1,6 +1,8 @@
 {
   "block.trading_station.powered_trading_station": "Powered Trading Station",
+  "block.trading_station.powered_trading_station_unbreakable": "Unbreakable Powered Trading Station",
   "block.trading_station.trading_station": "Trading Station",
+  "block.trading_station.trading_station_unbreakable": "Trading Station",
   "config.jade.plugin_trading_station.trading_station_data": "Trading Station data",
   "itemGroup.trading_station": "Trading Station",
   "trading_station.screen.redstone.high": "High",

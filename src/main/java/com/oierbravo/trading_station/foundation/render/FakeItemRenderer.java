@@ -84,7 +84,7 @@ public class FakeItemRenderer {
         }
     }
 
-    private static MultiBufferSource getWrappedBuffer(MultiBufferSource pBufferSource, float pAlpha) {
+    public static MultiBufferSource getWrappedBuffer(MultiBufferSource pBufferSource, float pAlpha) {
         return pRenderType -> new WrappedVertexConsumer(pBufferSource.getBuffer(RenderType.entityTranslucentCull(InventoryMenu.BLOCK_ATLAS)), 1F, 1F, 1F, pAlpha);
     }
 

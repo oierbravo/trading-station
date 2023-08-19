@@ -26,13 +26,25 @@ public class PoweredTradingStationMenu extends AbstractTradingMenu {
     }
     @Override
     public boolean stillValid(Player pPlayer) {
-        return stillValid(ContainerLevelAccess.create(level, getBlockPos()), pPlayer, PoweredTradingStationRegistrate.BLOCK.get());
+        if(stillValid(ContainerLevelAccess.create(level, getBlockPos()), pPlayer, PoweredTradingStationRegistrate.BLOCK.get()))
+            return true;
+        if(stillValid(ContainerLevelAccess.create(level, getBlockPos()), pPlayer, PoweredTradingStationRegistrate.BLOCK_UNBREAKABLE.get()))
+            return true;
+        return false;
     }
     @Override
     public Coords2D[] getInputSlotCoords() {
         return new Coords2D[]{
             Coords2D.of(28,47),
             Coords2D.of(51,47)
+        };
+    }
+
+    @Override
+    public Coords2D[] getInputRecipeCoords() {
+        return new Coords2D[]{
+                Coords2D.of(28,20),
+                Coords2D.of(51,20)
         };
     }
     @Override

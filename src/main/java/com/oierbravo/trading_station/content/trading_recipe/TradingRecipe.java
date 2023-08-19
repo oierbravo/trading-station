@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
 import javax.annotation.Nullable;
+import java.util.ServiceLoader;
 
 public class TradingRecipe implements Recipe<SimpleContainer> {
     private final ResourceLocation id;
@@ -38,7 +39,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     }
     @Override
     public boolean matches(SimpleContainer pContainer, Level pLevel) {
-        return matches(pContainer, pLevel, (Biome) null);
+        return matches(pContainer, pLevel, (Biome) null, "");
     }
 
     public boolean matchesBiome(Biome biome, Level pLevel){
@@ -49,13 +50,15 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return exclusiveToCondition.test(targetedMachine);
     }
 
-    public boolean matches(SimpleContainer pContainer, Level pLevel, @Nullable Biome biome) {
+    public boolean matches(SimpleContainer pContainer, Level pLevel, @Nullable Biome biome, String traderType) {
         if(pLevel.isClientSide)
             return false;
         if(pContainer.getContainerSize() != itemIngredients.size())
             return false;
 
         if(!getBiomeCondition().test(biome,pLevel))
+            return false;
+        if(!getExclusiveToCondition().test(traderType))
             return false;
 
         int matchedIngredients = 0;
@@ -69,10 +72,10 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
                 }
             }
 
-            return matchedIngredients == itemIngredients.size();
+
         }
 
-        return false;
+        return matchedIngredients == itemIngredients.size();
 
     }
     public boolean matches(SimpleContainer pContainer, Level pLevel, ItemStack preferedOutput){
@@ -133,6 +136,11 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     public RecipeType<?> getType() {
         return Type.INSTANCE;
     }
+
+    public boolean matchesId(ResourceLocation pId) {
+        return id.equals(pId);
+    }
+
     public static class Type implements RecipeType<TradingRecipe> {
         private Type() { }
         public static final Type INSTANCE = new Type();
