@@ -2,6 +2,8 @@
 	"credit": "Made with Blockbench",
 	"parent": "trading_station:block/trading_station",
 	"textures": {
-		"3": "trading_station:block/powered_trading_station"
+		"base": "trading_station:block/powered_trading_station",
+		"back": "trading_station:block/powered_trading_station_base",
+		"particle": "trading_station:block/powered_trading_station_base"
 	}
 }
