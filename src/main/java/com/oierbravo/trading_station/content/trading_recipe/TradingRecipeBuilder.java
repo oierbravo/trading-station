@@ -36,6 +36,21 @@ public class TradingRecipeBuilder {
         params.processingTime = time;
         return this;
     }
+    public TradingRecipeBuilder exclusiveTo(NonNullList<String> exclusiveTo) {
+        return exclusiveTo(ExclusiveToCondition.fromList(exclusiveTo));
+    }
+    public TradingRecipeBuilder exclusiveTo(String exclusiveTo) {
+        return exclusiveTo(ExclusiveToCondition.fromString(exclusiveTo));
+    }
+    public TradingRecipeBuilder exclusiveTo(ExclusiveToCondition exclusiveToCondition) {
+        params.exclusiveTo = exclusiveToCondition;
+        return this;
+    }
+
+    public TradingRecipeBuilder withBiomeCondition(BiomeCondition biomeCondition) {
+        params.biome = biomeCondition;
+        return this;
+    }
 
 
     public TradingRecipe build(){
@@ -53,6 +68,9 @@ public class TradingRecipeBuilder {
         protected ItemStack result;
         protected int fuelConsumed;
         protected int processingTime;
+        protected BiomeCondition biome;
+        public ExclusiveToCondition exclusiveTo;
+
 
         protected TradingRecipeParams(ResourceLocation id) {
             this.id = id;
@@ -60,6 +78,8 @@ public class TradingRecipeBuilder {
             result = ItemStack.EMPTY;
             fuelConsumed = 0;
             processingTime = 1;
+            biome = BiomeCondition.EMPTY;
+            exclusiveTo = ExclusiveToCondition.EMPTY;
         }
 
     }

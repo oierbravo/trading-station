@@ -7,6 +7,7 @@ import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.content.trading_station.TradingStationMenu;
 import com.oierbravo.trading_station.content.trading_station.TradingStationTargetSelectScreen;
 import com.oierbravo.trading_station.foundation.gui.AbstractTradingScreen;
+import com.oierbravo.trading_station.foundation.gui.Coords2D;
 import com.oierbravo.trading_station.foundation.render.EnergyDisplayTooltipArea;
 import com.oierbravo.trading_station.foundation.render.FakeItemRenderer;
 import com.oierbravo.trading_station.foundation.util.ModLang;
@@ -24,9 +25,7 @@ import java.util.Optional;
 
 public class PoweredTradingStationScreen extends AbstractTradingScreen<PoweredTradingStationMenu> {
 
-    protected static int[] progressArrowCoords = {79,47};
-    protected static int[] targetSelectButtonCoords = {131,18};
-    private static final ResourceLocation TEXTURE = TradingStation.asResource("textures/gui/powered_trading_station.png");
+    private static final ResourceLocation TEXTURE = TradingStation.asResource("textures/gui/trading_station.png");
     private EnergyDisplayTooltipArea energyInfoArea;
 
 
@@ -48,8 +47,16 @@ public class PoweredTradingStationScreen extends AbstractTradingScreen<PoweredTr
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
 
         super.renderBg(pPoseStack, pPartialTick, pMouseX, pMouseY);
+        RenderSystem.setShaderTexture(0, getTexture());
+
+        renderSlotPlaceholder(pPoseStack,((width - imageWidth) / 2) + 7,((height - imageHeight) / 2) + 23);
+
         energyInfoArea.render(pPoseStack);
 
+
+    }
+    private void renderSlotPlaceholder(PoseStack pPoseStack, int pX, int pY){
+        this.blit(pPoseStack, pX , pY , 0, 182,11, 32);
 
     }
     @Override
@@ -73,13 +80,13 @@ public class PoweredTradingStationScreen extends AbstractTradingScreen<PoweredTr
 
 
     @Override
-    protected int[] getProgressArrowCoords() {
-        return progressArrowCoords;
+    protected Coords2D getProgressArrowCoords() {
+        return Coords2D.of(79, 47);
     }
 
     @Override
-    protected int[] getTargetSelectButtonCoords() {
-        return targetSelectButtonCoords;
+    protected Coords2D getTargetSelectButtonCoords() {
+        return Coords2D.of(131, 29);
     }
-
+    protected Coords2D getRedstoneButtonCoords() { return Coords2D.of(151,28); }
 }

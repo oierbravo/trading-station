@@ -3,14 +3,20 @@ package com.oierbravo.trading_station.compat.kubejs;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.oierbravo.trading_station.content.trading_recipe.BiomeCondition;
+import com.oierbravo.trading_station.content.trading_recipe.ExclusiveToCondition;
 import dev.latvian.mods.kubejs.recipe.RecipeJS;
 import dev.latvian.mods.kubejs.recipe.component.ComponentRole;
 import dev.latvian.mods.kubejs.recipe.component.RecipeComponent;
+import dev.latvian.mods.rhino.NativeArray;
 import dev.latvian.mods.rhino.NativeObject;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.biome.Biome;
 
-public class ExclusiveToConditionComponent implements RecipeComponent<BiomeCondition> {
-    public static final RecipeComponent<BiomeCondition> BIOME_CONDITION= new ExclusiveToConditionComponent();
+import java.util.List;
+
+public class ExclusiveToConditionComponent implements RecipeComponent<ExclusiveToCondition> {
+    public static final RecipeComponent<ExclusiveToCondition> EXCLUSIVE_CONDITION = new ExclusiveToConditionComponent();
+
 
     public ComponentRole role() {
         return ComponentRole.OTHER;
@@ -18,33 +24,26 @@ public class ExclusiveToConditionComponent implements RecipeComponent<BiomeCondi
 
     @Override
     public Class<?> componentClass() {
-        return BiomeCondition.class;
+        return ExclusiveToCondition.class;
     }
 
     @Override
-    public JsonElement write(RecipeJS recipe, BiomeCondition value) {
+    public JsonElement write(RecipeJS recipe, ExclusiveToCondition value) {
         return value.toJson();
     }
 
-    private BiomeCondition fromNativeObject(NativeObject nativeObject ){
-        if(nativeObject.containsKey("tag"))
-            return BiomeCondition.fromString("#" + nativeObject.get("tag"));
-        return BiomeCondition.fromString(nativeObject.get("name").toString());
-    }
+private ExclusiveToCondition fromNativeArray(NativeArray pNativeArray){
+        return ExclusiveToCondition.fromList(pNativeArray.stream().toList());
+}
     @Override
-    public BiomeCondition read(RecipeJS recipe, Object from) {
-        if (from instanceof BiomeCondition bc) {
-            return bc;
-
-        } else if (from instanceof Biome b) {
-            return BiomeCondition.fromBiome(b);
-        } else if (from instanceof JsonObject je) {
-            return BiomeCondition.fromJson(je);
-        } else if(from instanceof NativeObject no){
-            return fromNativeObject(no);
+    public ExclusiveToCondition read(RecipeJS recipe, Object from) {
+        if (from instanceof ExclusiveToCondition ec) {
+            return ec;
+        } else if(from instanceof NativeArray nativeArray){
+            return fromNativeArray(nativeArray);
 
         } else {
-            return BiomeCondition.fromString(String.valueOf(from));
+            return ExclusiveToCondition.fromString(String.valueOf(from));
         }
     }
 }

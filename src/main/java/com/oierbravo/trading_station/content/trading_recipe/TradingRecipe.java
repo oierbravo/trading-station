@@ -12,6 +12,9 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+
+import javax.annotation.Nullable;
 
 public class TradingRecipe implements Recipe<SimpleContainer> {
     private final ResourceLocation id;
@@ -20,20 +23,39 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
 
     private final int processingTime;
 
+    private BiomeCondition biomeCondition;
+    private ExclusiveToCondition exclusiveToCondition;
+
+
     public TradingRecipe(TradingRecipeParams params) {
         this.id = params.id;
         this.result = params.result;
         this.itemIngredients = params.itemIngredients;
         this.processingTime = params.processingTime;
+        this.biomeCondition = params.biome;
+        this.exclusiveToCondition = params.exclusiveTo;
+
     }
-
-
-
     @Override
     public boolean matches(SimpleContainer pContainer, Level pLevel) {
+        return matches(pContainer, pLevel, (Biome) null);
+    }
+
+    public boolean matchesBiome(Biome biome, Level pLevel){
+        return biomeCondition.test(biome, pLevel);
+    }
+
+    public boolean matchesExclusiveTo(String targetedMachine){
+        return exclusiveToCondition.test(targetedMachine);
+    }
+
+    public boolean matches(SimpleContainer pContainer, Level pLevel, @Nullable Biome biome) {
         if(pLevel.isClientSide)
             return false;
         if(pContainer.getContainerSize() != itemIngredients.size())
+            return false;
+
+        if(!getBiomeCondition().test(biome,pLevel))
             return false;
 
         int matchedIngredients = 0;
@@ -76,7 +98,17 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     public boolean canCraftInDimensions(int pWidth, int pHeight) {
         return true;
     }
+    public int getProcessingTime() {
+        return processingTime;
+    }
 
+
+    public BiomeCondition getBiomeCondition(){
+        return biomeCondition;
+    }
+    public ExclusiveToCondition getExclusiveToCondition(){
+        return exclusiveToCondition;
+    }
 
     @Override
     public ItemStack getResultItem() {
@@ -85,6 +117,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     public ItemStack getResult(){
         return result.copy();
     }
+
 
     @Override
     public ResourceLocation getId() {
@@ -103,6 +136,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     public static class Type implements RecipeType<TradingRecipe> {
         private Type() { }
         public static final Type INSTANCE = new Type();
+        public static final  RecipeType<TradingRecipe> RECIPE_TYPE = new Type();
         public static final String ID = "trading";
     }
     public static class Serializer implements RecipeSerializer<TradingRecipe> {
@@ -115,6 +149,8 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
             TradingRecipeBuilder builder = new TradingRecipeBuilder(id);
             NonNullList<Ingredient> itemIngredients = NonNullList.create();
             int processingTime = 1;
+            BiomeCondition biomeCondition = BiomeCondition.EMPTY;
+            ExclusiveToCondition exclusiveToCondition = ExclusiveToCondition.EMPTY;
 
             for (JsonElement je : GsonHelper.getAsJsonArray(json, "ingredients")) {
                 JsonObject jsonObject = je.getAsJsonObject();
@@ -133,9 +169,19 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
                 processingTime = GsonHelper.getAsInt(json,"processingTime");
             }
 
+            if(GsonHelper.isValidNode(json,"biome")){
+                biomeCondition = BiomeCondition.fromJson(json.get("biome"));
+            }
+
+            if(GsonHelper.isValidNode(json,"exclusiveTo")){
+                exclusiveToCondition = ExclusiveToCondition.fromJson(json.get("exclusiveTo"));
+            }
+
             builder.withItemIngredients(itemIngredients)
                     .withSingleItemOutput(result)
-                    .processingTime(processingTime);
+                    .processingTime(processingTime)
+                    .withBiomeCondition(biomeCondition)
+                    .exclusiveTo(exclusiveToCondition);
 
             return builder.build();
         }
@@ -145,6 +191,8 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
             TradingRecipeBuilder builder = new TradingRecipeBuilder(id);
             NonNullList<Ingredient> itemIngredients = NonNullList.create();
             int processingTime = 1;
+            BiomeCondition biomeCondition = BiomeCondition.EMPTY;
+            ExclusiveToCondition exclusiveToCondition = ExclusiveToCondition.EMPTY;
 
             int size = buffer.readVarInt();
             for (int i = 0; i < size; i++)
@@ -152,11 +200,17 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
 
             ItemStack result = buffer.readItem();
             processingTime = buffer.readInt();
+            biomeCondition = BiomeCondition.read(buffer);
+            exclusiveToCondition = exclusiveToCondition.read(buffer);
 
 
             builder.withItemIngredients(itemIngredients)
                     .withSingleItemOutput(result)
-                    .processingTime(processingTime);
+                    .processingTime(processingTime)
+                    .withBiomeCondition(biomeCondition)
+                    .exclusiveTo(exclusiveToCondition);
+
+
             return builder.build();
         }
 
@@ -164,18 +218,19 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         public void toNetwork(FriendlyByteBuf buffer, TradingRecipe recipe) {
             NonNullList<Ingredient> itemIngredients = recipe.itemIngredients;
             int processingTime = recipe.getProcessingTime();
-
+            BiomeCondition biomeCondition = recipe.getBiomeCondition();
+            ExclusiveToCondition exclusiveToCondition = recipe.getExclusiveToCondition();
 
             buffer.writeVarInt(itemIngredients.size());
             itemIngredients.forEach(i -> i.toNetwork(buffer));
             buffer.writeItem(recipe.getResultItem());
             buffer.writeInt(processingTime);
+            biomeCondition.write(buffer);
+            exclusiveToCondition.write(buffer);
         }
 
 
     }
 
-    public int getProcessingTime() {
-        return processingTime;
-    }
+
 }

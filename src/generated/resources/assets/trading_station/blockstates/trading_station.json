@@ -1,33 +1,63 @@
 {
   "variants": {
-    "facing=east,powered=false": {
+    "facing=east,lit=false,powered=false": {
       "model": "trading_station:block/trading_station",
       "y": 90
     },
-    "facing=east,powered=true": {
+    "facing=east,lit=false,powered=true": {
       "model": "trading_station:block/trading_station_powered",
       "y": 90
     },
-    "facing=north,powered=false": {
+    "facing=east,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit",
+      "y": 90
+    },
+    "facing=north,lit=false,powered=false": {
       "model": "trading_station:block/trading_station"
     },
-    "facing=north,powered=true": {
+    "facing=north,lit=false,powered=true": {
       "model": "trading_station:block/trading_station_powered"
     },
-    "facing=south,powered=false": {
+    "facing=north,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit"
+    },
+    "facing=north,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit"
+    },
+    "facing=south,lit=false,powered=false": {
       "model": "trading_station:block/trading_station",
       "y": 180
     },
-    "facing=south,powered=true": {
+    "facing=south,lit=false,powered=true": {
       "model": "trading_station:block/trading_station_powered",
       "y": 180
     },
-    "facing=west,powered=false": {
+    "facing=south,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit",
+      "y": 180
+    },
+    "facing=west,lit=false,powered=false": {
       "model": "trading_station:block/trading_station",
       "y": 270
     },
-    "facing=west,powered=true": {
+    "facing=west,lit=false,powered=true": {
       "model": "trading_station:block/trading_station_powered",
+      "y": 270
+    },
+    "facing=west,lit=true,powered=false": {
+      "model": "trading_station:block/trading_station_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,powered=true": {
+      "model": "trading_station:block/trading_station_powered_lit",
       "y": 270
     }
   }

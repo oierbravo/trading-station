@@ -70,14 +70,19 @@ public class TradingStation
     }
     private static void registerLanguageKeys(){
         registrate().addRawLang("itemGroup.trading_station", "Trading Station");
-        registrate().addRawLang(ModLang.key("trading_station.block.display"), "Trading Station");
-        registrate().addRawLang(ModLang.key("powered_trading_station.block.display"), "Powered Trading Station");
         registrate().addRawLang(ModLang.key("trading.recipe"), "Trading recipe");
+        registrate().addRawLang(ModLang.key("trading.recipe.biome"), "%s biome required");
+        registrate().addRawLang(ModLang.key("trading.recipe.biomeRequired"), "Specific biome requeriment");
         registrate().addRawLang(ModLang.key("tooltip.progress"), "Progress: %d%%");
         registrate().addRawLang(ModLang.key("select_target.title"), "Select an output target");
         registrate().addRawLang(ModLang.key("select_target.button"), "Select target");
         registrate().addRawLang(ModLang.key("select_target.clear"), "Clear");
         registrate().addRawLang("config.jade.plugin_trading_station.trading_station_data", "Trading Station data");
+
+        registrate().addRawLang(ModLang.key("screen.redstone.redstoneMode"), "Redstone: ");
+        registrate().addRawLang(ModLang.key("screen.redstone.ignored"), "Ignored");
+        registrate().addRawLang(ModLang.key("screen.redstone.low"), "Low");
+        registrate().addRawLang(ModLang.key("screen.redstone.high"), "High");
     }
     public static Registrate registrate() {
         return REGISTRATE.get();

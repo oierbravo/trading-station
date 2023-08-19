@@ -1,6 +1,7 @@
 package com.oierbravo.trading_station.foundation.gui;
 
 import com.oierbravo.trading_station.content.trading_station.ITradingStationBlockEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -22,44 +23,55 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
     public AbstractTradingMenu(@Nullable MenuType<?> pMenuType, int pContainerId, Inventory pInv, BlockEntity pBlockEntity, ContainerData pData){
         super(pMenuType, pContainerId);
         checkContainerSize(pInv, 3);
+        checkContainerDataCount(pData,3);
+        blockPos = pBlockEntity.getBlockPos();
         blockEntity = (ITradingStationBlockEntity) pBlockEntity;
         level = pInv.player.getLevel();
         containerData = pData;
         inventory = pInv;
-        addPlayerHotbar(pInv);
-        addPlayerInventory(pInv);
-        this.addDataSlots(pData);
-        //this.blockEntity.inputItems
-        int[][] coords = getInputSlotCoords();
 
+        addDataSlots(pData);
+        addPlayerInventory(pInv);
+        addPlayerHotbar(pInv);
+        Coords2D co = getOutputSlotCoords();
         this.blockEntity.getInputItemHandler().ifPresent(itemHandler -> {
-            this.addSlot(new SlotItemHandler(itemHandler,0, getInputSlotCoords()[0][0],getInputSlotCoords()[0][1]));
-            this.addSlot(new SlotItemHandler(itemHandler,1, getInputSlotCoords()[1][0],getInputSlotCoords()[1][1]));
+            this.addSlot(new SlotItemHandler(itemHandler,0, getInputSlotCoords()[0].x,getInputSlotCoords()[0].y));
+            this.addSlot(new SlotItemHandler(itemHandler,1, getInputSlotCoords()[1].x,getInputSlotCoords()[1].y));
         });
         this.blockEntity.getOutputItemHandler().ifPresent(itemHandler -> {
-            this.addSlot(new SlotItemHandler(itemHandler,0,getOutputSlotCoords()[0],getOutputSlotCoords()[1]));
+            this.addSlot(new SlotItemHandler(itemHandler,0,getOutputSlotCoords().x,getOutputSlotCoords().y));
         });
-        this.addSlot(new SlotItemHandler(this.blockEntity.getTargetItemHandler(),0,87,28));
+        this.addSlot(new SlotItemHandler(this.blockEntity.getTargetItemHandler(),0,getTargetSlotCoords().x,getTargetSlotCoords().y));
+
 
 
     }
 
     public AbstractTradingMenu(@Nullable MenuType<?> pMenuType, int pContainerId, Inventory inv, FriendlyByteBuf extraData){
-        this(pMenuType, pContainerId, inv, inv.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(2));
+        this(pMenuType, pContainerId, inv, inv.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(3));
     }
-    public abstract int[][] getInputSlotCoords();
+    public abstract Coords2D[] getInputSlotCoords();
 
-    public abstract int[] getOutputSlotCoords();
+    public abstract Coords2D getOutputSlotCoords();
+    public abstract  Coords2D getTargetSlotCoords();
 
     @Override
     public abstract boolean stillValid(Player pPlayer);
 
+    private BlockPos blockPos;
+    public byte getCurrentRedstoneMode(){
+        return (byte) this.containerData.get(2);
+        //return 0;
+    }
     public int getScaledProgress() {
         int progress = this.containerData.get(0);
         int maxProgress = this.containerData.get(1);  // Max Progress
         int progressArrowSize = 34; // This is the height in pixels of your arrow
 
         return maxProgress != 0 && progress != 0 ? progress * progressArrowSize / maxProgress : 0;
+    }
+    public BlockPos getBlockPos(){
+        return blockPos;
     }
     public boolean isCrafting() {
         return containerData.get(0) > 0;
@@ -113,7 +125,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
     }
 
 
-    private static final int PLAYER_INVENTORY_Y = 64;
+    private static final int PLAYER_INVENTORY_Y = 74;
 
     private void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
@@ -122,7 +134,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
             }
         }
     }
-    private static final int HOTBAR_Y = 122;
+    private static final int HOTBAR_Y = 132;
 
     private void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; ++i) {

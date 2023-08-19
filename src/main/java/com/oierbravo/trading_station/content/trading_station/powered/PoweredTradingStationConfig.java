@@ -12,7 +12,7 @@ public class PoweredTradingStationConfig {
        COMMON_BUILDER.comment("Settings for the Powered Trading Station").push("powered_trading_station");
         PROGRESS_PER_TICK = COMMON_BUILDER
                 .comment("How much progress per tick")
-                .defineInRange("progressPerTick", 1, 1, Integer.MAX_VALUE);
+                .defineInRange("progressPerTick", 5, 1, Integer.MAX_VALUE);
         ENERGY_CAPACITY = COMMON_BUILDER
                 .comment("How much energy capacity has")
                 .defineInRange("energyCapacity", 64000, 1, Integer.MAX_VALUE);

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.gui.AbstractTradingScreen;
+import com.oierbravo.trading_station.foundation.gui.Coords2D;
 import com.oierbravo.trading_station.foundation.render.FakeItemRenderer;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.registrate.ModRecipes;
@@ -21,8 +22,6 @@ import java.util.Optional;
 
 public class TradingStationScreen extends AbstractTradingScreen<TradingStationMenu> {
 
-    protected static int[] progressArrowCoords = {79,47};
-    protected static int[] targetSelectButtonCoords = {131,18};
     private static final ResourceLocation TEXTURE = TradingStation.asResource("textures/gui/trading_station.png");
 
     public TradingStationScreen(TradingStationMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
@@ -33,14 +32,16 @@ public class TradingStationScreen extends AbstractTradingScreen<TradingStationMe
 
 
     @Override
-    public int[] getProgressArrowCoords() {
-        return progressArrowCoords;
+    public Coords2D getProgressArrowCoords() {
+        return Coords2D.of(79, 47);
     }
 
     @Override
-    protected int[] getTargetSelectButtonCoords() {
-        return targetSelectButtonCoords;
+    protected Coords2D getTargetSelectButtonCoords() {
+        return Coords2D.of(131, 31);
     }
+
+    protected Coords2D getRedstoneButtonCoords() { return Coords2D.of(151,31); }
 
 
     @Override

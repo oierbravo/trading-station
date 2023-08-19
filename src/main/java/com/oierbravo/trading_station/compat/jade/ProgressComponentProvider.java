@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.compat.jade;
 
+import com.oierbravo.trading_station.content.trading_station.ITradingStationBlockEntity;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -32,8 +33,8 @@ public class ProgressComponentProvider  implements IBlockComponentProvider, ISer
 
     @Override
     public void appendServerData(CompoundTag compoundTag, ServerPlayer serverPlayer, Level level, BlockEntity blockEntity, boolean b) {
-        if(blockEntity instanceof TradingStationBlockEntity){
-            TradingStationBlockEntity trading_station = (TradingStationBlockEntity) blockEntity;
+        if(blockEntity instanceof ITradingStationBlockEntity){
+            ITradingStationBlockEntity trading_station = (ITradingStationBlockEntity) blockEntity;
             compoundTag.putInt("trading_station.progress",trading_station.getProgressPercent());
         }
     }

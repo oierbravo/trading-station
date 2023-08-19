@@ -3,8 +3,10 @@ package com.oierbravo.trading_station.content.trading_recipe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.oierbravo.trading_station.foundation.util.ModLang;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -96,10 +98,9 @@ public class BiomeCondition {
     }
     protected boolean testInternal(Biome b, LevelAccessor pLevel){
         if(biome == null)
-            return false;
-        if (biome.toString() != b.toString())
-            return false;
-        return true;
+            return true;
+        ResourceKey<Biome> key = pLevel.registryAccess().registryOrThrow(ForgeRegistries.BIOMES.getRegistryKey()).getResourceKey(b).get();
+        return Objects.equals(getKeyOrThrow(biome).toString(), key.location().toString());
     };
 
     public void write(FriendlyByteBuf buffer) {
@@ -113,12 +114,21 @@ public class BiomeCondition {
         biome.readInternal(buffer);
         return biome;
     }
-    public JsonObject serialize() {
+    public JsonObject toJson() {
         JsonObject json = new JsonObject();
         writeInternal(json);
         return json;
     }
+     public static BiomeCondition fromJson(@Nullable JsonElement je) {
+        if (!isBiomeCondition(je))
+            throw new JsonSyntaxException("Invalid biome condition: " + Objects.toString(je));
 
+        JsonObject json = je.getAsJsonObject();
+        BiomeCondition condition = json.has("tag") ? new BiomeTagCondition() : new BiomeCondition();
+        condition.readInternal(json);
+
+        return condition;
+    }
     public static boolean isBiomeCondition(@Nullable JsonElement je) {
         if (je == null || je.isJsonNull())
             return false;
@@ -131,19 +141,11 @@ public class BiomeCondition {
             return true;
         return false;
     }
-
-    public static BiomeCondition deserialize(@Nullable JsonElement je) {
-        if (!isBiomeCondition(je))
-            throw new JsonSyntaxException("Invalid biome condition: " + Objects.toString(je));
-
-        JsonObject json = je.getAsJsonObject();
-        BiomeCondition condition = json.has("tag") ? new BiomeTagCondition() : new BiomeCondition();
-        condition.readInternal(json);
-
-        return condition;
-    }
     public String toString(){
         return toStringInternal();
+    }
+    public Component toComponent(){
+        return ModLang.translate("trading.recipe.biome", toString());
     }
 
     protected String toStringInternal(){
@@ -152,6 +154,7 @@ public class BiomeCondition {
         return ForgeRegistries.BIOMES.getKey(biome).toString();
     }
 
+
     public static class BiomeTagCondition extends BiomeCondition {
 
         protected TagKey<Biome> tag;
@@ -159,9 +162,8 @@ public class BiomeCondition {
 
         @Override
         protected boolean testInternal(Biome b, LevelAccessor pLevel) {
-            Registry<Biome> biomeRegistry = pLevel.registryAccess().registryOrThrow(ForgeRegistries.BIOMES.getRegistryKey());
-            ResourceKey<Biome> key = biomeRegistry.getResourceKey(b).get();
-            boolean result = biomeRegistry.getOrCreateTag(tag).contains(biomeRegistry.getOrCreateHolderOrThrow(key));
+           Registry<Biome> biomeRegistry = pLevel.registryAccess().registryOrThrow(ForgeRegistries.BIOMES.getRegistryKey());
+           ResourceKey<Biome> key = biomeRegistry.getResourceKey(b).get();
            return biomeRegistry.getOrCreateTag(tag).contains(biomeRegistry.getOrCreateHolderOrThrow(key));
         }
 
@@ -194,4 +196,5 @@ public class BiomeCondition {
             return "#" + tag.location().toString();
         }
     }
+
 }

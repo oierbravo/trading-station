@@ -27,7 +27,7 @@ public class PoweredTradingStationBlock extends TradingStationBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return PoweredTradingStationRegistrate.POWERED_TRADING_STATION_BLOCK_ENTITY.create(pPos, pState);
+        return PoweredTradingStationRegistrate.BLOCK_ENTITY.create(pPos, pState);
     }
 
     @Nullable
@@ -36,7 +36,7 @@ public class PoweredTradingStationBlock extends TradingStationBlock {
         if(pLevel.isClientSide()) {
             return null;
         }
-        return createTickerHelper(pBlockEntityType, PoweredTradingStationRegistrate.POWERED_TRADING_STATION_BLOCK_ENTITY.get(),
+        return createTickerHelper(pBlockEntityType, PoweredTradingStationRegistrate.BLOCK_ENTITY.get(),
                 (pLevel1, pPos, pState1, pBlockEntity) -> pBlockEntity.tick(pLevel1, pPos, pState1));
     }
 

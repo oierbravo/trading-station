@@ -50,6 +50,12 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
     public IEnergyStorage getEnergyStorage() {
         return this.energyStorage;
     }
+
+    @Override
+    public String getTraderType() {
+        return "powered";
+    }
+
     public void setRemoved() {
         super.setRemoved();
     }
@@ -79,7 +85,7 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
     }
 
     public Component getDisplayName() {
-        return ModLang.translate("powered_trading_station.block.display");
+        return Component.translatable("block.trading_station.powered_trading_station");
     }
 
     @Nullable
@@ -103,7 +109,7 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
     }
 
     @Override
-    protected boolean canCraftItem() {
+    public boolean canCraftItem() {
         Level level = this.getLevel();
         if(level == null)
             return false;

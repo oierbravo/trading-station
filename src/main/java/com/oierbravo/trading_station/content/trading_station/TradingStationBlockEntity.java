@@ -24,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,23 +55,29 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     public int progress = 0;
     public int maxProgress = 1;
+
+    private int lastProgress = 0;
+    private boolean isWorking = false;
     private BlockState lastBlockState;
 
     protected final ContainerData containerData;
+
+    byte currentRedstoneMode = 0;
 
     public TradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
         updateTag = getPersistentData();
         lastBlockState = this.getBlockState();
-        containerData = TradingStationBlockEntity.createContainerData(this);
+        containerData = createContainerData();
     }
-    public static ContainerData createContainerData(TradingStationBlockEntity pBlockEntity){
+    public ContainerData createContainerData(){
         return new ContainerData(){
             @Override
             public int get(int pIndex){
                 return switch (pIndex) {
-                    case 0 -> pBlockEntity.progress;
-                    case 1 -> pBlockEntity.maxProgress;
+                    case 0 -> progress;
+                    case 1 -> maxProgress;
+                    case 2 -> (int) currentRedstoneMode;
                     default -> 0;
                 };
             }
@@ -79,14 +86,15 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             @Override
             public void set(int pIndex, int pValue) {
                 switch (pIndex) {
-                    case 0 -> pBlockEntity.progress = pValue;
-                    case 1 -> pBlockEntity.maxProgress = pValue;
+                    case 0 -> progress = pValue;
+                    case 1 -> maxProgress = pValue;
+                    case 2 -> currentRedstoneMode = (byte) pValue;
                 }
             }
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
         };
     }
@@ -169,9 +177,16 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
     @Override
     public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
+        if(side == Direction.UP)
+            return  super.getCapability(cap, side);
+        if(cap == ForgeCapabilities.ITEM_HANDLER){
+            if(side == Direction.DOWN)
+                return outputItemHandler.cast();
+
+            Direction localDir = this.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
             return inputItemHandler.cast();
         }
+
         return super.getCapability(cap, side);
     }
 
@@ -207,6 +222,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         tag.put("target", targetItemHandler.serializeNBT());
         tag.putInt("trading_station.progress", progress);
         tag.putInt("trading_station.maxProgress", maxProgress);
+        tag.putByte("redstoneMode", currentRedstoneMode);
     }
 
     @Override
@@ -217,6 +233,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         targetItemHandler.deserializeNBT(tag.getCompound("target"));
         progress = tag.getInt("trading_station.progress");
         maxProgress = tag.getInt("trading_station.maxProgress");
+        currentRedstoneMode = tag.getByte("redstoneMode");
     }
 
     public void drops() {
@@ -235,89 +252,75 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         this.maxProgress = 1;
     }
 
-    protected static Optional<TradingRecipe> getRecipe(TradingStationBlockEntity pBlockEntity){
-        Level level = pBlockEntity.getLevel();
-        SimpleContainer inputInventory = getInputInventory(pBlockEntity);
-        if(!pBlockEntity.targetItemHandler.getStackInSlot(0).isEmpty())
-             return ModRecipes.findByOutput(level,pBlockEntity.targetItemHandler.getStackInSlot(0));
-        return ModRecipes.find(inputInventory,level);
-//        return level.getRecipeManager().getRecipeFor(TradingRecipe.Type.INSTANCE, inputInventory, level);
-    }
-    protected int getProcessingTime(TradingStationBlockEntity pBlockEntity) {
-        return getRecipe(pBlockEntity).map(TradingRecipe::getProcessingTime).orElse(1);
-    }
 
     public void tick(Level pLevel, BlockPos pPos, BlockState pState) {
 
         if(pLevel.isClientSide()) {
             return;
         }
-        if(!isPowered(this))
+        if(!isPowered()) {
+            setWorking(false);
             return;
-        if(!canCraftItem())
+        }
+        if(!canCraftItem()) {
+            setWorking(false);
             return;
+        }
 
-        this.updateProgress();
-        BlockEntity.setChanged(pLevel, pPos, pState);
-        this.maxProgress = this.getProcessingTime(this);
-        if (this.progress > this.maxProgress) {
+        updateProgress();
+        setWorking(true);
+
+        maxProgress = getProcessingTime();
+        if (progress > maxProgress) {
             craftItem();
         }
-        BlockEntity.setChanged(pLevel, pPos, pState);
+
+        setChanged(pLevel, pPos, pState);
+
+    }
+    private void setWorking(boolean value){
+        if(isWorking != value){
+            isWorking = value;
+            BlockState pState = getBlockState().setValue(AbstractFurnaceBlock.LIT, Boolean.valueOf(isWorking()));
+
+//            if(lastBlockState.getValue(BlockStateProperties.LIT) != pState.getValue(BlockStateProperties.LIT)){
+ //               lastBlockState = pState;
+                getLevel().setBlock(getBlockPos(), pState, 3);
+            setChanged(getLevel(), getBlockPos(), pState);
+
+            //}
+
+    }
+
+
+    }
+
+    private boolean isWorking() {
+        return isWorking;
     }
 
     protected void updateProgress(){
         this.progress += TradingStationConfig.PROGRESS_PER_TICK.get();
 
     }
-    private static boolean isPowered(TradingStationBlockEntity pBlockEntity){
-        return pBlockEntity.getLevel().getBlockState(pBlockEntity.getBlockPos())
+    public boolean isPowered() {
+        if(currentRedstoneMode == REDSTONE_MODES.IGNORE.ordinal())
+            return true;
+        if(currentRedstoneMode == REDSTONE_MODES.LOW.ordinal())
+            return !this.getLevel().getBlockState(getBlockPos())
+                    .getValue(BlockStateProperties.POWERED);
+
+        return this.getLevel().getBlockState(getBlockPos())
                 .getValue(BlockStateProperties.POWERED);
     }
-    private static SimpleContainer getInputInventory(TradingStationBlockEntity pBlockEntity){
-        int containerSize = 0;
-        for(int index = 0; index < pBlockEntity.inputItems.getSlots(); index++) {
-            if (!pBlockEntity.inputItems.getStackInSlot(index).isEmpty())
-                containerSize++;
-        }
-
-        SimpleContainer inputInventory = new SimpleContainer(containerSize);
-        pBlockEntity.inputItemHandler.ifPresent(iItemHandler -> {
-            for(int slot = 0; slot < iItemHandler.getSlots(); slot++) {
-                if(!iItemHandler.getStackInSlot(slot).isEmpty()){
-                    inputInventory.addItem(iItemHandler.getStackInSlot(slot));
-                }
-            }
-        });
-        return inputInventory;
-    }
-    private void craftItem() {
-        SimpleContainer inputInventory = getInputInventory(this);
-
-        Optional<TradingRecipe> recipe = getRecipe(this);
-
-        if(recipe.isPresent()){
-            for (int i = 0; i < recipe.get().getIngredients().size(); i++) {
-                Ingredient ingredient = recipe.get().getIngredients().get(i);
-
-                for (int slot = 0; slot < this.inputItems.getSlots(); slot++) {
-                    ItemStack itemStack = this.inputItems.getStackInSlot(slot);
-                    if(ingredient.test(itemStack)){
-                        this.inputItems.extractItem(slot,ingredient.getItems()[0].getCount(),false);
-                        inputInventory.setChanged();
-                    }
-                }
-            }
-            this.outputItems.insertItem(0, recipe.get().getResultItem(), false);
-        }
-
-        this.resetProgress();
-    }
 
 
-    protected boolean canCraftItem() {
-        SimpleContainer inputInventory = getInputInventory(this);
-        Optional<TradingRecipe> match = getRecipe(this);
+
+
+
+    public boolean canCraftItem() {
+        SimpleContainer inputInventory = getInputInventory();
+        Optional<TradingRecipe> match = getRecipe();
 
         if(!match.isPresent()) {
             return false;
@@ -326,9 +329,9 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
                 && hasEnoughOutputSpace(this.outputItems, match.get().getResultItem());
     }
 
-    private boolean canProcess(ItemStack stack) {
+    public boolean canProcess(ItemStack stack) {
 
-        return getRecipe(this).isPresent();
+        return getRecipe().isPresent();
     }
     protected boolean hasEnoughInputItems(SimpleContainer inventory, NonNullList<Ingredient> ingredients){
         int enough = 0;
@@ -376,6 +379,27 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return this.progress * 100 / this.maxProgress;
     }
 
+    @Override
+    public ItemStackHandler getInputItems() {
+        return inputItems;
+    }
+
+    @Override
+    public ItemStackHandler getOutputItems() {
+        return outputItems;
+    }
+
+    @Override
+    public void setRedstoneMode(byte mode) {
+        currentRedstoneMode = mode;
+        setChanged();
+    }
+
+    @Override
+    public byte getCurrentRedstoneMode() {
+        return currentRedstoneMode;
+    }
+
 
     public void setItemStack(int slot, ItemStack itemStack,ItemStackSyncS2CPacket.SlotType slotType) {
         if(slotType == ItemStackSyncS2CPacket.SlotType.INPUT)
@@ -393,14 +417,19 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
 
     @Override
+    public String getTraderType() {
+        return "basic";
+    }
+
+    @Override
     public Component getDisplayName() {
-        return ModLang.translate("block.display");
+        return Component.translatable("block.trading_station.trading_station");
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        return new TradingStationMenu(pContainerId, pPlayerInventory, this, this.containerData);
+        return new TradingStationMenu(pContainerId, pPlayerInventory, this, containerData);
     }
 
     public void setPreferedItem(ItemStack itemStack) {

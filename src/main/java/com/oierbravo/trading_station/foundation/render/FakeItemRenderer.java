@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -61,9 +62,9 @@ public class FakeItemRenderer {
             if (!model.usesBlockLight()) {
                 Lighting.setupForFlatItems();
             }
-
             MultiBufferSource.BufferSource bufferSource = MINECRAFT.renderBuffers().bufferSource();
-            ITEM_RENDERER.render(pItemStack,
+
+           ITEM_RENDERER.render(pItemStack,
                     ItemTransforms.TransformType.GUI,
                     false,
                     new PoseStack(),
@@ -84,12 +85,13 @@ public class FakeItemRenderer {
     }
 
     private static MultiBufferSource getWrappedBuffer(MultiBufferSource pBufferSource, float pAlpha) {
-        return pRenderType -> new WrappedVertexConsumer(pBufferSource.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS)), 1F, 1F, 1F, pAlpha);
+        return pRenderType -> new WrappedVertexConsumer(pBufferSource.getBuffer(RenderType.entityTranslucentCull(InventoryMenu.BLOCK_ATLAS)), 1F, 1F, 1F, pAlpha);
     }
 
     private static BakedModel getBakedModel(ItemStack pItemStack) {
          return ITEM_RENDERER.getModel(pItemStack, null, MINECRAFT.player, 0);
     }
+
 
 
 }

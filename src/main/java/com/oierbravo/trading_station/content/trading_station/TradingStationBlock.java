@@ -1,6 +1,5 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
 import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,8 +34,9 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 
 public class TradingStationBlock extends BaseEntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-    private static final VoxelShape RENDER_SHAPE = Shapes.box(0, 0, 0, 1, 1, 1);
+    private static final VoxelShape RENDER_SHAPE = Shapes.box(0, 0, 0, 0.9, 0.9, 0.9);
     //public static final BooleanProperty BOTTOM = BlockStateProperties.BOTTOM;
 
 
@@ -53,7 +53,7 @@ public class TradingStationBlock extends BaseEntityBlock {
 
     public TradingStationBlock(Properties pProperties) {
         super(pProperties);
-        registerDefaultState(getStateDefinition().any().setValue(HORIZONTAL_FACING, Direction.NORTH).setValue(POWERED,false));
+        registerDefaultState(getStateDefinition().any().setValue(HORIZONTAL_FACING, Direction.NORTH).setValue(POWERED,false).setValue(LIT,false));
 
     }
 
@@ -65,11 +65,12 @@ public class TradingStationBlock extends BaseEntityBlock {
             return null;
         return super.getStateForPlacement(context)
                 .setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite())
-                .setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
+                .setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()))
+                .setValue(LIT,false);
     }
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HORIZONTAL_FACING).add(POWERED);
+        builder.add(HORIZONTAL_FACING).add(POWERED).add(LIT);
     }
     @Override
     public RenderShape getRenderShape(BlockState pState) {
@@ -79,7 +80,7 @@ public class TradingStationBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return TradingStationRegistrate.TRADING_STATION_BLOCK_ENTITY.create(pPos, pState);
+        return TradingStationRegistrate.BLOCK_ENTITY.create(pPos, pState);
     }
 
     @Override
@@ -95,7 +96,7 @@ public class TradingStationBlock extends BaseEntityBlock {
         if(pLevel.isClientSide()) {
             return null;
         }
-        return createTickerHelper(pBlockEntityType, TradingStationRegistrate.TRADING_STATION_BLOCK_ENTITY.get(),
+        return createTickerHelper(pBlockEntityType, TradingStationRegistrate.BLOCK_ENTITY.get(),
                 (pLevel1, pPos, pState1, pBlockEntity) -> pBlockEntity.tick(pLevel1, pPos, pState1));
     }
 

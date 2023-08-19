@@ -1,6 +1,7 @@
 package com.oierbravo.trading_station.content.trading_station.powered;
 
 import com.oierbravo.trading_station.foundation.gui.AbstractTradingMenu;
+import com.oierbravo.trading_station.foundation.gui.Coords2D;
 import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,11 +14,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class PoweredTradingStationMenu extends AbstractTradingMenu {
     public PoweredTradingStationMenu(int pContainerId, Inventory pInv, BlockEntity pBlockEntity, ContainerData pData) {
-        super(PoweredTradingStationRegistrate.POWERED_TRADING_STATION_MENU.get(), pContainerId, pInv, pBlockEntity, pData);
+        super(PoweredTradingStationRegistrate.MENU.get(), pContainerId, pInv, pBlockEntity, pData);
     }
 
     public PoweredTradingStationMenu(int pContainerId, Inventory inventory, FriendlyByteBuf buf) {
-        super(PoweredTradingStationRegistrate.POWERED_TRADING_STATION_MENU.get(), pContainerId, inventory, buf);
+        super(PoweredTradingStationRegistrate.MENU.get(), pContainerId, inventory, buf);
     }
 
     public static PoweredTradingStationMenu factory(@Nullable MenuType<PoweredTradingStationMenu> pMenuType, int pContainerId, Inventory inventory, FriendlyByteBuf buf) {
@@ -25,14 +26,21 @@ public class PoweredTradingStationMenu extends AbstractTradingMenu {
     }
     @Override
     public boolean stillValid(Player pPlayer) {
-        return stillValid(ContainerLevelAccess.create(level, blockEntity.getBlockPos()), pPlayer, PoweredTradingStationRegistrate.POWERED_TRADING_STATION_BLOCK.get());
+        return stillValid(ContainerLevelAccess.create(level, getBlockPos()), pPlayer, PoweredTradingStationRegistrate.BLOCK.get());
     }
     @Override
-    public int[][] getInputSlotCoords() {
-        return new int[][]{{28,38},{51,38}};
+    public Coords2D[] getInputSlotCoords() {
+        return new Coords2D[]{
+            Coords2D.of(28,47),
+            Coords2D.of(51,47)
+        };
     }
     @Override
-    public int[] getOutputSlotCoords() {
-        return new int[]{131,38};
+    public Coords2D getOutputSlotCoords() {
+        return Coords2D.of(131,47);
     }
-  }
+    public Coords2D getTargetSlotCoords() {
+        return Coords2D.of(87,40);
+    }
+
+}

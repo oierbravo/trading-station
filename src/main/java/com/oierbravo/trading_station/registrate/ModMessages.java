@@ -3,6 +3,7 @@ package com.oierbravo.trading_station.registrate;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
+import com.oierbravo.trading_station.network.packets.RedstoneModeSyncC2SPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -39,6 +40,12 @@ public class ModMessages {
                 .decoder(GhostItemSyncC2SPacket::new)
                 .encoder(GhostItemSyncC2SPacket::toBytes)
                 .consumerMainThread(GhostItemSyncC2SPacket::handle)
+                .add();
+
+        net.messageBuilder(RedstoneModeSyncC2SPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(RedstoneModeSyncC2SPacket::new)
+                .encoder(RedstoneModeSyncC2SPacket::toBytes)
+                .consumerMainThread(RedstoneModeSyncC2SPacket::handle)
                 .add();
 
     }

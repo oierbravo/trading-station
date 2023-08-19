@@ -7,11 +7,13 @@ import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -51,15 +53,21 @@ public class TradingStationTargetSelectScreen extends Screen {
     protected int leftPos;
     protected int topPos;
 
+    private BlockPos blockPos;
     protected TradingStationTargetSelectScreen(Component pTitle) {
         super(pTitle);
     }
-    public TradingStationTargetSelectScreen(ITradingStationBlockEntity pBlockEntity) {
+    public TradingStationTargetSelectScreen(ITradingStationBlockEntity pBlockEntity, BlockPos pBlockPos) {
         this(ModLang.translate("select_target.title"));
         this.blockEntity = pBlockEntity;
-        this.allPossibleOutputs = ModRecipes.getAllOutputs(pBlockEntity.getLevel());
+        this.blockPos = pBlockPos;
+        this.allPossibleOutputs = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
         resetDisplayedTargets();
 
+    }
+
+    public BlockPos getBlockPos() {
+        return blockPos;
     }
 
     @Override
@@ -73,7 +81,7 @@ public class TradingStationTargetSelectScreen extends Screen {
             Minecraft.getInstance().popGuiLayer();
         }));
         addRenderableWidget(new Button(getGuiLeft() - 25, getGuiTop() + 30, 25, 20, ModLang.translate("select_target.clear"), (button) -> {
-            ModMessages.sendToServer(new GhostItemSyncC2SPacket(ItemStack.EMPTY,this.blockEntity.getBlockPos()));
+            ModMessages.sendToServer(new GhostItemSyncC2SPacket(ItemStack.EMPTY,getBlockPos()));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
             Minecraft.getInstance().popGuiLayer();
         }));
@@ -119,7 +127,7 @@ public class TradingStationTargetSelectScreen extends Screen {
             ItemStack target = allPossibleOutputs.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-            if(target.sameItem(selectedTarget))
+            if(ItemStack.isSameItemSameTags(selectedTarget, target ))
                 blit(pPoseStack, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
         }
     }
@@ -133,7 +141,7 @@ public class TradingStationTargetSelectScreen extends Screen {
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
 
-            renderFloatingItem(target, xStart, yStart);
+            renderFloatingItem(target, xStart, yStart );
 
             if (pMouseX >= xStart - 1 && pMouseX <= xStart + 16 && pMouseY >= yStart - 1 && pMouseY <= yStart + 16) {
                 renderTooltip(pPoseStack, target, pMouseX, pMouseY);
@@ -151,7 +159,7 @@ public class TradingStationTargetSelectScreen extends Screen {
         itemRenderer.blitOffset = 2000.0f;
 
         itemRenderer.renderAndDecorateItem(pItemStack, pX, pY);
-        itemRenderer.renderGuiItemDecorations(font, pItemStack, pX, pY, "");
+        itemRenderer.renderGuiItemDecorations(font, pItemStack, pX, pY);
 
         setBlitOffset(0);
         itemRenderer.blitOffset = 0.0f;
@@ -185,7 +193,7 @@ public class TradingStationTargetSelectScreen extends Screen {
 
             if (boxX > 0 && boxX <= TARGET_BOX_SIZE + 1 && boxY > 0 && boxY <= TARGET_BOX_SIZE + 1 && isValidRecipeIndex(index)) {
                 ItemStack itemStack = getDisplayedItemStacks().get(index);
-                ModMessages.sendToServer(new GhostItemSyncC2SPacket(itemStack,this.blockEntity.getBlockPos()));
+                ModMessages.sendToServer(new GhostItemSyncC2SPacket(itemStack,getBlockPos()));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
                 Minecraft.getInstance().popGuiLayer();
                 return true;

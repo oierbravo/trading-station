@@ -1,8 +1,8 @@
-// 1.19.2	2023-08-16T17:59:11.715017504	Registrate Provider for trading_station [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
-ac427e21e7a0915809800ce83800780c045678c6 assets/trading_station/blockstates/powered_trading_station.json
-391b0f87f6c9bd80e20dfc8b949e7dd99cd16fe9 assets/trading_station/blockstates/trading_station.json
-2c8a8b7c6874dcb7e5474ba19b33fbb2d166c834 assets/trading_station/lang/en_ud.json
-efb3401e9c37c753973bf81e4da4bb0946061a19 assets/trading_station/lang/en_us.json
+// 1.19.2	2023-08-19T22:34:02.349925986	Registrate Provider for trading_station [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+d529016ef556a0231f5da8dd90e7b84a30aad7f7 assets/trading_station/blockstates/powered_trading_station.json
+d529016ef556a0231f5da8dd90e7b84a30aad7f7 assets/trading_station/blockstates/trading_station.json
+72f9bf61c9db46a4fefece27497879b91d0290e3 assets/trading_station/lang/en_ud.json
+b39694f8daf13daba09feddb32de6f23e9bf20ad assets/trading_station/lang/en_us.json
 373be6ce42eee460888161c967f098e5943e3778 assets/trading_station/models/item/powered_trading_station.json
 7ddda578b6d6072db924599a9959579470354897 assets/trading_station/models/item/trading_station.json
 c3b4c04c1cecdc5001fcddda7b30b11b15f0b2b2 data/trading_station/loot_tables/blocks/powered_trading_station.json

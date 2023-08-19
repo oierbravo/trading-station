@@ -7,11 +7,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,11 +31,25 @@ public class ModRecipes {
     public static Optional<TradingRecipe> find(SimpleContainer pInv, Level pLevel) {
         if(pLevel.isClientSide())
             return Optional.empty();
-        return pLevel.getRecipeManager().getRecipeFor(TradingRecipe.Type.INSTANCE,pInv,pLevel);
+        return find(pInv, pLevel, null);
     }
-    public static List<ItemStack> getAllOutputs(Level pLevel){
+
+    public static Optional<TradingRecipe> find(SimpleContainer pInv, Level pLevel,@Nullable Biome biome) {
+        if(pLevel.isClientSide())
+            return Optional.empty();
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
-                .map(TradingRecipe::getResult).toList();
+                .filter((tradingRecipe -> tradingRecipe.matchesBiome(biome, pLevel)))
+                .findAny();
+
+    }
+
+    public static List<ItemStack> getAllOutputs(Level pLevel,@Nullable Biome biome, String machineType){
+        return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
+                .filter((tradingRecipe -> tradingRecipe.matchesBiome(biome, pLevel)))
+                .filter((tradingRecipe -> tradingRecipe.matchesExclusiveTo(machineType)))
+                .sorted((recipe1, recipe2) -> recipe1.getId().compareNamespaced(recipe2.getId()))
+                .map(TradingRecipe::getResult)
+                .toList();
 
     }
     public static Optional<TradingRecipe> findByOutput(Level pLevel,ItemStack targetedOutput){

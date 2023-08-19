@@ -46,8 +46,6 @@ public class RedstoneModeSyncC2SPacket {
 
             if(sender.getLevel().getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
                 blockEntity.setRedstoneMode(message.mode);
-                blockEntity.setChanged();
-
             }
         });
        context.setPacketHandled(true);
