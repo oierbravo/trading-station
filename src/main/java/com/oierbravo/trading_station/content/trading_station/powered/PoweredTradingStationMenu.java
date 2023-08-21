@@ -43,8 +43,8 @@ public class PoweredTradingStationMenu extends AbstractTradingMenu {
     @Override
     public Coords2D[] getInputRecipeCoords() {
         return new Coords2D[]{
-                Coords2D.of(28,20),
-                Coords2D.of(51,20)
+                Coords2D.of(28,24),
+                Coords2D.of(51,24)
         };
     }
     @Override
