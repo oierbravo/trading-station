@@ -8,7 +8,7 @@ modId="trading_station"
 version="${file.jarVersion}" 
 displayName="Trading Station"
 logoFile="logo.png"
-credits="Code inspirtation from the amazing Create mod"
+credits="Code inspiration from the amazing Create mod, LaserIO and AlchemLib"
 authors="oierbravo"
 description='''
 Trading made simple

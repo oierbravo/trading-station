@@ -3,6 +3,7 @@ package com.oierbravo.trading_station.registrate;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -54,6 +55,8 @@ public class ModRecipes {
 
     }
     public static List<TradingRecipe> getAllRecipesForMachine(Level pLevel, Biome biome, String machineType) {
+        if(pLevel.isClientSide())
+            return NonNullList.create();
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
                 .filter((tradingRecipe -> tradingRecipe.matchesBiome(biome, pLevel)))
                 .filter((tradingRecipe -> tradingRecipe.matchesExclusiveTo(machineType)))

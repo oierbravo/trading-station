@@ -81,7 +81,7 @@ public abstract class AbstractTradingScreen<MENU extends AbstractTradingMenu> ex
 
 
         if(!menu.blockEntity.getTargetItemStack().isEmpty()){
-            Optional<TradingRecipe> recipe = ModRecipes.findByOutput(menu.blockEntity.getLevel(),menu.blockEntity.getTargetItemStack());
+            Optional<TradingRecipe> recipe = ModRecipes.findByOutput(menu.getLevel(),menu.blockEntity.getTargetItemStack());
             if(recipe.isPresent()){
                 renderFakeRecipe(recipe.get(), pPoseStack);
             }

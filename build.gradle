@@ -31,8 +31,8 @@ apply plugin: 'maven-publish'
 jarJar.enable()
 
 group = "com.${author}.${modid}"
-version = "${mod_version}"
-archivesBaseName = "${modid}-${minecraft_version}"
+version = "${minecraft_version}-${mod_version}"
+archivesBaseName = "${modid}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -260,7 +260,7 @@ tasks.jarJar {
 }
 void addLicense(jarTask) {
     jarTask.from('LICENSE.txt') {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}" }
     }
 }
 addLicense(jar)

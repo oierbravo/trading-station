@@ -142,4 +142,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
             this.addSlot(new Slot(playerInventory, i, 8 + i * 18, HOTBAR_Y));
         }
     }
+    public Level getLevel(){
+        return level;
+    }
 }

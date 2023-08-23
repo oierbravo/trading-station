@@ -21,7 +21,7 @@ public class PoweredTradingStationConfig {
                 .defineInRange("energyTransfer", 2000, 1, Integer.MAX_VALUE);
         ENERGY_PER_TICK = COMMON_BUILDER
                 .comment("How much energy consumens per tick")
-                .defineInRange("energyPerTick", 1000, 1, Integer.MAX_VALUE);
+                .defineInRange("energyPerTick", 500, 1, Integer.MAX_VALUE);
         COMMON_BUILDER.pop();
     }
 

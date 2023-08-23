@@ -1,10 +1,11 @@
 Trading Station
----------------
+=============
 
 Made for modpacks. It doesn't add any recipe.
 
 Features
-========
+--------
+
 - Basic station with no power requirements.
 - Powered station with RF power requirements.
 - Custom *Trading recipe*
@@ -13,7 +14,8 @@ Features
 - Mechanical station available with companion mod.
 - 
 Trading recipe
-==============
+---------------
+
 - `ingredients` (required). An array/list of 1 or 2 ingredients.
 - `result` (required). Single output item/block
 - `processingTime` (optional). Ticks required to process. Default to 1. Powered machine has a 5x speed.
@@ -30,7 +32,7 @@ Trading recipe
 
 
 KubeJS 6.1 Integration
-======================
+----------------------
 ```
 ServerEvents.recipes(event => {
   /**

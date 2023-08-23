@@ -63,7 +63,7 @@ public class TradingStationTargetSelectScreen extends Screen {
         this.blockEntity = pBlockEntity;
         this.blockPos = pBlockPos;
         //this.allPossibleRecipes = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
-        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
+        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine(Minecraft.getInstance().level,pBlockEntity.getBiome(),pBlockEntity.getTraderType());
         resetDisplayedTargets();
 
     }

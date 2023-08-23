@@ -22,6 +22,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -290,16 +291,9 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             isWorking = value;
             BlockState pState = getBlockState().setValue(AbstractFurnaceBlock.LIT, Boolean.valueOf(isWorking()));
 
-//            if(lastBlockState.getValue(BlockStateProperties.LIT) != pState.getValue(BlockStateProperties.LIT)){
- //               lastBlockState = pState;
                 getLevel().setBlock(getBlockPos(), pState, 3);
             setChanged(getLevel(), getBlockPos(), pState);
-
-            //}
-
-    }
-
-
+        }
     }
 
     private boolean isWorking() {
@@ -384,6 +378,30 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     public int getProgressPercent() {
         return this.progress * 100 / this.maxProgress;
+    }
+
+    @Override
+    public void craftItem() {
+        SimpleContainer inputInventory = getInputInventory();
+
+        Optional<TradingRecipe> recipe = getRecipe();
+
+        if(recipe.isPresent()){
+            for (int i = 0; i < recipe.get().getIngredients().size(); i++) {
+                Ingredient ingredient = recipe.get().getIngredients().get(i);
+
+                for (int slot = 0; slot < getInputItems().getSlots(); slot++) {
+                    ItemStack itemStack = getInputItems().getStackInSlot(slot);
+                    if(ingredient.test(itemStack)){
+                        getInputItems().extractItem(slot,ingredient.getItems()[0].getCount(),false);
+                        inputInventory.setChanged();
+                    }
+                }
+            }
+            getOutputItems().insertItem(0, recipe.get().getResultItem(), false);
+        }
+
+        this.resetProgress();
     }
 
     @Override
@@ -479,5 +497,20 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             return "";
         }
         return targetedRecipe.get().getId().toString();
+    }
+
+    @Override
+    public Biome getBiome() {
+        return this.getLevel().getBiome(getBlockPos()).get();
+    }
+     protected Optional<TradingRecipe> getRecipe(){
+        SimpleContainer inputInventory = getInputInventory();
+        if(!getTargetItemHandler().getStackInSlot(0).isEmpty())
+            return ModRecipes.findByOutput(level,getTargetItemHandler().getStackInSlot(0));
+        return ModRecipes.find(inputInventory,level, getBiome(), getTraderType());
+    };
+
+    public int getProcessingTime(){
+        return getRecipe().map(TradingRecipe::getProcessingTime).orElse(1);
     }
 }
