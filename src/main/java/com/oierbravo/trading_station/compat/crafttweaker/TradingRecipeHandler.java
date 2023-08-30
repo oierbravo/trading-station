@@ -14,7 +14,7 @@ public class TradingRecipeHandler implements IRecipeHandler<TradingRecipe>{
 
     @Override
     public String dumpToCommandString(IRecipeManager<? super TradingRecipe> manager, TradingRecipe recipe) {
-        return manager.getCommandString() + recipe.toString() + recipe.getOutput() + "[" + recipe.getIngredient() + "]";
+        return manager.getCommandString() + recipe.toString() + recipe.getResultItem() + "[" + recipe.getIngredients() + "]";
     }
     @Override
     public <U extends Recipe<?>> boolean doesConflict(IRecipeManager<? super TradingRecipe> manager, TradingRecipe firstRecipe, U secondRecipe) {

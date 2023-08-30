@@ -55,8 +55,6 @@ public class ModRecipes {
 
     }
     public static List<TradingRecipe> getAllRecipesForMachine(Level pLevel, Biome biome, String machineType) {
-        if(pLevel.isClientSide())
-            return NonNullList.create();
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
                 .filter((tradingRecipe -> tradingRecipe.matchesBiome(biome, pLevel)))
                 .filter((tradingRecipe -> tradingRecipe.matchesExclusiveTo(machineType)))

@@ -29,8 +29,6 @@ public interface ITradingStationBlockEntity {
 
     ItemStack getTargetItemStack();
 
-    BlockPos getBlockPos();
-
     void setPreferedItem(ItemStack itemStack);
 
     void setItemStack(int slot, ItemStack itemStack, ItemStackSyncS2CPacket.SlotType slotType);

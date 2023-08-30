@@ -298,18 +298,18 @@ if(System.getenv('MODRINTH_TOKEN') != null) {
 
     modrinth {
         token = System.getenv("MODRINTH_TOKEN")
-        projectId = "mechanical_trading_station"
-        versionNumber = "${mod_version}"
+        projectId = "trading-station"
+        versionNumber = "${version}"
         versionName = "${display_name} - v${mod_version} for Minecraft ${minecraft_version}"
         versionType = "release" // This is the default -- can also be `beta` or `alpha`
         uploadFile = tasks.jarJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
         gameVersions = ["${minecraft_version}"] // Must be an array, even with only one version
         loaders = ["forge"] // Must also be an array - no need to specify this if you're using Loom or ForgeGradle
         dependencies { // A special DSL for creating dependencies
-            optional.project "create"
+            optional.project "kubejs"
             optional.project "jei"
-            optional.project "crafttweaker"
         }
+        changelog = rootProject.file("changes/${minecraft_version}-${mod_version}.md").text
         syncBodyFrom = rootProject.file("README.md").text
     }
     tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
@@ -323,7 +323,7 @@ if(System.getenv('MODRINTH_TOKEN') != null) {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
-publishing {
+/*publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
@@ -332,6 +332,29 @@ publishing {
     repositories {
         maven {
             url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}*/
+publishing {
+    // other settings of publication
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            name = "Gitea"
+            url = uri("https://git.fosil.eu/api/packages/oier/maven")
+
+            credentials(HttpHeaderCredentials) {
+                name = "Authorization"
+                value = "token ${System.getenv("FOSIL_TOKEN")}"
+            }
+
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
         }
     }
 }

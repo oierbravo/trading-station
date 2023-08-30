@@ -1,6 +1,8 @@
+<!-- modrinth_exclude.start -->
 Trading Station
 =============
-
+<!-- modrinth_exclude.end -->
+Item trading machine.
 Made for modpacks. It doesn't add any recipe.
 
 Features
@@ -11,7 +13,7 @@ Features
 - Custom *Trading recipe*
 - Indestructible variant for each station.
 - Configurable consumption & progress.
-- Mechanical station available with companion mod.
+- Mechanical (Create Addon) station available with companion mod.
 - 
 Trading recipe
 ---------------
@@ -23,13 +25,76 @@ Trading recipe
 - `exclusiveTo` (optional). Required station. Defaults any. Possible values: `basic`, `powered`, `mechanical`
 
 ### Example (basic input & output)
-
+```
+{
+  "type": "trading_station:trading",
+  "ingredients": [
+    {"item": "minecraft:emerald", "count": 5}
+  ],
+  "result": {
+    "item": "minecraft:diamond",
+    "count": 5
+  },
+  "processingTime": 500
+}
+```
 ### Example (output item with NBT)
+```
+{
+  "type": "trading_station:trading",
+  "ingredients": [
+    {"item": "minecraft:diamond", "count": 5}
+  ],
+  "result": {
+    "item": "minecraft:enchanted_book",
+    "nbt": "{StoredEnchantments: [{id:\"looting\",lvl:3s}]}"
+  },
+  "processingTime": 100
+}
 
+```
 ### Example (biome requirement)
-
+```
+{
+	"type": "trading_station:trading",
+	"result": {
+		"item": "minecraft:diamond_sword",
+		"count": 1,
+		"nbt": "{Damage:0,Enchantments:[{id:\"mending\",lvl:1s}]}"
+	},
+	"ingredients": [
+		{
+			"item": "minecraft:diamond",
+			"count": 5
+		}
+	],
+	"processingTime": 100,
+	"biome": {
+		"name": "minecraft:plains"
+	}
+}
+```
 ### Example (exclusiveTo)
-
+```
+{
+	"type": "trading_station:trading",
+	"result": {
+		"item": "minecraft:diamond_sword",
+		"count": 1,
+		"nbt": "{Damage:0,Enchantments:[{id:\"sharpness\",lvl:1s}]}"
+	},
+	"ingredients": [
+		{
+			"item": "minecraft:diamond",
+			"count": 5
+		}
+	],
+	"processingTime": 100,
+	"exclusiveTo": [
+		"powered"
+	]
+}
+```
 
 KubeJS 6.1 Integration
 ----------------------

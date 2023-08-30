@@ -4,6 +4,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.ArrayList;
@@ -30,6 +31,9 @@ public class TradingRecipeBuilder {
     public TradingRecipeBuilder withSingleItemOutput(ItemStack output) {
         params.result = output;
         return this;
+    }
+    public TradingRecipeBuilder withSingleItemOutput(ItemLike output) {
+        return withSingleItemOutput(new ItemStack(output));
     }
 
     public TradingRecipeBuilder processingTime(int time) {
