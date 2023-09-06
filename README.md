@@ -11,10 +11,25 @@ Features
 - Basic station with no power requirements.
 - Powered station with RF power requirements.
 - Custom *Trading recipe*
+  - Optional biome and required machine.
 - Indestructible variant for each station.
 - Configurable consumption & progress.
 - Mechanical (Create Addon) station available with companion mod.
-- 
+
+Pending features
+----------------
+- In world Structure
+- CraftTweaker support
+- Port to 1.20.1
+- Recipe requirements
+  - Distance from spawn
+  - minHeight & maxHeight
+- Patchouli book
+
+Known bugs
+---------
+- Screen resizing and JEI alters the menu slot positions.
+  
 Trading recipe
 ---------------
 
