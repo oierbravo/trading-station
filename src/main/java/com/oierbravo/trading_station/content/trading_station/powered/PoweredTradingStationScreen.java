@@ -13,6 +13,7 @@ import com.oierbravo.trading_station.foundation.render.FakeItemRenderer;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -44,32 +45,32 @@ public class PoweredTradingStationScreen extends AbstractTradingScreen<PoweredTr
     }
 
     @Override
-    protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
+    protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
 
-        super.renderBg(pPoseStack, pPartialTick, pMouseX, pMouseY);
+        super.renderBg(pGuiGraphics, pPartialTick, pMouseX, pMouseY);
         RenderSystem.setShaderTexture(0, getTexture());
 
-        renderSlotPlaceholder(pPoseStack,((width - imageWidth) / 2) + 7,((height - imageHeight) / 2) + 23);
+        renderSlotPlaceholder(pGuiGraphics,((width - imageWidth) / 2) + 7,((height - imageHeight) / 2) + 23);
 
-        energyInfoArea.render(pPoseStack);
+        energyInfoArea.render(pGuiGraphics);
 
 
     }
-    private void renderSlotPlaceholder(PoseStack pPoseStack, int pX, int pY){
-        this.blit(pPoseStack, pX , pY , 0, 182,11, 32);
+    private void renderSlotPlaceholder(GuiGraphics pGuiGraphics, int pX, int pY){
+        pGuiGraphics.blit(this.getTexture(), pX , pY , 0, 182,11, 32);
 
     }
     @Override
-    protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+    protected void renderLabels(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
 
-        renderEnergyAreaTooltip(pPoseStack, pMouseX, pMouseY, x, y);
-        super.renderLabels(pPoseStack, pMouseX, pMouseY);
+        renderEnergyAreaTooltip(pGuiGraphics, pMouseX, pMouseY, x, y);
+        super.renderLabels(pGuiGraphics, pMouseX, pMouseY);
     }
-    private void renderEnergyAreaTooltip(PoseStack pPoseStack, int pMouseX, int pMouseY, int x, int y) {
+    private void renderEnergyAreaTooltip(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int x, int y) {
         if(isMouseAboveArea(pMouseX, pMouseY, x, y, 8, 24, 9, 30)) {
-            this.renderTooltip(pPoseStack, energyInfoArea.getTooltips(),
+            pGuiGraphics.renderTooltip(this.font,energyInfoArea.getTooltips(),
                     Optional.empty(), pMouseX - x, pMouseY - y);
         }
     }

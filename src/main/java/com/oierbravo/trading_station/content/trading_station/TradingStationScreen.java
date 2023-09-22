@@ -10,6 +10,7 @@ import com.oierbravo.trading_station.foundation.render.FakeItemRenderer;
 import com.oierbravo.trading_station.foundation.util.ModLang;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -29,6 +30,10 @@ public class TradingStationScreen extends AbstractTradingScreen<TradingStationMe
 
     }
 
+    @Override
+    protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
+        super.renderBg(pGuiGraphics, pPartialTick, pMouseX, pMouseY);
+    }
 
 
     @Override

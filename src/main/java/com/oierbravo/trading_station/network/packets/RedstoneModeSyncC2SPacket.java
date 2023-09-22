@@ -44,7 +44,7 @@ public class RedstoneModeSyncC2SPacket {
             if (container == null)
                 return;
 
-            if(sender.getLevel().getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
+            if(sender.serverLevel().getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
                 blockEntity.setRedstoneMode(message.mode);
             }
         });

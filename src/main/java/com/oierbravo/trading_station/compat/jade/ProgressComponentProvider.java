@@ -13,10 +13,11 @@ import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
+import snownee.jade.api.ui.BoxStyle;
 import snownee.jade.api.ui.IElementHelper;
 import snownee.jade.api.ui.IProgressStyle;
 
-public class ProgressComponentProvider  implements IBlockComponentProvider, IServerDataProvider<BlockEntity> {
+public class ProgressComponentProvider  implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -26,21 +27,22 @@ public class ProgressComponentProvider  implements IBlockComponentProvider, ISer
             IElementHelper elementHelper = tooltip.getElementHelper();
             IProgressStyle progressStyle = elementHelper.progressStyle();
             if(progress > 0)
-                tooltip.add(elementHelper.progress((float)progress / 100, Component.translatable("trading_station.tooltip.progress", progress), progressStyle,elementHelper.borderStyle()));
+                tooltip.add(elementHelper.progress((float)progress / 100, Component.translatable("trading_station.tooltip.progress", progress), progressStyle, BoxStyle.DEFAULT, true));
         }
 
-    }
-
-    @Override
-    public void appendServerData(CompoundTag compoundTag, ServerPlayer serverPlayer, Level level, BlockEntity blockEntity, boolean b) {
-        if(blockEntity instanceof ITradingStationBlockEntity){
-            ITradingStationBlockEntity trading_station = (ITradingStationBlockEntity) blockEntity;
-            compoundTag.putInt("trading_station.progress",trading_station.getProgressPercent());
-        }
     }
 
     @Override
     public ResourceLocation getUid() {
         return TradingStationPlugin.TRADING_STATION_DATA;
+    }
+
+    @Override
+    public void appendServerData(CompoundTag compoundTag, BlockAccessor blockAccessor) {
+        ITradingStationBlockEntity blockEntity = (ITradingStationBlockEntity) blockAccessor.getBlockEntity();
+        if(blockEntity != null){
+            ITradingStationBlockEntity trading_station = (ITradingStationBlockEntity) blockEntity;
+            compoundTag.putInt("trading_station.progress",trading_station.getProgressPercent());
+        }
     }
 }

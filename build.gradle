@@ -156,6 +156,13 @@ repositories {
         }
     }
     maven {
+        url "https://jitpack.io"
+        content {
+            includeGroup "com.github.llamalad7.mixinextras"
+        }
+    }
+
+    maven {
         url "https://maven.saps.dev/minecraft"
         content {
             includeGroup "dev.latvian.mods"
@@ -193,17 +200,10 @@ dependencies {
         implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
         implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
         implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+        annotationProcessor "com.github.llamalad7.mixinextras:mixinextras-common:${mixin_extras}"
+        implementation fg.deobf("com.github.llamalad7.mixinextras:mixinextras-forge:${mixin_extras}")
     }
     implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
-    if(generators_enabled.toBoolean()){
-        runtimeOnly fg.deobf("curse.maven:generatorgalore-${generators_id}:${generators_file_id}")
-    }
-
-
-    if (create_enabled.toBoolean()) {
-        implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
-        implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
-    }
 
     if (ct_enabled.toBoolean()) {
         def minecraftVersion= "net.minecraftforge:forge:${minecraft_version}-${forge_version}"

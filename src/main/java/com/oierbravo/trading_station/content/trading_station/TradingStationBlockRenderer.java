@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
@@ -22,14 +23,14 @@ public class  TradingStationBlockRenderer<TSBE extends BlockEntity> implements B
             if (!blockEntity.getTargetItemStack().isEmpty()) {
                 pPoseStack.pushPose();
                 pPoseStack.translate(0.5d, 1.1d, 0.5d);
-                renderBlock(pPoseStack, pBufferSource, LightTexture.FULL_BRIGHT, pPackedOverlay, blockEntity.getTargetItemStack());
+                renderBlock(pPoseStack, pBufferSource, LightTexture.FULL_BRIGHT, pPackedOverlay, blockEntity.getTargetItemStack(),pBlockEntity);
                 pPoseStack.popPose();
             }
         }
     }
-    protected void renderBlock(PoseStack ms, MultiBufferSource buffer, int light, int overlay, ItemStack stack) {
+    protected void renderBlock(PoseStack ms, MultiBufferSource buffer, int light, int overlay, ItemStack stack, BlockEntity pBlockEntity) {
         Minecraft.getInstance()
                 .getItemRenderer()
-                .renderStatic(stack, ItemTransforms.TransformType.GROUND, light, overlay, ms, buffer, 0);
+                .renderStatic(stack, ItemDisplayContext.GROUND, light, overlay, ms, buffer,pBlockEntity.getLevel(), 0);
     }
 }

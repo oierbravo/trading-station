@@ -1,7 +1,7 @@
 package com.oierbravo.trading_station.foundation.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.energy.IEnergyStorage;
 
@@ -15,7 +15,7 @@ import java.util.List;
  *
  *  Slightly Modified Version by: oierbravo
  */
-public class EnergyDisplayTooltipArea extends GuiComponent {
+public class EnergyDisplayTooltipArea {
     private final int xPos;
     private final int yPos;
     private final int width;
@@ -38,9 +38,9 @@ public class EnergyDisplayTooltipArea extends GuiComponent {
         return List.of(Component.literal(energy.getEnergyStored()+" / "+energy.getMaxEnergyStored()+" FE"));
     }
 
-    public void render(PoseStack pPoseStack) {
+    public void render(GuiGraphics pGuiGraphics) {
         int stored = (int)(height * (energy.getEnergyStored() / (float)energy.getMaxEnergyStored()));
-        fillGradient(pPoseStack,xPos,yPos + (height - stored),xPos + width, yPos + height,0xffb51500, 0xff600b00);
+        pGuiGraphics.fillGradient(xPos,yPos + (height - stored),xPos + width, yPos + height,0xffb51500, 0xff600b00);
     }
 
 }

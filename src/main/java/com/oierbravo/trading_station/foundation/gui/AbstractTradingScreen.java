@@ -13,6 +13,7 @@ import com.oierbravo.trading_station.network.packets.RedstoneModeSyncC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -60,22 +61,23 @@ public abstract class AbstractTradingScreen<MENU extends AbstractTradingMenu> ex
     protected abstract ResourceLocation getTexture();
 
       @Override
-    protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
+    protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, getTexture());
-        this.fillGradient(pPoseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+        PoseStack poseStack = pGuiGraphics.pose();
+        pGuiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
 
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
-        this.blit(pPoseStack, x, y, 0, 0, imageWidth, imageHeight);
+        pGuiGraphics.blit(getTexture(), x, y,  0,0, imageWidth, imageHeight);
 
         if (menu.isCrafting()) {
-            this.blit(pPoseStack, x + getProgressArrowCoords().x, y + getProgressArrowCoords().y, 179, 0, menu.getScaledProgress(), 7);
+            pGuiGraphics.blit(getTexture(), x + getProgressArrowCoords().x, y + getProgressArrowCoords().y, 179, 0, menu.getScaledProgress(), 7);
         }
-        renderSlotPlaceholder(pPoseStack,getGuiLeft() +  this.menu.getInputSlotCoords()[0].x -1,getGuiTop() +  this.menu.getInputSlotCoords()[0].y -1);
-        renderSlotPlaceholder(pPoseStack,getGuiLeft() +  this.menu.getInputSlotCoords()[1].x -1,getGuiTop() +  this.menu.getInputSlotCoords()[1].y -1);
-        renderSlotPlaceholder(pPoseStack,getGuiLeft() +  this.menu.getOutputSlotCoords().x -1,getGuiTop() +  this.menu.getOutputSlotCoords().y -1);
+        renderSlotPlaceholder(pGuiGraphics,getGuiLeft() +  this.menu.getInputSlotCoords()[0].x -1,getGuiTop() +  this.menu.getInputSlotCoords()[0].y -1);
+        renderSlotPlaceholder(pGuiGraphics,getGuiLeft() +  this.menu.getInputSlotCoords()[1].x -1,getGuiTop() +  this.menu.getInputSlotCoords()[1].y -1);
+        renderSlotPlaceholder(pGuiGraphics,getGuiLeft() +  this.menu.getOutputSlotCoords().x -1,getGuiTop() +  this.menu.getOutputSlotCoords().y -1);
 
 
 
@@ -83,7 +85,7 @@ public abstract class AbstractTradingScreen<MENU extends AbstractTradingMenu> ex
         if(!menu.blockEntity.getTargetItemStack().isEmpty()){
             Optional<TradingRecipe> recipe = ModRecipes.findByOutput(menu.getLevel(),menu.blockEntity.getTargetItemStack());
             if(recipe.isPresent()){
-                renderFakeRecipe(recipe.get(), pPoseStack);
+                renderFakeRecipe(recipe.get(), pGuiGraphics);
             }
         }
     }
@@ -91,21 +93,21 @@ public abstract class AbstractTradingScreen<MENU extends AbstractTradingMenu> ex
 
       FakeItemRenderer.renderFakeItem(pItemStack, pX, pY);
     }
-    private void renderSlotPlaceholder(PoseStack pPoseStack, int pX, int pY){
-        this.blit(pPoseStack, pX , pY , 0, 164,18, 18);
+    private void renderSlotPlaceholder(GuiGraphics pGuiGraphics, int pX, int pY){
+        pGuiGraphics.blit(getTexture(), pX , pY , 0, 164,18, 18);
 
     }
 
-    private void renderInputRecipePlaceholder(PoseStack pPoseStack, int pX, int pY){
-        this.blit(pPoseStack, pX , pY , 18, 146,18, 23);
+    private void renderInputRecipePlaceholder(GuiGraphics pGuiGraphics, int pX, int pY){
+        pGuiGraphics.blit(getTexture(), pX , pY , 18, 146,18, 23);
 
     }
-    private void renderFakeRecipe(TradingRecipe recipe, PoseStack pPoseStack){
+    private void renderFakeRecipe(TradingRecipe recipe, GuiGraphics pGuiGraphics){
         for(int index = 0; index < recipe.getIngredients().size(); index++){
             Ingredient ingredient = recipe.getIngredients().get(index);
 
             if(!ingredient.isEmpty())
-                renderInputRecipePlaceholder(pPoseStack, getGuiLeft() + this.menu.getInputRecipeCoords()[index].x, getGuiTop() + this.menu.getInputRecipeCoords()[index].y);
+                renderInputRecipePlaceholder(pGuiGraphics, getGuiLeft() + this.menu.getInputRecipeCoords()[index].x, getGuiTop() + this.menu.getInputRecipeCoords()[index].y);
                 renderItem(ingredient.getItems()[0],getGuiLeft() + this.menu.getInputRecipeCoords()[index].x +  1,getGuiTop() + this.menu.getInputRecipeCoords()[index].y + 1);
         }
         //renderItem(recipe.getResultItem(),getGuiLeft() +  this.menu.getOutputSlotCoords().x,getGuiTop() +  this.menu.getOutputSlotCoords().y);
@@ -119,22 +121,24 @@ public abstract class AbstractTradingScreen<MENU extends AbstractTradingMenu> ex
 
 
     @Override
-    public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
         Button redstoneMode = buttons.get("redstoneMode");
         currentRedstoneMode = this.menu.getCurrentRedstoneMode();
         ((ToggleButton) redstoneMode).setTexturePosition(currentRedstoneMode);
-        if (MiscTools.inBounds(redstoneMode.x, redstoneMode.y, redstoneMode.getWidth(), redstoneMode.getHeight(), pMouseX, pMouseY)) {
+        if (MiscTools.inBounds(redstoneMode.getX(), redstoneMode.getY(), redstoneMode.getWidth(), redstoneMode.getHeight(), pMouseX, pMouseY)) {
             MutableComponent translatableComponents[] = new MutableComponent[3];
             translatableComponents[0] = ModLang.translate("screen.redstone.ignored");
             translatableComponents[1] = ModLang.translate("screen.redstone.low");
             translatableComponents[2] = ModLang.translate("screen.redstone.high");
-            this.renderTooltip(pPoseStack, ModLang.translate("screen.redstone.redstoneMode").append(translatableComponents[currentRedstoneMode]), pMouseX, pMouseY);
+
+            pGuiGraphics.renderTooltip(this.font, ModLang.translate("screen.redstone.redstoneMode").append(translatableComponents[currentRedstoneMode]), pMouseX, pMouseY);
+
         }
         Button targetSelect = buttons.get("targetSelect");
-        if (MiscTools.inBounds(targetSelect.x, targetSelect.y, targetSelect.getWidth(), targetSelect.getHeight(), pMouseX, pMouseY)) {
-            this.renderTooltip(pPoseStack, ModLang.translate("select_target.title"), pMouseX, pMouseY);
+        if (MiscTools.inBounds(targetSelect.getX(), targetSelect.getY(), targetSelect.getWidth(), targetSelect.getHeight(), pMouseX, pMouseY)) {
+            pGuiGraphics.renderTooltip(this.font, ModLang.translate("select_target.title"), pMouseX, pMouseY);
         }
 
     }

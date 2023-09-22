@@ -164,14 +164,14 @@ public class BiomeCondition {
         protected boolean testInternal(Biome b, LevelAccessor pLevel) {
            Registry<Biome> biomeRegistry = pLevel.registryAccess().registryOrThrow(ForgeRegistries.BIOMES.getRegistryKey());
            ResourceKey<Biome> key = biomeRegistry.getResourceKey(b).get();
-           return biomeRegistry.getOrCreateTag(tag).contains(biomeRegistry.getOrCreateHolderOrThrow(key));
+           return biomeRegistry.getOrCreateTag(tag).contains(biomeRegistry.getHolderOrThrow(key));
         }
 
 
         @Override
         protected void readInternal(FriendlyByteBuf buffer) {
             ResourceLocation resourceLocation = buffer.readResourceLocation();
-            tag = TagKey.create(Registry.BIOME_REGISTRY, resourceLocation);
+            tag = TagKey.create(ForgeRegistries.BIOMES.getRegistryKey(), resourceLocation);
         }
 
         @Override
@@ -182,7 +182,7 @@ public class BiomeCondition {
         @Override
         protected void readInternal(JsonObject json) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, "tag"));
-            tag = TagKey.create(Registry.BIOME_REGISTRY, resourceLocation);
+            tag = TagKey.create(ForgeRegistries.BIOMES.getRegistryKey(), resourceLocation);
         }
 
         @Override
@@ -193,6 +193,8 @@ public class BiomeCondition {
 
         @Override
         protected String toStringInternal(){
+            if(biome == null)
+                return "Any";
             return "#" + tag.location().toString();
         }
     }

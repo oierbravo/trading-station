@@ -46,7 +46,6 @@ public class TradingStation
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
 
-        ModCreativeTab modTab = new ModCreativeTab();
         Config.register();
 
         TradingStationRegistrate.register();
@@ -54,6 +53,8 @@ public class TradingStation
 
         ModRecipes.register(modEventBus);
         ModMessages.register();
+        ModCreativeTab.register(modEventBus);
+
 
         modEventBus.addListener(EventPriority.LOWEST, TradingStation::gatherData);
 

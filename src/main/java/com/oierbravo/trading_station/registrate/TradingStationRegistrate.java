@@ -11,8 +11,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 
 public class TradingStationRegistrate {
-    private static final Registrate REGISTRATE = TradingStation.registrate()
-            .creativeModeTab(() ->  ModCreativeTab.MAIN);
+    private static final Registrate REGISTRATE = TradingStation.registrate();
 
     public static final BlockEntry<TradingStationBlock> BLOCK = TradingStation.registrate()
             .block("trading_station", TradingStationBlock::new)

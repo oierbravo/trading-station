@@ -42,7 +42,7 @@ public class RecipeSelectC2SPacket {
             if (container == null)
                 return;
 
-            if(sender.getLevel().getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
+            if(sender.serverLevel().getBlockEntity(message.pos) instanceof ITradingStationBlockEntity blockEntity) {
                 blockEntity.setTargetedRecipeById(message.recipeId);
                 //blockEntity.setChanged();
 

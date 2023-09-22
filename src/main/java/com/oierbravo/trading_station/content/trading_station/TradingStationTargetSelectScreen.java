@@ -10,6 +10,7 @@ import com.oierbravo.trading_station.network.packets.RecipeSelectC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -20,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -79,10 +81,10 @@ public class TradingStationTargetSelectScreen extends Screen {
         this.titleLabelY = 4;
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
-        addRenderableWidget(new Button(getGuiLeft() - 25, getGuiTop() + 1, 25, 20, Component.literal("<--"), (button) -> {
+        addRenderableWidget(new ExtendedButton(getGuiLeft() - 25, getGuiTop() + 1, 25, 20, Component.literal("<--"), (button) -> {
             Minecraft.getInstance().popGuiLayer();
         }));
-        addRenderableWidget(new Button(getGuiLeft() - 25, getGuiTop() + 30, 25, 20, ModLang.translate("select_target.clear"), (button) -> {
+        addRenderableWidget(new ExtendedButton(getGuiLeft() - 25, getGuiTop() + 30, 25, 20, ModLang.translate("select_target.clear"), (button) -> {
             ModMessages.sendToServer(new GhostItemSyncC2SPacket(ItemStack.EMPTY,getBlockPos()));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
             Minecraft.getInstance().popGuiLayer();
@@ -104,23 +106,22 @@ public class TradingStationTargetSelectScreen extends Screen {
         super.tick();
     }
     @Override
-    public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-
-        renderBackground(pPoseStack);
+    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        renderBackground(pGuiGraphics);
 
         int lastDisplayedIndex = startIndex + MAX_DISPLAYED_RECIPES;
 
-        renderScrollbar(pPoseStack);
-        renderSelectedRecipe(pPoseStack, pMouseX, pMouseY, lastDisplayedIndex);
-        renderRecipe(pPoseStack, pMouseX, pMouseY, lastDisplayedIndex);
-        renderLabels(pPoseStack, pMouseX, pMouseY);
+        renderScrollbar(pGuiGraphics);
+        renderSelectedRecipe(pGuiGraphics, pMouseX, pMouseY, lastDisplayedIndex);
+        renderRecipe(pGuiGraphics, pMouseX, pMouseY, lastDisplayedIndex);
+        renderLabels(pGuiGraphics, pMouseX, pMouseY);
 
-        super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
     }
-    protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
-        this.font.draw(pPoseStack, this.title, (float)this.titleLabelX + getGuiLeft(), (float)this.titleLabelY + getGuiTop(), 4210752);
+    protected void renderLabels(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+        pGuiGraphics.drawString(this.font,this.title.getString(), (float)this.titleLabelX + getGuiLeft(), (float)this.titleLabelY + getGuiTop(), 4210752,false);
     }
-    private void renderSelectedRecipe(PoseStack pPoseStack, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
+    private void renderSelectedRecipe(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
         LinkedList<TradingRecipe> displayedRecipes = getDisplayedRecipes();
         for (int index = startIndex; index >= 0 && index < pLastDisplayedIndex && index < displayedRecipes.size(); index++) {
 
@@ -128,11 +129,13 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
+            String t = target.getId().toString();
+            String bt = this.blockEntity.getTargetedRecipeId();
             if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId()))
-                blit(pPoseStack, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
+                pGuiGraphics.blit(TEXTURE, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
         }
     }
-    private void renderRecipe(PoseStack pPoseStack, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
+    private void renderRecipe(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
         LinkedList<TradingRecipe> displayedRecipes = getDisplayedRecipes();
 
         for (int index = startIndex; index >= 0 && index < pLastDisplayedIndex && index < displayedRecipes.size(); index++) {
@@ -141,13 +144,13 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-           // if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId())){
-           //     blit(pPoseStack, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
-           // }
-            renderFloatingItem(target.getResultItem(), xStart, yStart );
+            //if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId())){
+            //    pGuiGraphics.blit(TEXTURE, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
+            //}
+            renderFloatingItem(pGuiGraphics, target.getResult(), xStart, yStart );
 
             if (pMouseX >= xStart - 1 && pMouseX <= xStart + 16 && pMouseY >= yStart - 1 && pMouseY <= yStart + 16) {
-                renderTooltip(pPoseStack, target.getResultItem(), pMouseX, pMouseY);
+                pGuiGraphics.renderTooltip(this.font,target.getResult(), pMouseX, pMouseY);
             }
         }
     }
@@ -156,31 +159,24 @@ public class TradingStationTargetSelectScreen extends Screen {
         return displayedRecipes;
     }
 
-    private void renderFloatingItem(ItemStack pItemStack, int pX, int pY) {
+    private void renderFloatingItem(GuiGraphics pGuiGraphics,ItemStack pItemStack, int pX, int pY) {
         RenderSystem.applyModelViewMatrix();
-        setBlitOffset(2000);
-        itemRenderer.blitOffset = 2000.0f;
-
-        itemRenderer.renderAndDecorateItem(pItemStack, pX, pY);
-        itemRenderer.renderGuiItemDecorations(font, pItemStack, pX, pY);
-
-        setBlitOffset(0);
-        itemRenderer.blitOffset = 0.0f;
+        pGuiGraphics.renderFakeItem(pItemStack, pX, pY);
     }
 
 
     @Override
-    public void renderBackground(PoseStack pPoseStack) {
+    public void renderBackground(GuiGraphics pGuiGraphics) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        this.fillGradient(pPoseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
-        this.blit(pPoseStack, getGuiLeft(), getGuiTop(), 0, 0, imageWidth, imageHeight);
+        pGuiGraphics.fillGradient( 0, 0, this.width, this.height, -1072689136, -804253680);
+        pGuiGraphics.blit(TEXTURE, getGuiLeft(), getGuiTop(), 0, 0, imageWidth, imageHeight);
     }
 
-    private void renderScrollbar(PoseStack pPoseStack) {
+    private void renderScrollbar(GuiGraphics pGuiGraphics) {
         int scrollPosition = (int) (43.0f * scrollOffset);
-        blit(pPoseStack, getGuiLeft() + scrollBarXOffset, getGuiTop() + scrollBarYOffset + scrollPosition, 0, imageHeight + 1  + (isScrollBarActive() ? 0 : 9), 7, 9);
+        pGuiGraphics.blit( TEXTURE,getGuiLeft() + scrollBarXOffset, getGuiTop() + scrollBarYOffset + scrollPosition, 0, imageHeight + 1  + (isScrollBarActive() ? 0 : 9), 7, 9);
     }
 
     @Override

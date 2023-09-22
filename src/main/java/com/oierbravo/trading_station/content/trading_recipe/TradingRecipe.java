@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipeBuilder.TradingRecipeParams;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -41,6 +42,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     public boolean matches(SimpleContainer pContainer, Level pLevel) {
         return matches(pContainer, pLevel, (Biome) null, "");
     }
+
 
     public boolean matchesBiome(Biome biome, Level pLevel){
         return biomeCondition.test(biome, pLevel);
@@ -83,7 +85,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     }
 
     public boolean matchesOutput(ItemStack targetItemStack){
-        return result.sameItem(targetItemStack);
+        return ItemStack.isSameItem(targetItemStack,result);
     }
 
     @Override
@@ -91,16 +93,23 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return itemIngredients;
     }
 
-    @Override
-    public ItemStack assemble(SimpleContainer pContainer) {
 
+    @Override
+    public ItemStack assemble(SimpleContainer pContainer, RegistryAccess pRegistryAccess) {
         return result.copy();
     }
+
 
     @Override
     public boolean canCraftInDimensions(int pWidth, int pHeight) {
         return true;
     }
+
+    @Override
+    public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+        return result.copy();
+    }
+
     public int getProcessingTime() {
         return processingTime;
     }
@@ -113,10 +122,6 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return exclusiveToCondition;
     }
 
-    @Override
-    public ItemStack getResultItem() {
-        return result.copy();
-    }
     public ItemStack getResult(){
         return result.copy();
     }
@@ -231,7 +236,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
 
             buffer.writeVarInt(itemIngredients.size());
             itemIngredients.forEach(i -> i.toNetwork(buffer));
-            buffer.writeItem(recipe.getResultItem());
+            buffer.writeItem(recipe.getResult());
             buffer.writeInt(processingTime);
             biomeCondition.write(buffer);
             exclusiveToCondition.write(buffer);

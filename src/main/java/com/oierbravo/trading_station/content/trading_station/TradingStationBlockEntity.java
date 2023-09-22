@@ -327,7 +327,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             return false;
         }
         return hasEnoughInputItems(inputInventory, match.get().getIngredients())
-                && hasEnoughOutputSpace(this.outputItems, match.get().getResultItem());
+                && hasEnoughOutputSpace(this.outputItems, match.get().getResult());
     }
 
     public boolean canProcess(ItemStack stack) {
@@ -398,7 +398,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
                     }
                 }
             }
-            getOutputItems().insertItem(0, recipe.get().getResultItem(), false);
+            getOutputItems().insertItem(0, recipe.get().getResult(), false);
         }
 
         this.resetProgress();
@@ -474,7 +474,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(),recipeId);
         targetedRecipe = recipe;
         if(recipe.isPresent()) {
-            targetItemHandler.setStackInSlot(0,recipe.get().getResultItem());
+            targetItemHandler.setStackInSlot(0,recipe.get().getResult());
         }
 
     }
@@ -482,7 +482,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(), recipeId);
         targetedRecipe = recipe;
         if(recipe.isPresent()) {
-            targetItemHandler.setStackInSlot(0,recipe.get().getResultItem());
+            targetItemHandler.setStackInSlot(0,recipe.get().getResult());
         }
         setChanged();
 
