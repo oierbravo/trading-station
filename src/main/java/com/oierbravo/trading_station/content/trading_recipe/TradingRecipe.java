@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipeBuilder.TradingRecipeParams;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -40,6 +41,11 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     @Override
     public boolean matches(SimpleContainer pContainer, Level pLevel) {
         return matches(pContainer, pLevel, (Biome) null, "");
+    }
+
+    @Override
+    public ItemStack assemble(SimpleContainer pContainer, RegistryAccess pRegistryAccess) {
+        return result.copy();
     }
 
     public boolean matchesBiome(Biome biome, Level pLevel){
@@ -83,7 +89,7 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     }
 
     public boolean matchesOutput(ItemStack targetItemStack){
-        return result.sameItem(targetItemStack);
+        return result.is(targetItemStack.getItem());
     }
 
     @Override
@@ -92,15 +98,18 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     }
 
     @Override
-    public ItemStack assemble(SimpleContainer pContainer) {
-
-        return result.copy();
-    }
-
-    @Override
     public boolean canCraftInDimensions(int pWidth, int pHeight) {
         return true;
     }
+
+    @Override
+    public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+        return getResultItem();
+    }
+    public ItemStack getResultItem() {
+        return result.copy();
+    }
+
     public int getProcessingTime() {
         return processingTime;
     }
@@ -113,10 +122,9 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         return exclusiveToCondition;
     }
 
-    @Override
-    public ItemStack getResultItem() {
-        return result.copy();
-    }
+    /*public ItemStack getResultItem() {
+
+    }*/
     public ItemStack getResult(){
         return result.copy();
     }

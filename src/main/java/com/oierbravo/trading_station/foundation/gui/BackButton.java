@@ -10,9 +10,5 @@ public class BackButton extends ExtendedButton {
     public BackButton(int pX, int pY, int pWidth, int pHeight, Component pMessage, OnPress pOnPress) {
         super(pX, pY, pWidth, pHeight, pMessage, pOnPress);
     }
-   /* public BackButton(int pX, int pY, AbstractContainerScreen<TradingStationScreen> parentScreen){
-        this(pX,pY,16,16,Component.literal("Back"), btn->{
-            this.
-        })
-    }*/
+
 }

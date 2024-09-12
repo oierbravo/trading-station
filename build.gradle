@@ -141,20 +141,46 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
-        // Location of the maven that hosts JEI files (and TiC)
-        name 'Progwml6 maven'
-        url 'https://dvs1.progwml6.com/files/maven'
-    }
-    maven {
+        // location of the maven for Registrate and Flywheel
         name = 'tterrag maven'
-        url = 'https://maven.tterrag.com/'
+        url = 'https://maven.tterrag.com'
     }
     maven {
-        url "https://www.cursemaven.com"
+        // location of the maven that hosts JEI files since January 2023
+        // location of the maven for Vazkii's mods
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        // location of the maven for Curios API
+        url = "https://maven.theillusivec4.top/"
+    }
+    maven {
+        // location of maven for CC: Tweaked
+        name = "squiddev"
+        url = "https://squiddev.cc/maven/"
+    }
+
+    maven {
+        url = 'https://www.cursemaven.com'
         content {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        url "https://jitpack.io"
+        content {
+            includeGroup "com.github.llamalad7.mixinextras"
+        }
+    }
+
     maven {
         url "https://maven.saps.dev/minecraft"
         content {
@@ -168,8 +194,9 @@ repositories {
             includeGroup "dev.architectury"
         }
     }
-    maven {
-        url "https://maven.blamejared.com"
+    mavenLocal()
+    flatDir {
+        dirs 'libs'
     }
 }
 
@@ -178,9 +205,9 @@ dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.19,MC1.20)")
+    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.20,MC1.21)")
 
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: '[MC1.19-1.1.5,)') {
+    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},)") {
         jarJar.pin(it, project.registrate_version)
     }
     implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")

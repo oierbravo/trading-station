@@ -1,15 +1,15 @@
-// 1.19.2	2023-08-20T05:34:06.144973297	Registrate Provider for trading_station [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+// 1.20.1	2024-09-12T22:13:00.791653982	Registrate Provider for trading_station [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
 76015b2093284d49b4645a032a1401ad54416aed assets/trading_station/blockstates/powered_trading_station.json
 76015b2093284d49b4645a032a1401ad54416aed assets/trading_station/blockstates/powered_trading_station_unbreakable.json
 d529016ef556a0231f5da8dd90e7b84a30aad7f7 assets/trading_station/blockstates/trading_station.json
 d529016ef556a0231f5da8dd90e7b84a30aad7f7 assets/trading_station/blockstates/trading_station_unbreakable.json
-4a698dd4a98169d92e2307f2f3ecc9276eaa56bd assets/trading_station/lang/en_ud.json
-be713c678361dbc9c9f0a45112214a71cf5faae4 assets/trading_station/lang/en_us.json
+b963adb929c876fe3c4f1d436780caaffe1a8ec8 assets/trading_station/lang/en_ud.json
+243b6845adf17b94c8b70f0e4f8885de0f2dda44 assets/trading_station/lang/en_us.json
 373be6ce42eee460888161c967f098e5943e3778 assets/trading_station/models/item/powered_trading_station.json
 77bf5b94b46ff3ecdfec5e8edff0676571d9ed1b assets/trading_station/models/item/powered_trading_station_unbreakable.json
 7ddda578b6d6072db924599a9959579470354897 assets/trading_station/models/item/trading_station.json
 84ad64215c6c13c1dbe223941a19b03fbf5dd5e6 assets/trading_station/models/item/trading_station_unbreakable.json
-c3b4c04c1cecdc5001fcddda7b30b11b15f0b2b2 data/trading_station/loot_tables/blocks/powered_trading_station.json
-305e10b5cc680c810cea1e8e1cc8987fa6957c68 data/trading_station/loot_tables/blocks/powered_trading_station_unbreakable.json
-4c82f05fb35c8b26972d5fd3abf4bb5da6cba466 data/trading_station/loot_tables/blocks/trading_station.json
-e29db90ad205b2a74c29ed50e8ae52792d9670fe data/trading_station/loot_tables/blocks/trading_station_unbreakable.json
+2db17805122179bab1bfe1e91a1c85508a90bf7b data/trading_station/loot_tables/blocks/powered_trading_station.json
+2ea7a743b4965109538057104dce6bb63bc35d0e data/trading_station/loot_tables/blocks/powered_trading_station_unbreakable.json
+d736184112435ac9e4b4dbb8da0aae4342072576 data/trading_station/loot_tables/blocks/trading_station.json
+100c374addadafe0d3dd53ed04a1a98202c21537 data/trading_station/loot_tables/blocks/trading_station_unbreakable.json

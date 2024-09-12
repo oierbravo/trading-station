@@ -26,7 +26,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
         checkContainerDataCount(pData,3);
         blockPos = pBlockEntity.getBlockPos();
         blockEntity = (ITradingStationBlockEntity) pBlockEntity;
-        level = pInv.player.getLevel();
+        level = pInv.player.level();
         containerData = pData;
         inventory = pInv;
 
@@ -48,7 +48,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
     }
 
     public AbstractTradingMenu(@Nullable MenuType<?> pMenuType, int pContainerId, Inventory inv, FriendlyByteBuf extraData){
-        this(pMenuType, pContainerId, inv, inv.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(3));
+        this(pMenuType, pContainerId, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(3));
     }
     public abstract Coords2D[] getInputSlotCoords();
 

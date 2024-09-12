@@ -22,6 +22,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.common.Constants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -60,7 +61,7 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
             }
 
             @Override
-            public void draw(PoseStack poseStack, int xOffset, int yOffset) {
+            public void draw(GuiGraphics pGuiGraphics, int xOffset, int yOffset) {
 
             }
         };
@@ -113,30 +114,30 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
     }
 
     @Override
-    public void draw(TradingRecipe recipe, IRecipeSlotsView recipeSlotsView, PoseStack stack, double mouseX, double mouseY) {
-        IRecipeCategory.super.draw(recipe, recipeSlotsView, stack, mouseX, mouseY);
+    public void draw(TradingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics pGuiGraphics, double mouseX, double mouseY) {
+        IRecipeCategory.super.draw(recipe, recipeSlotsView, pGuiGraphics, mouseX, mouseY);
         IDrawableAnimated arrow = getArrow();
-        arrow.draw(stack, 75, 14);
+        arrow.draw(pGuiGraphics, 75, 14);
         //drawProcessingTime(recipe, stack, 81,4);
-        drawBiome(recipe, stack, 1,34);
+        drawBiome(recipe, pGuiGraphics, 1,34);
 
 
     }
-    protected void drawProcessingTime(TradingRecipe recipe, PoseStack poseStack, int x, int y) {
+    protected void drawProcessingTime(TradingRecipe recipe, GuiGraphics pGuiGraphics, int x, int y) {
         int processingTime = recipe.getProcessingTime();
         if (processingTime > 0) {
             int cookTimeSeconds = processingTime / 20;
             MutableComponent timeString = Component.translatable("gui.jei.category.smelting.time.seconds", cookTimeSeconds);
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
-            fontRenderer.draw(poseStack, timeString, x, y, 0xFF808080);
+            pGuiGraphics.drawString(fontRenderer, timeString, x, y, 0xFF808080);
         }
     }
-    protected void drawBiome(TradingRecipe recipe, PoseStack poseStack, int x, int y) {
+    protected void drawBiome(TradingRecipe recipe, GuiGraphics pGuiGraphics, int x, int y) {
         if(recipe.getBiomeCondition() == BiomeCondition.EMPTY)
             return;
         Minecraft minecraft = Minecraft.getInstance();
         Font fontRenderer = minecraft.font;
-        fontRenderer.draw(poseStack, recipe.getBiomeCondition().toComponent(), x, y, 0xFF808080);
+        pGuiGraphics.drawString(fontRenderer, recipe.getBiomeCondition().toComponent(), x, y, 0xFF808080);
     }
 }
