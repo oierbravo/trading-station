@@ -142,7 +142,7 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
                     Ingredient ingredient = recipe.get().getIngredients().get(index);
 
                     if(!ingredient.isEmpty()) {
-                        FakeItemRenderer.renderFakeItem(pGuiGraphics,ingredient.getItems()[0], leftPos + 20 + 23*index, topPos + 38, true,true);
+                        FakeItemRenderer.renderFakeItem(pGuiGraphics,ingredient.getItems()[0], leftPos + 20 + 23*index, topPos + 38, true,false);
                     }
                 }
             }

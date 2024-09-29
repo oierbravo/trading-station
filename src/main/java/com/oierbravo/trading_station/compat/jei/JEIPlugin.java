@@ -2,6 +2,8 @@ package com.oierbravo.trading_station.compat.jei;
 
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
+import com.oierbravo.trading_station.content.trading_station.TradingStationMenu;
+import com.oierbravo.trading_station.registrate.ModMenus;
 import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
 import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import mezz.jei.api.IModPlugin;
@@ -54,7 +56,7 @@ public class JEIPlugin implements IModPlugin {
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
         //registration.addRecipeTransferHandler(new TradingRecipeHandler(), TRAING_RECIPE);
-        //registration.addRecipeTransferHandler(TradingStationMenu.class, TradingStationRegistrate.MENU.get(), new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class), 36, 2, 0, 36);
+        registration.addRecipeTransferHandler(TradingStationMenu.class, ModMenus.TRADING_STATION.get(), new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class), 36, 2, 0, 36);
 
     }
 }

@@ -65,6 +65,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     byte currentRedstoneMode = 0;
 
     Optional<TradingRecipe> targetedRecipe;
+    String targetedRecipeId;
 
     public TradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
@@ -226,11 +227,14 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         tag.putInt("trading_station.progress", progress);
         tag.putInt("trading_station.maxProgress", maxProgress);
         tag.putByte("redstoneMode", currentRedstoneMode);
-        String targetedRecipeId = "";
-        if(targetedRecipe.isPresent()){
-            targetedRecipeId = targetedRecipe.get().getId().toString();
-            tag.putString("targetedRecipeId", targetedRecipeId);
+        //String targetedRecipeId = "";
+        //if(targetedRecipe.isPresent()){
+            //targetedRecipeId = targetedRecipe.get().getId().toString();
+        //    tag.putString("targetedRecipeId", targetedRecipe.get().getId().toString());
 
+        //}
+        if(targetedRecipeId != null){
+            tag.putString("targetedRecipeId", targetedRecipeId);
         }
     }
 
@@ -492,6 +496,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(),recipeId);
         targetedRecipe = recipe;
         recipe.ifPresent(tradingRecipe -> targetItemHandler.setStackInSlot(0, tradingRecipe.getResult()));
+        targetedRecipeId = recipeId.toString();
         setChanged();
     }
     public void setTargetedRecipeById(String recipeId){

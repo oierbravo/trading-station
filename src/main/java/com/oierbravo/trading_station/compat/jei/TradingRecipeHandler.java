@@ -36,11 +36,17 @@ public class TradingRecipeHandler  implements IRecipeTransferHandler<TradingStat
 
     @Override
     public @Nullable IRecipeTransferError transferRecipe(TradingStationMenu container, TradingRecipe recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
+        if(!doTransfer)
+            return null;
+        return null;
+    }
+/*@Override
+    public @Nullable IRecipeTransferError transferRecipe(TradingStationMenu container, TradingRecipe recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
        // for( index = 0; index < recipe.)
        if(!doTransfer)
             return null;
         Optional<IRecipeSlotView> input_0 = recipeSlots.findSlotByName("input_0");
         List<ItemStack> itemStacks= input_0.get().getItemStacks().toList();
         return null;
-    }
+    }*/
 }
