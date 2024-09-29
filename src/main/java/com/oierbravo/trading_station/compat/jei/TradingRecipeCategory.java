@@ -79,7 +79,7 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
 
     @Override
     public Component getTitle() {
-        return ModLang.translate("trading.recipe");
+        return ModLang.translate("trading.recipe").component();
     }
 
     @Override

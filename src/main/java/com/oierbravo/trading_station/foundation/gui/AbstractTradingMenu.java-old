@@ -19,6 +19,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
     protected final Level level;
     private final ContainerData containerData;
 
+    private int xOffset, yOffset;
 
     public AbstractTradingMenu(@Nullable MenuType<?> pMenuType, int pContainerId, Inventory pInv, BlockEntity pBlockEntity, ContainerData pData){
         super(pMenuType, pContainerId);
@@ -35,13 +36,13 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
         addPlayerHotbar(pInv);
         Coords2D co = getOutputSlotCoords();
         this.blockEntity.getInputItemHandler().ifPresent(itemHandler -> {
-            this.addSlot(new SlotItemHandler(itemHandler,0, getInputSlotCoords()[0].x,getInputSlotCoords()[0].y));
-            this.addSlot(new SlotItemHandler(itemHandler,1, getInputSlotCoords()[1].x,getInputSlotCoords()[1].y));
+            this.addSlot(new SlotItemHandler(itemHandler,0,xOffset + getInputSlotCoords()[0].x,getInputSlotCoords()[0].y));
+            this.addSlot(new SlotItemHandler(itemHandler,1,xOffset + getInputSlotCoords()[1].x,getInputSlotCoords()[1].y));
         });
         this.blockEntity.getOutputItemHandler().ifPresent(itemHandler -> {
-            this.addSlot(new SlotItemHandler(itemHandler,0,getOutputSlotCoords().x,getOutputSlotCoords().y));
+            this.addSlot(new SlotItemHandler(itemHandler,0,xOffset + getOutputSlotCoords().x,getOutputSlotCoords().y));
         });
-        this.addSlot(new SlotItemHandler(this.blockEntity.getTargetItemHandler(),0,getTargetSlotCoords().x,getTargetSlotCoords().y));
+        this.addSlot(new SlotItemHandler(this.blockEntity.getTargetItemHandler(),0,xOffset + getTargetSlotCoords().x,getTargetSlotCoords().y));
 
 
 
@@ -131,7 +132,7 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int l = 0; l < 9; ++l) {
-                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 8 + l * 18, PLAYER_INVENTORY_Y + i * 18));
+                this.addSlot(new Slot(playerInventory, xOffset + l + i * 9 + 9, 8 + l * 18, PLAYER_INVENTORY_Y + i * 18));
             }
         }
     }
@@ -139,10 +140,17 @@ public abstract class AbstractTradingMenu  extends AbstractContainerMenu {
 
     private void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, HOTBAR_Y));
+            this.addSlot(new Slot(playerInventory, i, xOffset + 8 + i * 18, HOTBAR_Y));
         }
     }
     public Level getLevel(){
         return level;
+    }
+
+    public void setXOffset(int pOffset) {
+        this.xOffset = pOffset;
+    }
+    public void setYOffset(int pOffset) {
+        this.yOffset = pOffset;
     }
 }

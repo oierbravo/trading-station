@@ -55,8 +55,8 @@ public class ExclusiveToCondition implements Predicate {
             return condition;
         }
         JsonObject jsonObject = je.getAsJsonObject();
-        if(jsonObject.has("exclusivesTo"))
-            condition.readInternal(jsonObject.getAsJsonArray("exclusivesTo"));
+        if(jsonObject.has("exclusiveTo"))
+            condition.readInternal(jsonObject.getAsJsonArray("exclusiveTo"));
         return condition;
     }
 

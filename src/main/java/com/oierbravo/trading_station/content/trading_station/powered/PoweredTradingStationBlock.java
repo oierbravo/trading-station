@@ -52,7 +52,7 @@ public class PoweredTradingStationBlock extends TradingStationBlock {
         super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
     }
 
-    @Override
+    /*@Override
     public InteractionResult use(BlockState state, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand handIn, BlockHitResult hit) {
         if (!pLevel.isClientSide()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
@@ -64,7 +64,7 @@ public class PoweredTradingStationBlock extends TradingStationBlock {
         }
 
         return InteractionResult.sidedSuccess(pLevel.isClientSide());
-    }
+    }*/
 
 
 

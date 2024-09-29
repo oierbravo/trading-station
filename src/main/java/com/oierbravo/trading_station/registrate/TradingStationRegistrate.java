@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 
 public class TradingStationRegistrate {
-    private static final Registrate REGISTRATE = TradingStation.registrate();
+    private static final Registrate REGISTRATE = TradingStation.registrate();//.defaultCreativeTab(MechanicalLemonLib);
 
     public static final BlockEntry<TradingStationBlock> BLOCK = TradingStation.registrate()
             .block("trading_station", TradingStationBlock::new)
@@ -58,9 +58,6 @@ public class TradingStationRegistrate {
             .renderer(() -> TradingStationBlockRenderer::new)
             .register();
 
-    public static final MenuEntry<TradingStationMenu> MENU =  REGISTRATE
-            .menu("trading_station",TradingStationMenu::factory, () -> TradingStationScreen::new)
-            .register();
 
     public static void register() {
 

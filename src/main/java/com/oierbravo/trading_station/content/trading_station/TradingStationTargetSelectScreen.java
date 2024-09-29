@@ -1,7 +1,8 @@
 package com.oierbravo.trading_station.content.trading_station;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.IconButton;
+import com.oierbravo.mechanical_lemon_ui.register.LibIcons;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;
@@ -11,17 +12,16 @@ import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,11 +57,15 @@ public class TradingStationTargetSelectScreen extends Screen {
     protected int topPos;
 
     private BlockPos blockPos;
+
+    private IconButton backButton;
+    private IconButton clearButton;
+
     protected TradingStationTargetSelectScreen(Component pTitle) {
         super(pTitle);
     }
     public TradingStationTargetSelectScreen(ITradingStationBlockEntity pBlockEntity, BlockPos pBlockPos) {
-        this(ModLang.translate("select_target.title"));
+        this(ModLang.translate("select_target.title").component());
         this.blockEntity = pBlockEntity;
         this.blockPos = pBlockPos;
         //this.allPossibleRecipes = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
@@ -81,17 +85,26 @@ public class TradingStationTargetSelectScreen extends Screen {
         this.titleLabelY = 4;
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
-        addRenderableWidget(new ExtendedButton(getGuiLeft() - 25, getGuiTop() + 1, 25, 20, Component.literal("<--"), (button) -> {
+
+        backButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 1, LibIcons.ARROW_LEFT);
+        backButton.withCallback(() -> {
             Minecraft.getInstance().popGuiLayer();
-        }));
-        addRenderableWidget(new ExtendedButton(getGuiLeft() - 25, getGuiTop() + 30, 25, 20, ModLang.translate("select_target.clear"), (button) -> {
+        });
+        backButton.setToolTip(ModLang.translate("select_target.back").component());
+        addRenderableWidget(backButton);
+
+        clearButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 30, LibIcons.TRASH);
+        clearButton.withCallback(() -> {
             ModMessages.sendToServer(new GhostItemSyncC2SPacket(ItemStack.EMPTY,getBlockPos()));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
             Minecraft.getInstance().popGuiLayer();
-        }));
+        });
+        clearButton.setToolTip(ModLang.translate("select_target.clear").component());
+        addRenderableWidget(clearButton);
+
     }
 
-    public int getGuiLeft() { return leftPos; }
+    public int getGuiLeft() { return leftPos - 25; }
     public int getGuiTop() { return topPos; }
     @Override
     public void tick() {
@@ -129,8 +142,8 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-            String t = target.getId().toString();
-            String bt = this.blockEntity.getTargetedRecipeId();
+            //String t = target.getId().toString();
+            //String bt = this.blockEntity.getTargetedRecipeId();
             if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId()))
                 pGuiGraphics.blit(TEXTURE, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
         }
@@ -144,13 +157,15 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-            //if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId())){
-            //    pGuiGraphics.blit(TEXTURE, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
-            //}
             renderFloatingItem(pGuiGraphics, target.getResult(), xStart, yStart );
 
             if (pMouseX >= xStart - 1 && pMouseX <= xStart + 16 && pMouseY >= yStart - 1 && pMouseY <= yStart + 16) {
-                pGuiGraphics.renderTooltip(this.font,target.getResult(), pMouseX, pMouseY);
+                ItemStack result = target.getResult();
+                CompoundTag tag = result.getOrCreateTag();
+
+                tag.putString("tradingRecipeId",target.getId().toString());
+                result.setTag(tag);
+                pGuiGraphics.renderTooltip(this.font,result, pMouseX, pMouseY);
             }
         }
     }
@@ -192,7 +207,6 @@ public class TradingStationTargetSelectScreen extends Screen {
 
             if (boxX > 0 && boxX <= TARGET_BOX_SIZE + 1 && boxY > 0 && boxY <= TARGET_BOX_SIZE + 1 && isValidRecipeIndex(index)) {
                 TradingRecipe recipe = getDisplayedRecipes().get(index);
-                //ModMessages.sendToServer(new GhostItemSyncC2SPacket(itemStack,getBlockPos()));
                 ModMessages.sendToServer(new RecipeSelectC2SPacket(recipe.getId(),getBlockPos()));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
                 Minecraft.getInstance().popGuiLayer();

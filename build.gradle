@@ -43,6 +43,7 @@ minecraft {
     } else {
         mappings channel: 'official', version: "${minecraft_version}"
     }
+    copyIdeResources = true
 
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
@@ -140,6 +141,8 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenLocal()
+
     maven {
         // Location of the maven that hosts JEI files (and TiC)
         name 'Progwml6 maven'
@@ -178,6 +181,11 @@ repositories {
     maven {
         url "https://maven.blamejared.com"
     }
+    maven { // LDLib Configuration
+        name "firstdarkdev"
+        url "https://maven.firstdarkdev.xyz/snapshots"
+    }
+
 }
 
 
@@ -195,6 +203,8 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge-api:${jei_version}")
     implementation fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge:${jei_version}")
+
+
 
     if (kubejs_enabled.toBoolean()) {
         implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
@@ -215,6 +225,21 @@ dependencies {
         annotationProcessor minecraftVersion
         annotationProcessor ctDep
     }
+   /* jarJar("com.lowdragmc.ldlib:ldlib-forge-${minecraft_version}:${ldlib_version}") {
+        jarJar.ranged(it, "[${ldlib_version},)")
+    }*/
+
+    //jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[MC1.19,MC1.20)")
+
+    jarJar(group: 'com.oierbravo.mechanical_lemon_ui', name: 'MechanicalLemonUI', version: "[${mechanical_lemon_ui_version},)") {
+        jarJar.pin(it, project.mechanical_lemon_ui_version)
+    }
+    implementation fg.deobf("com.oierbravo.mechanical_lemon_ui:MechanicalLemonUI:${mechanical_lemon_ui_version}")
+
+    jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[${mechanical_lemon_lib_version},)") {
+        jarJar.pin(it, project.mechanical_lemon_lib_version)
+    }
+    implementation fg.deobf("com.oierbravo.mechanical_lemon_lib:MechanicalLemonLib:${mechanical_lemon_lib_version}")
 
     //annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
@@ -224,6 +249,22 @@ compileJava.options.encoding = 'UTF-8'
 compileJava {
     options.compilerArgs = ['-Xdiags:verbose']
 }
+
+/*tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+                             forge_version       : forge_version, forge_version_range: forge_version_range,
+                             loader_version_range: loader_version_range,
+                             modid              : modid, mod_name: display_name, mod_license: mod_license, mod_version: mod_version,
+                             author        : author
+                           ]
+
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}*/
+
 tasks.withType(Jar) {
     //from tasks.createChangelog.outputFile
     archiveClassifier = 'slim'

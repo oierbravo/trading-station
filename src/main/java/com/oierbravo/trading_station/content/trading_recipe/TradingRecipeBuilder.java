@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.content.trading_recipe;
 
+import com.oierbravo.trading_station.foundation.recipe.RecipeRequirement;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -74,6 +75,7 @@ public class TradingRecipeBuilder {
         protected int processingTime;
         protected BiomeCondition biome;
         public ExclusiveToCondition exclusiveTo;
+        public ArrayList<RecipeRequirement> recipeRequirements;
 
 
         protected TradingRecipeParams(ResourceLocation id) {
@@ -84,6 +86,8 @@ public class TradingRecipeBuilder {
             processingTime = 1;
             biome = BiomeCondition.EMPTY;
             exclusiveTo = ExclusiveToCondition.EMPTY;
+            recipeRequirements = new ArrayList<>();
+
         }
 
     }

@@ -84,18 +84,17 @@ public class ModRecipes {
 
 
     public static Optional<TradingRecipe> findById(Level pLevel, ResourceLocation recipeId) {
-        if(pLevel.isClientSide())
+        if(pLevel == null)
             return Optional.empty();
-        return Minecraft.getInstance().level.getRecipeManager(). getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
+
+        return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
                 .filter(tradingRecipe -> tradingRecipe.matchesId(recipeId))
                 .findFirst();
     }
     public static Optional<TradingRecipe> findById(Level pLevel,String pRecipeId) {
         if(pLevel == null)
             return Optional.empty();
-        if(pLevel.isClientSide())
-            return Optional.empty();
-        if(Objects.equals(pRecipeId, ""))
+        if(pRecipeId.isEmpty())
             return Optional.empty();
         ResourceLocation recipeId = ResourceLocation.tryParse(pRecipeId);
         return findById(pLevel, recipeId);

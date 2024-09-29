@@ -127,7 +127,8 @@ public class TradingStationBlock extends BaseEntityBlock {
         if (!pLevel.isClientSide()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
             if(blockEntity instanceof TradingStationBlockEntity) {
-                NetworkHooks.openScreen(((ServerPlayer)pPlayer), (TradingStationBlockEntity) blockEntity, pPos);
+                TradingStationBlockEntity tradingStationBlockEntity = (TradingStationBlockEntity) blockEntity;
+                        NetworkHooks.openScreen((ServerPlayer) pPlayer,tradingStationBlockEntity, tradingStationBlockEntity::sendToMenu);
             } else {
                 throw new IllegalStateException("Our Container provider is missing!");
             }

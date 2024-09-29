@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -228,8 +229,9 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         String targetedRecipeId = "";
         if(targetedRecipe.isPresent()){
             targetedRecipeId = targetedRecipe.get().getId().toString();
+            tag.putString("targetedRecipeId", targetedRecipeId);
+
         }
-        tag.putString("targetedRecipeId", targetedRecipeId);
     }
 
     @Override
@@ -354,9 +356,13 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     @Override
     public CompoundTag getUpdateTag() {
-        this.saveAdditional(updateTag);
-        return updateTag;
+        return writeClient(new CompoundTag());
     }
+
+    //public CompoundTag getUpdateTag() {
+    //    this.saveAdditional(updateTag);
+    //    return updateTag;
+   // }
 
     @Nullable
     @Override
@@ -366,12 +372,14 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
-        this.load(tag);
+
+        readClient(tag);
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        this.load(pkt.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
+        CompoundTag tag = packet.getTag();
+        readClient(tag == null ? new CompoundTag() : tag);
     }
 
 
@@ -442,6 +450,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
 
     @Override
+    public LazyOptional<IEnergyStorage> getEnergyStorageHandler() {
+        return LazyOptional.empty();
+    }
+
+    @Override
     public String getTraderType() {
         return "basic";
     }
@@ -456,7 +469,12 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        return new TradingStationMenu(pContainerId, pPlayerInventory, this, containerData);
+        return TradingStationMenu.create(pContainerId, pPlayerInventory, this, this.containerData);
+
+    }
+    public void sendToMenu(FriendlyByteBuf buffer) {
+        buffer.writeBlockPos(this.getBlockPos());
+        buffer.writeNbt(this.getUpdateTag());
     }
 
     public void setPreferedItem(ItemStack itemStack) {
@@ -473,19 +491,12 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     public void setTargetedRecipeById(ResourceLocation recipeId){
         Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(),recipeId);
         targetedRecipe = recipe;
-        if(recipe.isPresent()) {
-            targetItemHandler.setStackInSlot(0,recipe.get().getResult());
-        }
-
+        recipe.ifPresent(tradingRecipe -> targetItemHandler.setStackInSlot(0, tradingRecipe.getResult()));
+        setChanged();
     }
     public void setTargetedRecipeById(String recipeId){
-        Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(), recipeId);
-        targetedRecipe = recipe;
-        if(recipe.isPresent()) {
-            targetItemHandler.setStackInSlot(0,recipe.get().getResult());
-        }
-        setChanged();
-
+        ResourceLocation resourceLocation = ResourceLocation.tryParse(recipeId);
+        this.setTargetedRecipeById(resourceLocation);
     }
     @Nullable
     public Optional<TradingRecipe> getTargetedRecipe(){
@@ -493,10 +504,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
     @Override
     public String getTargetedRecipeId() {
-        if(!targetedRecipe.isPresent()){
-            return "";
-        }
-        return targetedRecipe.get().getId().toString();
+        if(targetedRecipe.isPresent())
+            return targetedRecipe.get().getId().toString();
+        if(updateTag.contains("targetedRecipeId"))
+            return updateTag.getString("targetedRecipeId");
+        return "";
     }
 
     @Override
@@ -512,5 +524,14 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     public int getProcessingTime(){
         return getRecipe().map(TradingRecipe::getProcessingTime).orElse(1);
+    }
+    public final void readClient(CompoundTag tag) {
+        //this.read(tag, true);
+        load(tag);
+    }
+
+    public CompoundTag writeClient(CompoundTag tag) {
+        saveAdditional(tag);
+        return tag;
     }
 }

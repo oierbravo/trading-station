@@ -4,11 +4,8 @@ import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockRenderer;
 import com.oierbravo.trading_station.content.trading_station.powered.PoweredTradingStationBlock;
 import com.oierbravo.trading_station.content.trading_station.powered.PoweredTradingStationBlockEntity;
-import com.oierbravo.trading_station.content.trading_station.powered.PoweredTradingStationMenu;
-import com.oierbravo.trading_station.content.trading_station.powered.PoweredTradingStationScreen;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import com.tterrag.registrate.util.entry.BlockEntry;
-import com.tterrag.registrate.util.entry.MenuEntry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -60,9 +57,9 @@ public class PoweredTradingStationRegistrate {
             .renderer(() -> TradingStationBlockRenderer::new)
             .register();
 
-    public static final MenuEntry<PoweredTradingStationMenu> MENU =  TradingStation.registrate()
+    /*public static final MenuEntry<PoweredTradingStationMenu> MENU =  TradingStation.registrate()
             .menu("powered_trading_station", PoweredTradingStationMenu::factory, () -> PoweredTradingStationScreen::new)
-            .register();
+            .register();*/
     public static void register() {
 
     }

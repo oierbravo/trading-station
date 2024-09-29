@@ -2,14 +2,10 @@ package com.oierbravo.trading_station.compat.jei;
 
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.content.trading_station.TradingStationMenu;
-import com.oierbravo.trading_station.foundation.gui.AbstractTradingMenu;
-import com.oierbravo.trading_station.registrate.ModRecipes;
 import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
 import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
@@ -17,8 +13,6 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 

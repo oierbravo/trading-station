@@ -23,14 +23,11 @@ public class ModCreativeTab {
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.trading_station"))
                     .icon(TradingStationRegistrate.BLOCK::asStack)
-                    .displayItems((pParameters, pOutput) -> {
-                        for (RegistryEntry<Block> entry : TradingStation.registrate().getAll(Registries.BLOCK)) {
-                            pOutput.accept(entry.get());
-                        }
+                    /*.displayItems((pParameters, pOutput) -> {
                         for (RegistryEntry<Item> entry : TradingStation.registrate().getAll(Registries.ITEM)) {
                             pOutput.accept(entry.get());
                         }
-                    })
+                    })*/
                     .build());
 
 

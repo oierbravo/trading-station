@@ -145,7 +145,7 @@ public class BiomeCondition {
         return toStringInternal();
     }
     public Component toComponent(){
-        return ModLang.translate("trading.recipe.biome", toString());
+        return ModLang.translate("trading.recipe.biome", toString()).component();
     }
 
     protected String toStringInternal(){

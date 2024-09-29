@@ -4,6 +4,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipeBuilder.TradingRecipeParams;
+import com.oierbravo.trading_station.foundation.recipe.RecipeRequirement;
+import com.oierbravo.trading_station.foundation.recipe.RecipeRequirementType;
+import com.oierbravo.trading_station.foundation.recipe.requirements.BiomeRequirement;
+import com.oierbravo.trading_station.foundation.recipe.requirements.MaxHeightRequirement;
+import com.oierbravo.trading_station.foundation.recipe.requirements.MinHeightRequirement;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -16,6 +21,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 
 public class TradingRecipe implements Recipe<SimpleContainer> {
@@ -28,6 +36,13 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     private BiomeCondition biomeCondition;
     private ExclusiveToCondition exclusiveToCondition;
 
+    private final Map<RecipeRequirementType<?>, RecipeRequirement> recipeRequirements = new HashMap<>();
+
+    private static final List<RecipeRequirementType<?>> enabledRecipeRequirements = List.of(
+            BiomeRequirement.TYPE,
+            MinHeightRequirement.TYPE,
+            MaxHeightRequirement.TYPE
+    );
 
     public TradingRecipe(TradingRecipeParams params) {
         this.id = params.id;
@@ -37,6 +52,21 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
         this.biomeCondition = params.biome;
         this.exclusiveToCondition = params.exclusiveTo;
 
+        params.recipeRequirements.forEach(
+                recipeRequirement -> recipeRequirements.put(recipeRequirement.getType(), recipeRequirement)
+        );
+
+    }
+    public List<RecipeRequirementType<?>> getEnabledRequirements() {
+        return enabledRecipeRequirements;
+    }
+
+    public Map<RecipeRequirementType<?>, RecipeRequirement> getRecipeRequirements() {
+        return recipeRequirements;
+    }
+
+    public <T extends RecipeRequirement> T getRequirement(RecipeRequirementType<T> type) {
+        return (T) recipeRequirements.get(type);
     }
     @Override
     public boolean matches(SimpleContainer pContainer, Level pLevel) {
@@ -143,7 +173,8 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     }
 
     public boolean matchesId(ResourceLocation pId) {
-        return id.equals(pId);
+        return pId.toString().equals(id.toString());
+        //return id.equals(pId);
     }
 
     public static class Type implements RecipeType<TradingRecipe> {

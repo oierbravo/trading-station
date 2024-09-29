@@ -2,6 +2,7 @@ package com.oierbravo.trading_station.compat.jei;
 
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.content.trading_station.TradingStationMenu;
+import com.oierbravo.trading_station.registrate.ModMenus;
 import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -25,7 +26,7 @@ public class TradingRecipeHandler  implements IRecipeTransferHandler<TradingStat
 
     @Override
     public Optional<MenuType<TradingStationMenu>> getMenuType() {
-        return Optional.of(TradingStationRegistrate.MENU.get());
+        return Optional.of(ModMenus.TRADING_STATION.get());
     }
 
     @Override

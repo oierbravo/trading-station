@@ -50,7 +50,10 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
     public IEnergyStorage getEnergyStorage() {
         return this.energyStorage;
     }
-
+    @Override
+    public LazyOptional<IEnergyStorage> getEnergyStorageHandler() {
+        return lazyEnergyHandler;
+    }
     @Override
     public String getTraderType() {
         return "powered";
@@ -88,11 +91,6 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
         return Component.translatable("block.trading_station.powered_trading_station");
     }
 
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        return new PoweredTradingStationMenu(pContainerId, pPlayerInventory, this, this.containerData);
-    }
 
     @Override
     public void tick(Level pLevel, BlockPos pPos, BlockState pState) {
