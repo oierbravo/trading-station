@@ -185,7 +185,11 @@ repositories {
         name "firstdarkdev"
         url "https://maven.firstdarkdev.xyz/snapshots"
     }
-
+    maven {
+        // Location of the maven for Ponder, Catnip
+        name = 'createmod maven'
+        url 'https://maven.createmod.net'
+    }
 }
 
 
@@ -225,9 +229,12 @@ dependencies {
         annotationProcessor minecraftVersion
         annotationProcessor ctDep
     }
-   /* jarJar("com.lowdragmc.ldlib:ldlib-forge-${minecraft_version}:${ldlib_version}") {
-        jarJar.ranged(it, "[${ldlib_version},)")
-    }*/
+
+    //implementation fg.deobf("net.createmod.catnip:Catnip-Forge-${minecraft_version}:${catnip_version}")
+
+    /* jarJar("com.lowdragmc.ldlib:ldlib-forge-${minecraft_version}:${ldlib_version}") {
+         jarJar.ranged(it, "[${ldlib_version},)")
+     }*/
 
     //jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[MC1.19,MC1.20)")
 

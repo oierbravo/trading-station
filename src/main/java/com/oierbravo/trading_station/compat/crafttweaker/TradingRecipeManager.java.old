@@ -34,7 +34,6 @@ public class TradingRecipeManager implements IRecipeManager<TradingRecipe> {
      * @param output  The output fluidStack of the recipe.
      * @param input    The input of the recipe.
      * @param processingTime The duration of the recipe (default 100 ticks)
-     * @param heatLevel Minimum heat level
      *
      * @docParam name "meltDown"
      * @docParam output <fluid:minecraft:lava> * 100
@@ -46,7 +45,7 @@ public class TradingRecipeManager implements IRecipeManager<TradingRecipe> {
     public void addRecipe(String name, IItemStack output, IIngredient[] itemInputs, int processingTime, String biome, String[] exclusiveTo   ){
         name = fixRecipeName(name);
         ResourceLocation resourceLocation = new ResourceLocation(TradingStation.MODID, name);
-        TradingRecipeBuilder builder = new TradingRecipeBuilder(resourceLocation);
+        TradingRecipeBuilder builder = new TradingRecipeBuilder(TradingRecipe::new);
         List<Ingredient> ingredients = new ArrayList();
         Arrays.stream(itemInputs).forEach((iIngredient) -> {
             ingredients.add(iIngredient.asVanillaIngredient());
@@ -54,8 +53,8 @@ public class TradingRecipeManager implements IRecipeManager<TradingRecipe> {
         builder.withItemIngredients((Ingredient[])ingredients.toArray(new Ingredient[0]));
         builder.withSingleItemOutput(output.asItemLike());
         builder.processingTime(processingTime);
-        builder.withBiomeCondition(BiomeCondition.fromString(biome));
-        builder.exclusiveTo(ExclusiveToCondition.fromList(List.of(exclusiveTo)));
+       // builder.withBiomeCondition(BiomeCondition.fromString(biome));
+       // builder.exclusiveTo(ExclusiveToCondition.fromList(List.of(exclusiveTo)));
 
         TradingRecipe recipe = builder.build();
 

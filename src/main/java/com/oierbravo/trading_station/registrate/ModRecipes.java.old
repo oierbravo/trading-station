@@ -2,6 +2,8 @@ package com.oierbravo.trading_station.registrate;
 
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +18,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ModRecipes {
@@ -27,7 +30,7 @@ public class ModRecipes {
             RECIPE_TYPES.register("trading",() -> TradingRecipe.Type.INSTANCE);
 
     public static final RegistryObject<RecipeSerializer<TradingRecipe>> TRADING_SERIALIZER =
-            SERIALIZERS.register("trading", () -> new TradingRecipe.TradingRecipeSerializer((params, enabledRecipeRequeriments) -> ));
+            SERIALIZERS.register("trading", () -> TradingRecipe.Serializer.INSTANCE);
 
     public static Optional<TradingRecipe> find(SimpleContainer pInv, Level pLevel) {
         if(pLevel.isClientSide())
@@ -39,7 +42,7 @@ public class ModRecipes {
         if(pLevel.isClientSide())
             return Optional.empty();
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
-                .filter((tradingRecipe -> tradingRecipe.matches(pInv, pLevel)))
+                .filter((tradingRecipe -> tradingRecipe.matchesBiome(biome, pLevel)))
                 .findFirst();
 
     }
@@ -47,8 +50,7 @@ public class ModRecipes {
         if(pLevel.isClientSide())
             return Optional.empty();
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
-                .filter((tradingRecipe -> tradingRecipe.matches(pInv, pLevel)))
-                //.filter((tradingRecipe -> tradingRecipe.matches(pInv, pLevel, biome, traderType)))
+                .filter((tradingRecipe -> tradingRecipe.matches(pInv, pLevel, biome, traderType)))
                 .findFirst();
 
     }
@@ -59,7 +61,7 @@ public class ModRecipes {
                 .sorted((recipe1, recipe2) -> recipe1.getId().compareNamespaced(recipe2.getId()))
                 .toList();
     }
-    public static List<ItemStack> getAllOutputs(Level pLevel, @Nullable Biome biome, String machineType){
+    public static List<ItemStack> getAllOutputs(Level pLevel,@Nullable Biome biome, String machineType){
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
                 //.filter((tradingRecipe -> tradingRecipe.matchesBiome(biome, pLevel)))
                 //.filter((tradingRecipe -> tradingRecipe.matchesExclusiveTo(machineType)))
@@ -69,7 +71,7 @@ public class ModRecipes {
 
     }
     public static Optional<TradingRecipe> findByOutput(Level pLevel,ItemStack targetedOutput){
-        return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
+        return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe..INSTANCE).stream()
                 .filter(recipe -> recipe.matchesOutput(targetedOutput)).findFirst();
 
     }

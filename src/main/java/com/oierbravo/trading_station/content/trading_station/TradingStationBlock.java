@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station;
 
+import com.oierbravo.trading_station.registrate.ModShapes;
 import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,7 +37,7 @@ public class TradingStationBlock extends BaseEntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-    private static final VoxelShape RENDER_SHAPE = Shapes.box(0, 0, 0, 0.9, 0.9, 0.9);
+    private static final VoxelShape RENDER_SHAPE = ModShapes.TRADING_STATION;
     //public static final BooleanProperty BOTTOM = BlockStateProperties.BOTTOM;
 
 

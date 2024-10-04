@@ -1,14 +1,13 @@
 package com.oierbravo.trading_station.content.trading_recipe;
 
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.oierbravo.mechanical_lemon_lib.foundation.recipe.*;
+import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.BiomeRequirement;
+import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.MaxHeightRequirement;
+import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.MinHeightRequirement;
 import com.oierbravo.trading_station.TradingStation;
-import com.oierbravo.trading_station.content.trading_recipe.TradingRecipeBuilder.TradingRecipeParams;
-import com.oierbravo.trading_station.foundation.recipe.RecipeRequirement;
-import com.oierbravo.trading_station.foundation.recipe.RecipeRequirementType;
-import com.oierbravo.trading_station.foundation.recipe.requirements.BiomeRequirement;
-import com.oierbravo.trading_station.foundation.recipe.requirements.MaxHeightRequirement;
-import com.oierbravo.trading_station.foundation.recipe.requirements.MinHeightRequirement;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -16,82 +15,58 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
-public class TradingRecipe implements Recipe<SimpleContainer> {
-    private final ResourceLocation id;
+public class TradingRecipe extends BaseRecipe<SimpleContainer, TradingRecipe.TradingRecipeParams> {
+
     private final NonNullList<Ingredient> itemIngredients;
     private final ItemStack result;
-
     private final int processingTime;
 
-    private BiomeCondition biomeCondition;
-    private ExclusiveToCondition exclusiveToCondition;
-
-    private final Map<RecipeRequirementType<?>, RecipeRequirement> recipeRequirements = new HashMap<>();
-
-    private static final List<RecipeRequirementType<?>> enabledRecipeRequirements = List.of(
+    public static List<RecipeRequirementType<?>> enabledRecipeRequirements = List.of(
             BiomeRequirement.TYPE,
             MinHeightRequirement.TYPE,
             MaxHeightRequirement.TYPE
     );
 
-    public TradingRecipe(TradingRecipeParams params) {
-        this.id = params.id;
+    public TradingRecipe(IRecipeTypeInfo typeInfo, TradingRecipeParams params) {
+        super(typeInfo, params);
         this.result = params.result;
         this.itemIngredients = params.itemIngredients;
         this.processingTime = params.processingTime;
-        this.biomeCondition = params.biome;
-        this.exclusiveToCondition = params.exclusiveTo;
-
-        params.recipeRequirements.forEach(
-                recipeRequirement -> recipeRequirements.put(recipeRequirement.getType(), recipeRequirement)
-        );
 
     }
-    public List<RecipeRequirementType<?>> getEnabledRequirements() {
-        return enabledRecipeRequirements;
-    }
 
+
+    @Override
     public Map<RecipeRequirementType<?>, RecipeRequirement> getRecipeRequirements() {
         return recipeRequirements;
     }
 
-    public <T extends RecipeRequirement> T getRequirement(RecipeRequirementType<T> type) {
-        return (T) recipeRequirements.get(type);
-    }
     @Override
-    public boolean matches(SimpleContainer pContainer, Level pLevel) {
-        return matches(pContainer, pLevel, (Biome) null, "");
+    public void setRecipeRequirements(Map<RecipeRequirementType<?>, RecipeRequirement> map) {
+        recipeRequirements = map;
     }
 
-
-    public boolean matchesBiome(Biome biome, Level pLevel){
-        return biomeCondition.test(biome, pLevel);
-    }
-
-    public boolean matchesExclusiveTo(String targetedMachine){
-        return exclusiveToCondition.test(targetedMachine);
-    }
-
-    public boolean matches(SimpleContainer pContainer, Level pLevel, @Nullable Biome biome, String traderType) {
+    @Override
+    public boolean matches(@NotNull SimpleContainer pContainer, Level pLevel) {
         if(pLevel.isClientSide)
             return false;
         if(pContainer.getContainerSize() != itemIngredients.size())
             return false;
 
-        if(!getBiomeCondition().test(biome,pLevel))
+        /*if(!getBiomeCondition().test(biome,pLevel))
             return false;
         if(!getExclusiveToCondition().test(traderType))
-            return false;
+            return false;*/
 
         int matchedIngredients = 0;
         for (int i = 0; i < itemIngredients.size(); i++) {
@@ -109,9 +84,6 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
 
         return matchedIngredients == itemIngredients.size();
 
-    }
-    public boolean matches(SimpleContainer pContainer, Level pLevel, ItemStack preferedOutput){
-        return false;
     }
 
     public boolean matchesOutput(ItemStack targetItemStack){
@@ -143,58 +115,62 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
     public int getProcessingTime() {
         return processingTime;
     }
-
-
-    public BiomeCondition getBiomeCondition(){
-        return biomeCondition;
-    }
-    public ExclusiveToCondition getExclusiveToCondition(){
-        return exclusiveToCondition;
-    }
-
     public ItemStack getResult(){
         return result.copy();
     }
-
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return Serializer.INSTANCE;
-    }
-
-    @Override
-    public RecipeType<?> getType() {
-        return Type.INSTANCE;
-    }
-
     public boolean matchesId(ResourceLocation pId) {
         return pId.toString().equals(id.toString());
-        //return id.equals(pId);
+    }
+
+    public boolean matchesBiome(Biome biome, Level pLevel) {
+        return true;
+    }
+
+    public boolean matchesExclusiveTo(String machineType) {
+        return true;
     }
 
     public static class Type implements RecipeType<TradingRecipe> {
         private Type() { }
         public static final Type INSTANCE = new Type();
-        public static final  RecipeType<TradingRecipe> RECIPE_TYPE = new Type();
+        public static final RecipeType<TradingRecipe> RECIPE_TYPE = new Type();
         public static final String ID = "trading";
     }
-    public static class Serializer implements RecipeSerializer<TradingRecipe> {
-        public static final Serializer INSTANCE = new Serializer();
+    public static class TradingRecipeParams extends BaseRecipeParams {
+        protected NonNullList<Ingredient> itemIngredients;
+        protected ItemStack result;
+        protected int fuelConsumed;
+        protected int processingTime;
+
+        protected TradingRecipeParams(ResourceLocation id) {
+            super(id);
+            itemIngredients = NonNullList.create();
+            result = ItemStack.EMPTY;
+            fuelConsumed = 0;
+            processingTime = 1;
+        }
+    }
+    public static class TradingRecipeSerializer extends BaseRecipeSerializer<TradingRecipe, TradingRecipeBuilder> {
+        public static final TradingRecipeSerializer INSTANCE = new TradingRecipeSerializer();
+
         public static final ResourceLocation ID =
                 new ResourceLocation(TradingStation.MODID,"trading");
 
+        public TradingRecipeSerializer(TradingRecipeBuilder.TradingRecipeFactory pFactory, List<RecipeRequirementType<?>> pEnabledRecipeRequirements) {
+            super((BaseRecipeBuilder.MechanicalRecipeFactory<TradingRecipe>) pFactory, pEnabledRecipeRequirements);
+        }
+
+        public TradingRecipeSerializer() {
+            super();
+        }
+
         @Override
-        public TradingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            TradingRecipeBuilder builder = new TradingRecipeBuilder(id);
+        protected TradingRecipeBuilder readFromJson(ResourceLocation recipeId, JsonObject json) {
+            TradingRecipeBuilder builder = new TradingRecipeBuilder(this.factory,recipeId);
             NonNullList<Ingredient> itemIngredients = NonNullList.create();
             int processingTime = 1;
-            BiomeCondition biomeCondition = BiomeCondition.EMPTY;
-            ExclusiveToCondition exclusiveToCondition = ExclusiveToCondition.EMPTY;
+            //BiomeCondition biomeCondition = BiomeCondition.EMPTY;
+            //ExclusiveToCondition exclusiveToCondition = ExclusiveToCondition.EMPTY;
 
             for (JsonElement je : GsonHelper.getAsJsonArray(json, "ingredients")) {
                 JsonObject jsonObject = je.getAsJsonObject();
@@ -213,68 +189,37 @@ public class TradingRecipe implements Recipe<SimpleContainer> {
                 processingTime = GsonHelper.getAsInt(json,"processingTime");
             }
 
-            if(GsonHelper.isValidNode(json,"biome")){
+           /* if(GsonHelper.isValidNode(json,"biome")){
                 biomeCondition = BiomeCondition.fromJson(json.get("biome"));
             }
 
             if(GsonHelper.isValidNode(json,"exclusiveTo")){
                 exclusiveToCondition = ExclusiveToCondition.fromJson(json.get("exclusiveTo"));
             }
-
+*/
             builder.withItemIngredients(itemIngredients)
                     .withSingleItemOutput(result)
-                    .processingTime(processingTime)
-                    .withBiomeCondition(biomeCondition)
-                    .exclusiveTo(exclusiveToCondition);
+                    .processingTime(processingTime);
+                    //.withBiomeCondition(biomeCondition)
+                    //.exclusiveTo(exclusiveToCondition);
 
-            return builder.build();
+            return builder;
         }
 
         @Override
-        public TradingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-            TradingRecipeBuilder builder = new TradingRecipeBuilder(id);
-            NonNullList<Ingredient> itemIngredients = NonNullList.create();
-            int processingTime = 1;
-            BiomeCondition biomeCondition = BiomeCondition.EMPTY;
-            ExclusiveToCondition exclusiveToCondition = ExclusiveToCondition.EMPTY;
-
-            int size = buffer.readVarInt();
-            for (int i = 0; i < size; i++)
-                itemIngredients.add(Ingredient.fromNetwork(buffer));
-
-            ItemStack result = buffer.readItem();
-            processingTime = buffer.readInt();
-            biomeCondition = BiomeCondition.read(buffer);
-            exclusiveToCondition = exclusiveToCondition.read(buffer);
-
-
-            builder.withItemIngredients(itemIngredients)
-                    .withSingleItemOutput(result)
-                    .processingTime(processingTime)
-                    .withBiomeCondition(biomeCondition)
-                    .exclusiveTo(exclusiveToCondition);
-
-
-            return builder.build();
+        protected TradingRecipeBuilder readFromBuffer(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+            return null;
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf buffer, TradingRecipe recipe) {
-            NonNullList<Ingredient> itemIngredients = recipe.itemIngredients;
-            int processingTime = recipe.getProcessingTime();
-            BiomeCondition biomeCondition = recipe.getBiomeCondition();
-            ExclusiveToCondition exclusiveToCondition = recipe.getExclusiveToCondition();
+        protected void writeToJson(JsonObject json, TradingRecipe recipe) {
 
-            buffer.writeVarInt(itemIngredients.size());
-            itemIngredients.forEach(i -> i.toNetwork(buffer));
-            buffer.writeItem(recipe.getResult());
-            buffer.writeInt(processingTime);
-            biomeCondition.write(buffer);
-            exclusiveToCondition.write(buffer);
         }
 
+        @Override
+        protected void writeToBuffer(FriendlyByteBuf buffer, TradingRecipe recipe) {
 
+        }
     }
-
-
 }
+

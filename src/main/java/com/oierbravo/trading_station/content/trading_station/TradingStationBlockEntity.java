@@ -282,24 +282,24 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         }
 
         updateProgress();
-        setWorking(true);
 
         maxProgress = getProcessingTime();
         if (progress > maxProgress) {
             craftItem();
         }
+        setWorking(true);
 
-        setChanged(pLevel, pPos, pState);
+        //setChanged(pLevel, pPos, pState);
 
     }
     private void setWorking(boolean value){
-        if(isWorking != value){
-            isWorking = value;
+        //if(isWorking != value){
+        //    isWorking = value;
             BlockState pState = getBlockState().setValue(AbstractFurnaceBlock.LIT, Boolean.valueOf(isWorking()));
 
                 getLevel().setBlock(getBlockPos(), pState, 3);
             setChanged(getLevel(), getBlockPos(), pState);
-        }
+        //}
     }
 
     private boolean isWorking() {
@@ -521,10 +521,11 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return this.getLevel().getBiome(getBlockPos()).get();
     }
      protected Optional<TradingRecipe> getRecipe(){
-        SimpleContainer inputInventory = getInputInventory();
+        return targetedRecipe;
+        /*SimpleContainer inputInventory = getInputInventory();
         if(!getTargetItemHandler().getStackInSlot(0).isEmpty())
             return ModRecipes.findByOutput(level,getTargetItemHandler().getStackInSlot(0));
-        return ModRecipes.find(inputInventory,level, getBiome(), getTraderType());
+        return ModRecipes.find(inputInventory,level, getBiome(), getTraderType());*/
     };
 
     public int getProcessingTime(){
