@@ -3,9 +3,9 @@ package com.oierbravo.trading_station.compat.jei;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.content.trading_station.TradingStationMenu;
+import com.oierbravo.trading_station.registrate.ModBlocks;
 import com.oierbravo.trading_station.registrate.ModMenus;
-import com.oierbravo.trading_station.registrate.PoweredTradingStationRegistrate;
-import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
+import com.oierbravo.trading_station.registrate.ModRecipes;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
@@ -13,17 +13,14 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeManager;
 
 import java.util.List;
-import java.util.Objects;
 
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
-    static RecipeType<TradingRecipe> TRAING_RECIPE =  new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class);
+    static RecipeType<TradingRecipe> TRAING_RECIPE =  RecipeType.create("trading_station","trading", TradingRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -38,17 +35,16 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(TradingStationRegistrate.BLOCK.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
-        registration.addRecipeCatalyst(new ItemStack(TradingStationRegistrate.BLOCK_UNBREAKABLE.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
-        registration.addRecipeCatalyst(new ItemStack(PoweredTradingStationRegistrate.BLOCK.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
-        registration.addRecipeCatalyst(new ItemStack(PoweredTradingStationRegistrate.BLOCK_UNBREAKABLE.get()),new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class));
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.TRADING_STATION.get()),TRAING_RECIPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.TRADING_STATION_UNBREAKABLE.get()),TRAING_RECIPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.POWERED_TRADING_STATION.get()),TRAING_RECIPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.POWERED_TRADING_STATION_UNBREAKABLE.get()),TRAING_RECIPE);
     }
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
 
-        List<TradingRecipe> tradingRecipes = rm.getAllRecipesFor(TradingRecipe.Type.INSTANCE);
+        List<TradingRecipe> tradingRecipes = ModRecipes.getAll();
         registration.addRecipes(TRAING_RECIPE, tradingRecipes);
 
     }
@@ -56,7 +52,7 @@ public class JEIPlugin implements IModPlugin {
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
         //registration.addRecipeTransferHandler(new TradingRecipeHandler(), TRAING_RECIPE);
-        registration.addRecipeTransferHandler(TradingStationMenu.class, ModMenus.TRADING_STATION.get(), new RecipeType<>(TradingRecipeCategory.UID, TradingRecipe.class), 36, 2, 0, 36);
+        registration.addRecipeTransferHandler(TradingStationMenu.class, ModMenus.TRADING_STATION.get(), TRAING_RECIPE, 36, 2, 0, 36);
 
     }
 }

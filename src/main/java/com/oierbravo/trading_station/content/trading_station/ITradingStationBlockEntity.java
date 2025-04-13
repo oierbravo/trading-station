@@ -4,6 +4,8 @@ import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -17,40 +19,29 @@ import net.minecraftforge.items.ItemStackHandler;
 import java.util.Optional;
 
 public interface ITradingStationBlockEntity {
-    public int progress = 0;
-    public int maxProgress = 1;
     LazyOptional<IItemHandler> getInputItemHandler();
     LazyOptional<IItemHandler> getOutputItemHandler();
 
     IItemHandler getTargetItemHandler();
 
-
-    ItemStack getTargetItemStack();
-
-    void setPreferedItem(ItemStack itemStack);
-
     void setItemStack(int slot, ItemStack itemStack, ItemStackSyncS2CPacket.SlotType slotType);
 
-
-    IEnergyStorage getEnergyStorage();
     LazyOptional<IEnergyStorage> getEnergyStorageHandler();
 
-    byte currentRedstoneMode = 0;
-    default byte getRedstoneMode(){
-        return currentRedstoneMode;
-    };
+    byte getRedstoneMode();
 
-    String getTraderType();
-
+    void setInputLock(boolean lock);
+    boolean isLocked();
 
     String getTargetedRecipeId();
-
     void setTargetedRecipeById(ResourceLocation recipeId);
+
+    Optional<TradingRecipe> getRecipe();
+
+    void readClient(CompoundTag readNbt);
 
     BlockPos getBlockPos();
     Level getLevel();
-
-    Optional<TradingRecipe> getTargetedRecipe();
 
     enum REDSTONE_MODES {
         IGNORE,
@@ -58,20 +49,17 @@ public interface ITradingStationBlockEntity {
         HIGH
     }
 
-
-
+    void setWorking(boolean value);
+    boolean isWorking();
 
     boolean canCraftItem();
     boolean canProcess(ItemStack stack);
-    void resetProgress();
 
+    void resetProgress();
     int getProcessingTime();
-    default int getProgressPercent() {
-        return progress * 100 / maxProgress;
-    }
-    default int getProgress() {
-        return progress;
-    }
+    int getProgressPercent();
+    int getProgress();
+    int getMaxProgress();
 
     default SimpleContainer getInputInventory(){
         int containerSize = 0;
@@ -97,6 +85,6 @@ public interface ITradingStationBlockEntity {
     void setRedstoneMode(byte mode);
     byte getCurrentRedstoneMode();
     boolean isPowered();
-
-    Biome getBiome();
+    void sendToMenu(FriendlyByteBuf buffer);
+    void clearTargetedRecipe();
 }

@@ -22,12 +22,7 @@ public class ModCreativeTab {
     public static final RegistryObject<CreativeModeTab> MAIN_TAB = TAB_REGISTER.register("main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.trading_station"))
-                    .icon(TradingStationRegistrate.BLOCK::asStack)
-                    /*.displayItems((pParameters, pOutput) -> {
-                        for (RegistryEntry<Item> entry : TradingStation.registrate().getAll(Registries.ITEM)) {
-                            pOutput.accept(entry.get());
-                        }
-                    })*/
+                    .icon(ModBlocks.TRADING_STATION::asStack)
                     .build());
 
 

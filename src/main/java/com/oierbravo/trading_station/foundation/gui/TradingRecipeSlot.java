@@ -11,12 +11,12 @@ import java.util.Optional;
 
 public class TradingRecipeSlot extends SlotItemHandler {
     String tradingRecipeId;
-    public TradingRecipeSlot(String tradingRecipe, IItemHandler itemHandler, int index, int xPosition, int yPosition) {
+    public TradingRecipeSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
         super(itemHandler, index, xPosition, yPosition);
-        this.tradingRecipeId = tradingRecipe;
+        //this.tradingRecipeId = tradingRecipe;
     }
 
-    @Override
+    /*@Override
     public @NotNull ItemStack getItem() {
         ItemStack item =  super.getItem();
         if(!tradingRecipeId.isEmpty()){
@@ -25,5 +25,5 @@ public class TradingRecipeSlot extends SlotItemHandler {
             item.setTag(tag);
         }
         return item;
-    }
+    }*/
 }

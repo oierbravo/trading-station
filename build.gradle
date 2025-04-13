@@ -19,6 +19,8 @@ plugins {
     id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
     id "com.modrinth.minotaur" version "2.+"
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -37,7 +39,12 @@ archivesBaseName = "${modid}"
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
+boolean MechanicalLemonLibInWorkspace = findProject(':MechanicalLemonLib') != null
+
+
 minecraft {
+
     if (Boolean.parseBoolean(project.use_parchment)) {
         mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
     } else {
@@ -197,10 +204,11 @@ dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.19,MC1.20)")
+    //jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},MC1.21)")
 
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: '[MC1.19-1.1.5,)') {
-        jarJar.pin(it, project.registrate_version)
+    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},)") {
+        jarJar.ranged(it, "[${registrate_version},)")
+
     }
     implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
 
@@ -230,24 +238,19 @@ dependencies {
         annotationProcessor ctDep
     }
 
-    //implementation fg.deobf("net.createmod.catnip:Catnip-Forge-${minecraft_version}:${catnip_version}")
-
-    /* jarJar("com.lowdragmc.ldlib:ldlib-forge-${minecraft_version}:${ldlib_version}") {
-         jarJar.ranged(it, "[${ldlib_version},)")
-     }*/
-
-    //jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[MC1.19,MC1.20)")
-
     jarJar(group: 'com.oierbravo.mechanical_lemon_ui', name: 'MechanicalLemonUI', version: "[${mechanical_lemon_ui_version},)") {
-        jarJar.pin(it, project.mechanical_lemon_ui_version)
+        jarJar.pin(it, "[${project.mechanical_lemon_ui_version},)")
     }
     implementation fg.deobf("com.oierbravo.mechanical_lemon_ui:MechanicalLemonUI:${mechanical_lemon_ui_version}")
 
     jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[${mechanical_lemon_lib_version},)") {
-        jarJar.pin(it, project.mechanical_lemon_lib_version)
+        jarJar.pin(it, "[${project.mechanical_lemon_lib_version},)")
     }
+
     implementation fg.deobf("com.oierbravo.mechanical_lemon_lib:MechanicalLemonLib:${mechanical_lemon_lib_version}")
 
+    runtimeOnly fg.deobf("curse.maven:generatorgalore-691049:5318306")
+    runtimeOnly fg.deobf("curse.maven:pipez-443900:4916633")
     //annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 }
@@ -356,6 +359,7 @@ if(System.getenv('MODRINTH_TOKEN') != null) {
         dependencies { // A special DSL for creating dependencies
             optional.project "kubejs"
             optional.project "jei"
+            optional.project "jade"
         }
         changelog = rootProject.file("changes/${minecraft_version}-${mod_version}.md").text
         syncBodyFrom = rootProject.file("README.md").text

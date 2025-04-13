@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.compat.jade;
 
+import com.oierbravo.mechanical_lemon_lib.jade.ProgressComponentProvider;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlock;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
@@ -14,13 +15,13 @@ public class TradingStationPlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(new ProgressComponentProvider(), TradingStationBlockEntity.class);
-        //registration.registerBlockDataProvider(new ProgressComponentProvider(), PoweredTradingStationBlockEntity.class);
+        registration.registerBlockDataProvider(new ProgressComponentProvider(TRADING_STATION_DATA), TradingStationBlockEntity.class);
+        registration.registerBlockDataProvider(new ProgressComponentProvider(TRADING_STATION_DATA), PoweredTradingStationBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(new ProgressComponentProvider(), TradingStationBlock.class);
-        //registration.registerBlockComponent(new ProgressComponentProvider(), PoweredTradingStationBlock.class);
+        registration.registerBlockComponent(new ProgressComponentProvider(TRADING_STATION_DATA), TradingStationBlock.class);
+        registration.registerBlockComponent(new ProgressComponentProvider(TRADING_STATION_DATA), PoweredTradingStationBlock.class);
     }
 }

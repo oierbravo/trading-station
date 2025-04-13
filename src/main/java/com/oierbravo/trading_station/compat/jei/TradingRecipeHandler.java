@@ -3,18 +3,14 @@ package com.oierbravo.trading_station.compat.jei;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.content.trading_station.TradingStationMenu;
 import com.oierbravo.trading_station.registrate.ModMenus;
-import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
-import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 public class TradingRecipeHandler  implements IRecipeTransferHandler<TradingStationMenu, TradingRecipe> {

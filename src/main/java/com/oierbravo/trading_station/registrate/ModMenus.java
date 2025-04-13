@@ -16,7 +16,7 @@ public class ModMenus {
     private static final Registrate REGISTRATE = TradingStation.registrate();
 
     public static final MenuEntry<TradingStationMenu> TRADING_STATION =
-            register("mechanical_trading_station", TradingStationMenu::new, () -> TradingStationScreen::new);
+            register("trading_station", TradingStationMenu::new, () -> TradingStationScreen::new);
 
 
     private static <C extends AbstractContainerMenu, S extends Screen & MenuAccess<C>> MenuEntry<C> register(

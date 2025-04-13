@@ -1,16 +1,11 @@
 package com.oierbravo.trading_station.content.trading_station.powered;
 
+import com.oierbravo.mechanical_lemon_lib.foundation.energy.AbstractEnergyStorage;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
-import com.oierbravo.trading_station.content.trading_station.TradingStationConfig;
-import com.oierbravo.trading_station.foundation.util.ModEnergyStorage;
-import com.oierbravo.trading_station.foundation.util.ModLang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity {
 
-    private final ModEnergyStorage energyStorage = createEnergyStorage();
+    private final AbstractEnergyStorage energyStorage = createEnergyStorage();
     private LazyOptional<IEnergyStorage> lazyEnergyHandler = LazyOptional.empty();
 
     @Override
@@ -38,8 +33,8 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
     public PoweredTradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
     }
-    private ModEnergyStorage createEnergyStorage() {
-        return new ModEnergyStorage(PoweredTradingStationConfig.ENERGY_CAPACITY.get(), PoweredTradingStationConfig.ENERGY_TRANSFER.get()) {
+    private AbstractEnergyStorage createEnergyStorage() {
+        return new AbstractEnergyStorage(PoweredTradingStationConfig.ENERGY_CAPACITY.get(), PoweredTradingStationConfig.ENERGY_TRANSFER.get()) {
             @Override
             public void onEnergyChanged() {
                 setChanged();
@@ -52,11 +47,8 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
     }
     @Override
     public LazyOptional<IEnergyStorage> getEnergyStorageHandler() {
+
         return lazyEnergyHandler;
-    }
-    @Override
-    public String getTraderType() {
-        return "powered";
     }
 
     public void setRemoved() {
@@ -116,5 +108,9 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
             return false;
         }
         return super.canCraftItem();
+    }
+    @Override
+    public String getMachineId() {
+        return "powered";
     }
 }

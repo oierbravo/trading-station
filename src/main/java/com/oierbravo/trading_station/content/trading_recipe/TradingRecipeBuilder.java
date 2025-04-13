@@ -13,8 +13,15 @@ import net.minecraft.world.level.ItemLike;
 import java.util.List;
 
 public class TradingRecipeBuilder extends BaseRecipeBuilder<TradingRecipe, TradingRecipe.TradingRecipeParams> {
-    public TradingRecipeBuilder(MechanicalRecipeFactory<TradingRecipe> factory, ResourceLocation id) {
-        super(factory, id);
+    public TradingRecipeBuilder( ResourceLocation id) {
+        super(id);
+        params = new TradingRecipe.TradingRecipeParams(id);
+
+    }
+
+    @Override
+    public TradingRecipe build() {
+        return new TradingRecipe(this.params);
     }
 
     public TradingRecipeBuilder withItemIngredients(Ingredient... itemIngredients) {

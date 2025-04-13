@@ -1,6 +1,5 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.google.common.collect.ImmutableList;
 import com.oierbravo.mechanical_lemon_ui.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.EnergyDisplay;
 import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.IconButton;
@@ -12,18 +11,18 @@ import com.oierbravo.mechanical_lemon_ui.register.LibGuiTextures;
 import com.oierbravo.mechanical_lemon_ui.register.LibIcons;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;
+import com.oierbravo.trading_station.network.packets.LockInputSyncC2SPacket;
 import com.oierbravo.trading_station.network.packets.RedstoneModeSyncC2SPacket;
 import com.oierbravo.trading_station.registrate.ModGuiTextures;
 import com.oierbravo.trading_station.registrate.ModMessages;
-import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 public class TradingStationScreen extends AbstractSimiContainerScreen<TradingStationMenu> {
@@ -35,9 +34,13 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
 
     protected byte currentRedstoneMode;
 
+    protected boolean isLocked;
 
     private IconButton confirmButton;
+    private ToggleIconButton lockButton;
+
     private IconButton targetButton;
+
     private ToggleIconButton redstoneButton;
 
     private EnergyDisplay energyInfoArea;
@@ -47,6 +50,8 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
 
     public TradingStationScreen(TradingStationMenu container, Inventory inv, Component title) {
         super(container, inv, title);
+        this.titleXOffset = 8;
+        this.titleYOffset = 6;
         init();
     }
 
@@ -68,14 +73,37 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
 
         addRenderableWidget(confirmButton);
 
-        targetButton = new IconButton(leftPos + BG.width/2 -2, topPos + BG.height - 10, LibIcons.SEARCH);
+        ScreenElement[] lockButtonIcons = new ScreenElement[2];
+        lockButtonIcons[0] = LibIcons.LOCK_OPEN;
+        lockButtonIcons[1] = LibIcons.LOCK_CLOSE;
+
+        MutableComponent[] lockButtonLabels = new MutableComponent[2];
+        lockButtonLabels[0] = ModLang.translate("screen.lock.lock").component();
+        lockButtonLabels[1] = ModLang.translate("screen.lock.unlock").component();
+
+
+        isLocked = this.menu.contentHolder.isLocked();
+        lockButton = new ToggleIconButton(leftPos + BG.width/2 - 9, topPos + BG.height - 10, lockButtonIcons,lockButtonLabels,(isLocked)? 1:0);
+
+        lockButton.withCallback(() -> {
+            isLocked = !isLocked;
+            lockButton.setCurrentIndex((isLocked)? 1:0);
+            this.menu.contentHolder.setInputLock(isLocked);
+            ModMessages.sendToServer(new LockInputSyncC2SPacket(isLocked,this.menu.contentHolder.getBlockPos()));
+        });
+
+        lockButton.setToolTip(ModLang.translate("lock_target.button").component());
+
+        addRenderableWidget(lockButton);
+
+
+        targetButton = new IconButton(leftPos + BG.width/2 + 10, topPos + BG.height - 10, LibIcons.SEARCH);
         targetButton.withCallback(() -> {
 
             TradingStationTargetSelectScreen screen = new TradingStationTargetSelectScreen( this.menu.contentHolder, this.menu.contentHolder.getBlockPos());
             Minecraft.getInstance().pushGuiLayer(screen);
         });
 
-        targetButton.setToolTip(ModLang.translate("select_target.button").component());
 
         addRenderableWidget(targetButton);
 
@@ -115,11 +143,14 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
 
 
     }
+    protected void drawExclamation(GuiGraphics pGuiGraphics,int pX, int pY){
+        ScreenElement exclamationElement = LibIcons.TRIANGLE_EXCLAMATION_ORANGE;
+        exclamationElement.render(pGuiGraphics, pX, pY);
 
+    }
     @Override
     protected void containerTick() {
         progressArrow.setProgress(this.menu.containerData.get(0),this.menu.containerData.get(1));
-        //progressArrow.setProgress(this.menu.contentHolder.getProgressPercent(),this.menu.contentHolder.getProcessingTime());
     }
 
     @Override
@@ -128,21 +159,24 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
         int y = topPos;
 
         BG.render(pGuiGraphics, x, y);
-        pGuiGraphics.drawString(font, title, x + 15, y + 4, 0x592424, false);
+        pGuiGraphics.drawString(font, title, x + titleXOffset, y + 4, 0x592424, false);
 
         int invX = leftPos;
         int invY = topPos + imageHeight - PLAYER.height;
         renderPlayerInventory(pGuiGraphics, invX, invY);
 
-        if(!menu.contentHolder.getTargetItemStack().isEmpty()){
-            //Optional<TradingRecipe> recipe = ModRecipes.findByOutput(menu.contentHolder.getLevel(), menu.contentHolder.getTargetItemStack());
-            Optional<TradingRecipe> recipe = menu.contentHolder.getTargetedRecipe();
+        if(!menu.contentHolder.getTargetedRecipeId().isEmpty()){
+            Optional<TradingRecipe> recipe = menu.contentHolder.getRecipe();
             if(recipe.isPresent()){
                 for(int index = 0; index < recipe.get().getIngredients().size(); index++){
                     Ingredient ingredient = recipe.get().getIngredients().get(index);
 
                     if(!ingredient.isEmpty()) {
                         FakeItemRenderer.renderFakeItem(pGuiGraphics,ingredient.getItems()[0], leftPos + 20 + 23*index, topPos + 38, true,false);
+                        ItemStack slotStack = menu.contentHolder.getInputInventory().getItem(index);
+                        if(slotStack.isEmpty() || !slotStack.is(ingredient.getItems()[0].getItem())){
+                            drawExclamation(pGuiGraphics,leftPos + 20 + 23*index, topPos + 20);
+                        }
                     }
                 }
             }

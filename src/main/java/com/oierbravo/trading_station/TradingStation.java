@@ -49,27 +49,23 @@ public class TradingStation
         IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
 
         Config.register();
+        ModCreativeTab.register(modEventBus);
 
-        TradingStationRegistrate.register();
-        PoweredTradingStationRegistrate.register();
+        ModBlocks.register();
+        ModBlockEntities.register();
 
         ModRecipes.register(modEventBus);
         ModMessages.register();
 
         ModMenus.register();
-        ModCreativeTab.register(modEventBus);
         modEventBus.addListener(this::addCreative);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> TradingStationClient.onCtorClient(modEventBus, forgeEventBus));
 
         modEventBus.addListener(EventPriority.LOWEST, TradingStation::gatherData);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            //modEventBus.addListener(TradingStationClient::setToolTip);
-            //MinecraftForge.EVENT_BUS.register(new TradingStationClient());
             MinecraftForge.EVENT_BUS.register(TradingStationClient.class);
         });
-
-        //MinecraftForge.EVENT_BUS.register(TradingStationClient.class);
 
     }
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
@@ -78,7 +74,6 @@ public class TradingStation
                 event.accept(entry.get());
             }
         }
-            //event.accept(EXAMPLE_BLOCK_ITEM);
     }
     public static void gatherData(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
@@ -97,6 +92,8 @@ public class TradingStation
         registerLang("tooltip.progress", "Progress: %d%%");
         registerLang(("select_target.title"), "Select an output target");
         registerLang("select_target.button", "Select target");
+        registerLang("screen.lock.lock", "Lock input slots to recipe");
+        registerLang("screen.lock.unlock", "Unlock input slots");
         registerLang("select_target.clear", "Clear");
         registerLang("select_target.back", "Back");
         registerLang("confirm.button", "Confirm");

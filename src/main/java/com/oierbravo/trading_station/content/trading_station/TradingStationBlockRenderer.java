@@ -23,15 +23,17 @@ public class  TradingStationBlockRenderer<TSBE extends BlockEntity> implements B
     public void render(BlockEntity pBlockEntity, float pPartialTick, @NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
         if(pBlockEntity instanceof ITradingStationBlockEntity) {
             ITradingStationBlockEntity blockEntity = (ITradingStationBlockEntity) pBlockEntity;
-            if (!blockEntity.getTargetItemStack().isEmpty()) {
+            if (blockEntity.getRecipe().isPresent()) {
                 pPoseStack.pushPose();
-
-                pPoseStack.translate(0.5d, 1.2d, 0.5d);
-                if(blockEntity.getProgressPercent() > 0){
-                    pPoseStack.mulPose(Axis.YN.rotationDegrees(pPartialTick * 360f*((float) blockEntity.getProgressPercent() /100)));
+                pPoseStack.translate(.5, .5, .5);
+                if(blockEntity.isWorking()){
+                    float rot = ((blockEntity.getLevel().getGameTime() + pPartialTick) % 180F) * 2;
+                    pPoseStack.mulPose(Axis.YP.rotationDegrees(rot));
 
                 }
-                renderBlock(pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, blockEntity.getTargetItemStack(),pBlockEntity);
+                pPoseStack.translate(0, .7d, 0);
+
+                renderBlock(pPoseStack, pBufferSource, pPackedLight, pPackedOverlay, blockEntity.getRecipe().get().getResult(),pBlockEntity);
                 pPoseStack.popPose();
             }
         }

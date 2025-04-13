@@ -21,6 +21,7 @@ import net.minecraftforge.items.SlotItemHandler;
 public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
     public final ContainerData containerData;
 
+
     public TradingStationMenu(MenuType<?> type, int id, Inventory inv, FriendlyByteBuf extraData) {
         this(type, id, inv, extraData, new SimpleContainerData(3));
     }
@@ -34,11 +35,11 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
 
     }
 
-    protected TradingStationMenu(MenuType<?> type, int id, Inventory inv, TradingStationBlockEntity contentHolder) {
+    protected TradingStationMenu(MenuType<?> type, int id, Inventory inv, ITradingStationBlockEntity contentHolder) {
         this(type, id, inv, contentHolder,new SimpleContainerData(3));
     }
 
-    protected TradingStationMenu(MenuType<?> type, int id, Inventory inv, TradingStationBlockEntity contentHolder, ContainerData pData) {
+    protected TradingStationMenu(MenuType<?> type, int id, Inventory inv, ITradingStationBlockEntity contentHolder, ContainerData pData) {
         super(type, id, inv, contentHolder);
         this.containerData = pData;
         checkContainerSize(inv, 3);
@@ -48,16 +49,15 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
     }
 
     @Override
-    protected TradingStationBlockEntity createOnClient(FriendlyByteBuf extraData) {
+    protected ITradingStationBlockEntity createOnClient(FriendlyByteBuf extraData) {
         BlockPos readBlockPos = extraData.readBlockPos();
         CompoundTag readNbt = extraData.readNbt();
 
         ClientLevel world = Minecraft.getInstance().level;
         BlockEntity blockEntity = world.getBlockEntity(readBlockPos);
-        if (blockEntity instanceof TradingStationBlockEntity) {
-            TradingStationBlockEntity mechanicalTradingStationBlockEntity = (TradingStationBlockEntity) blockEntity;
-            mechanicalTradingStationBlockEntity.readClient(readNbt);
-             return mechanicalTradingStationBlockEntity;
+        if (blockEntity instanceof ITradingStationBlockEntity tradingStationBlockEntity) {
+            tradingStationBlockEntity.readClient(readNbt);
+            return tradingStationBlockEntity;
         }
 
         return null;
@@ -80,7 +80,7 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
         contentHolder.getOutputItemHandler().ifPresent((iItemHandler -> {
             addSlot(new SlotItemHandler(iItemHandler,0,132,38));
         }));
-        addSlot(new TradingRecipeSlot(this.contentHolder.getTargetedRecipeId(), this.contentHolder.getTargetItemHandler(),0,85,28));
+        addSlot(new TradingRecipeSlot( this.contentHolder.getTargetItemHandler(),0,85,28));
     }
 
     @Override
@@ -139,7 +139,7 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
         return copyOfSourceStack;
     }
 
-    public static TradingStationMenu create(int id, Inventory inv, TradingStationBlockEntity be, ContainerData containerData) {
+    public static TradingStationMenu create(int id, Inventory inv, ITradingStationBlockEntity be, ContainerData containerData) {
         return new TradingStationMenu(ModMenus.TRADING_STATION.get(), id, inv, be, containerData);
     }
 

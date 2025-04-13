@@ -6,7 +6,7 @@ import com.oierbravo.mechanical_lemon_ui.register.LibIcons;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;
-import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
+import com.oierbravo.trading_station.network.packets.RecipeClearC2SPacket;
 import com.oierbravo.trading_station.network.packets.RecipeSelectC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
@@ -22,6 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -68,8 +70,7 @@ public class TradingStationTargetSelectScreen extends Screen {
         this(ModLang.translate("select_target.title").component());
         this.blockEntity = pBlockEntity;
         this.blockPos = pBlockPos;
-        //this.allPossibleRecipes = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
-        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine(Minecraft.getInstance().level,pBlockEntity.getBiome(),pBlockEntity.getTraderType());
+        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine((Level) Minecraft.getInstance().level, (BlockEntity) pBlockEntity);
         resetDisplayedTargets();
 
     }
@@ -95,7 +96,7 @@ public class TradingStationTargetSelectScreen extends Screen {
 
         clearButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 30, LibIcons.TRASH);
         clearButton.withCallback(() -> {
-            ModMessages.sendToServer(new GhostItemSyncC2SPacket(ItemStack.EMPTY,getBlockPos()));
+            ModMessages.sendToServer(new RecipeClearC2SPacket(getBlockPos()));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
             Minecraft.getInstance().popGuiLayer();
         });
@@ -142,8 +143,7 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-            //String t = target.getId().toString();
-            //String bt = this.blockEntity.getTargetedRecipeId();
+
             if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId()))
                 pGuiGraphics.blit(TEXTURE, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
         }

@@ -1,5 +1,7 @@
 package com.oierbravo.trading_station.content.trading_station;
 
+import com.oierbravo.mechanical_lemon_lib.jade.IHavePercent;
+import com.oierbravo.trading_station.content.trading_recipe.IHaveMachineId;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
@@ -35,14 +37,15 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider, ITradingStationBlockEntity {
+public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider, ITradingStationBlockEntity, IHaveMachineId, IHavePercent {
 
 
     private CompoundTag updateTag;
@@ -66,6 +69,8 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     Optional<TradingRecipe> targetedRecipe;
     String targetedRecipeId;
+
+    protected boolean inputLocked = false;
 
     public TradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
@@ -121,7 +126,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
                 return true;
-                //return canProcess(stack) && super.isItemValid(slot, stack);
             }
 
             @Override
@@ -133,6 +137,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
                 return ItemStack.EMPTY;
             }
+
         };
     }
 
@@ -142,17 +147,22 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
-                resetProgress();
-                if(!level.isClientSide()) {
+                //resetProgress();
+                /*if(!level.isClientSide()) {
                     ModMessages.sendToClients(new ItemStackSyncS2CPacket(slot,this.getStackInSlot(0), worldPosition, ItemStackSyncS2CPacket.SlotType.INPUT));
                 }
                 if(!level.isClientSide()) {
                     level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-                }
+                }*/
             }
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
-                return true;
+                if(!isLocked())
+                    return true;
+                Optional<TradingRecipe> recipe = getRecipe();
+                if(recipe.isEmpty())
+                    return true;
+                return recipe.get().matchIngredient(slot, stack);
             }
         };
     }
@@ -164,18 +174,10 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
-                if(!level.isClientSide()) {
-                    ModMessages.sendToClients(new ItemStackSyncS2CPacket(slot, this.getStackInSlot(slot), worldPosition, ItemStackSyncS2CPacket.SlotType.OUTPUT));
-                }
-                if(!level.isClientSide()) {
-                    level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-                }
-                // clientSync();
             }
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
                 return canProcess(stack) && super.isItemValid(slot, stack);
-                //return false;
             }
         };
     }
@@ -187,7 +189,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             if(side == Direction.DOWN)
                 return outputItemHandler.cast();
 
-            Direction localDir = this.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
             return inputItemHandler.cast();
         }
 
@@ -224,18 +225,14 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         tag.put("input", inputItems.serializeNBT());
         tag.put("output", outputItems.serializeNBT());
         tag.put("target", targetItemHandler.serializeNBT());
-        tag.putInt("trading_station.progress", progress);
-        tag.putInt("trading_station.maxProgress", maxProgress);
+        tag.putInt("progress", progress);
+        tag.putInt("maxProgress", maxProgress);
         tag.putByte("redstoneMode", currentRedstoneMode);
-        //String targetedRecipeId = "";
-        //if(targetedRecipe.isPresent()){
-            //targetedRecipeId = targetedRecipe.get().getId().toString();
-        //    tag.putString("targetedRecipeId", targetedRecipe.get().getId().toString());
-
-        //}
+        tag.putBoolean("isWorking", isWorking);
         if(targetedRecipeId != null){
             tag.putString("targetedRecipeId", targetedRecipeId);
         }
+        tag.putBoolean("inputLocked",inputLocked);
     }
 
     @Override
@@ -244,10 +241,12 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         inputItems.deserializeNBT(tag.getCompound("input"));
         outputItems.deserializeNBT(tag.getCompound("output"));
         targetItemHandler.deserializeNBT(tag.getCompound("target"));
-        progress = tag.getInt("trading_station.progress");
-        maxProgress = tag.getInt("trading_station.maxProgress");
+        progress = tag.getInt("progress");
+        maxProgress = tag.getInt("maxProgress");
         currentRedstoneMode = tag.getByte("redstoneMode");
+        isWorking = tag.getBoolean("isWorking");
         setTargetedRecipeById(tag.getString("targetedRecipeId"));
+        inputLocked = tag.getBoolean("inputLocked");
     }
 
     public void drops() {
@@ -288,26 +287,22 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             craftItem();
         }
         setWorking(true);
-
-        //setChanged(pLevel, pPos, pState);
-
     }
-    private void setWorking(boolean value){
-        //if(isWorking != value){
-        //    isWorking = value;
-            BlockState pState = getBlockState().setValue(AbstractFurnaceBlock.LIT, Boolean.valueOf(isWorking()));
+    public void setWorking(boolean value){
+            isWorking = value;
+            BlockState pState = getBlockState().setValue(TradingStationBlock.LIT, isWorking());
 
-                getLevel().setBlock(getBlockPos(), pState, 3);
+            getLevel().setBlock(getBlockPos(), pState, 2);
             setChanged(getLevel(), getBlockPos(), pState);
-        //}
     }
 
-    private boolean isWorking() {
+    public boolean isWorking() {
         return isWorking;
     }
 
     protected void updateProgress(){
         this.progress += TradingStationConfig.PROGRESS_PER_TICK.get();
+        setChanged();
 
     }
     public boolean isPowered() {
@@ -330,6 +325,15 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         Optional<TradingRecipe> match = getRecipe();
 
         if(!match.isPresent()) {
+            return false;
+        }
+        ArrayList<ItemStack> currentStackList = new ArrayList<>();
+        for(int i = 0; i< 2; i++){
+            ItemStack currentStack = inputInventory.getItem(i);
+            if(!currentStack.isEmpty())
+                currentStackList.add(currentStack);
+        }
+        if(match.get().getIngredients().size() != currentStackList.size()){
             return false;
         }
         return hasEnoughInputItems(inputInventory, match.get().getIngredients())
@@ -363,10 +367,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return writeClient(new CompoundTag());
     }
 
-    //public CompoundTag getUpdateTag() {
-    //    this.saveAdditional(updateTag);
-    //    return updateTag;
-   // }
 
     @Nullable
     @Override
@@ -376,7 +376,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
-
         readClient(tag);
     }
 
@@ -386,10 +385,18 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         readClient(tag == null ? new CompoundTag() : tag);
     }
 
-
-
     public int getProgressPercent() {
         return this.progress * 100 / this.maxProgress;
+    }
+
+    @Override
+    public int getProgress() {
+        return this.progress;
+    }
+
+    @Override
+    public int getMaxProgress() {
+        return this.maxProgress;
     }
 
     @Override
@@ -449,20 +456,14 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
 
     @Override
-    public IEnergyStorage getEnergyStorage() {
-        return null;
-    }
-
-    @Override
     public LazyOptional<IEnergyStorage> getEnergyStorageHandler() {
         return LazyOptional.empty();
     }
 
     @Override
-    public String getTraderType() {
-        return "basic";
+    public byte getRedstoneMode() {
+        return currentRedstoneMode;
     }
-
 
 
     @Override
@@ -481,6 +482,13 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         buffer.writeNbt(this.getUpdateTag());
     }
 
+    @Override
+    public void clearTargetedRecipe() {
+        targetedRecipeId = "";
+        targetItemHandler.setStackInSlot(0, ItemStack.EMPTY);
+        setChanged();
+    }
+
     public void setPreferedItem(ItemStack itemStack) {
         this.targetItemHandler.setStackInSlot(0,itemStack);
     }
@@ -495,7 +503,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     public void setTargetedRecipeById(ResourceLocation recipeId){
         Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(),recipeId);
         targetedRecipe = recipe;
-        recipe.ifPresent(tradingRecipe -> targetItemHandler.setStackInSlot(0, tradingRecipe.getResult()));
+        recipe.ifPresent(tradingRecipe -> targetItemHandler.setStackInSlot(0, tradingRecipe.getResultWithRecipeId()));
         targetedRecipeId = recipeId.toString();
         setChanged();
     }
@@ -503,10 +511,7 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         ResourceLocation resourceLocation = ResourceLocation.tryParse(recipeId);
         this.setTargetedRecipeById(resourceLocation);
     }
-    @Nullable
-    public Optional<TradingRecipe> getTargetedRecipe(){
-        return targetedRecipe;
-    }
+
     @Override
     public String getTargetedRecipeId() {
         if(targetedRecipe.isPresent())
@@ -516,28 +521,38 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return "";
     }
 
-    @Override
-    public Biome getBiome() {
-        return this.getLevel().getBiome(getBlockPos()).get();
-    }
-     protected Optional<TradingRecipe> getRecipe(){
+     public Optional<TradingRecipe> getRecipe(){
+        if(targetedRecipeId == null)
+            return Optional.empty();
+        if(!targetedRecipeId.isEmpty())
+            targetedRecipe = ModRecipes.findById(this.level,targetedRecipeId);
         return targetedRecipe;
-        /*SimpleContainer inputInventory = getInputInventory();
-        if(!getTargetItemHandler().getStackInSlot(0).isEmpty())
-            return ModRecipes.findByOutput(level,getTargetItemHandler().getStackInSlot(0));
-        return ModRecipes.find(inputInventory,level, getBiome(), getTraderType());*/
     };
 
     public int getProcessingTime(){
         return getRecipe().map(TradingRecipe::getProcessingTime).orElse(1);
     }
     public final void readClient(CompoundTag tag) {
-        //this.read(tag, true);
         load(tag);
     }
 
     public CompoundTag writeClient(CompoundTag tag) {
         saveAdditional(tag);
         return tag;
+    }
+
+    @Override
+    public String getMachineId() {
+        return "basic";
+    }
+
+    @Override
+    public void setInputLock(boolean lock) {
+        inputLocked = lock;
+    }
+
+    @Override
+    public boolean isLocked() {
+        return inputLocked;
     }
 }
