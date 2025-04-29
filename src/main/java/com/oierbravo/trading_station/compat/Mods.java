@@ -1,10 +1,10 @@
 package com.oierbravo.trading_station.compat;
 
-import com.oierbravo.trading_station.foundation.util.ModLang;
+import com.oierbravo.trading_station.ModLang;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -56,6 +56,6 @@ public enum Mods {
 	}
 
 	public Block getBlock(String id) {
-		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(asId(), id));
+		return BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(asId(), id));
 	}
 }

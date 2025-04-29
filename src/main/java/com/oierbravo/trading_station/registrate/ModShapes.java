@@ -1,7 +1,6 @@
 package com.oierbravo.trading_station.registrate;
 
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.ShapeBuilder;
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.VoxelShaper;
+import com.oierbravo.mechanicals_ui.foundation.utility.ShapeBuilder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.shapes.VoxelShape;
 

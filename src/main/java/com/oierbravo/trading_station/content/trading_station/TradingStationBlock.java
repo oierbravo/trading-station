@@ -1,5 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station;
 
+import com.mojang.serialization.MapCodec;
 import com.oierbravo.trading_station.registrate.ModBlockEntities;
 import com.oierbravo.trading_station.registrate.ModShapes;
 import net.minecraft.core.BlockPos;
@@ -8,8 +9,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -23,18 +25,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
-
-import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 
 public class TradingStationBlock extends BaseEntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    public static final DirectionProperty HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private static final VoxelShape RENDER_SHAPE = ModShapes.TRADING_STATION;
 
@@ -57,6 +58,11 @@ public class TradingStationBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return null;
+    }
+
+    @Override
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
@@ -71,6 +77,7 @@ public class TradingStationBlock extends BaseEntityBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(HORIZONTAL_FACING).add(POWERED).add(LIT);
     }
+
     @Override
     public RenderShape getRenderShape(BlockState pState) {
         return RenderShape.MODEL;
@@ -122,18 +129,24 @@ public class TradingStationBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand handIn, BlockHitResult hit) {
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
+
         if (!pLevel.isClientSide()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
             if(blockEntity instanceof TradingStationBlockEntity) {
                 TradingStationBlockEntity tradingStationBlockEntity = (TradingStationBlockEntity) blockEntity;
-                        NetworkHooks.openScreen((ServerPlayer) pPlayer,tradingStationBlockEntity, tradingStationBlockEntity::sendToMenu);
+
+                if (!pLevel.isClientSide && pPlayer instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.openMenu(tradingStationBlockEntity, tradingStationBlockEntity::sendToMenu);
+
+                }
+                        //NetworkHooks.openScreen((ServerPlayer) pPlayer,tradingStationBlockEntity, tradingStationBlockEntity::sendToMenu);
             } else {
                 throw new IllegalStateException("Our Container provider is missing!");
             }
         }
 
-        return InteractionResult.sidedSuccess(pLevel.isClientSide());
+        return ItemInteractionResult.sidedSuccess(pLevel.isClientSide());
     }
 
 

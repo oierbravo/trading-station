@@ -1,0 +1,16 @@
+// 1.21.1	2025-04-21T06:43:05.944332936	Registrate Provider for trading_station [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (enchantments), Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+76015b2093284d49b4645a032a1401ad54416aed assets/trading_station/blockstates/powered_trading_station.json
+76015b2093284d49b4645a032a1401ad54416aed assets/trading_station/blockstates/powered_trading_station_unbreakable.json
+d529016ef556a0231f5da8dd90e7b84a30aad7f7 assets/trading_station/blockstates/trading_station.json
+d529016ef556a0231f5da8dd90e7b84a30aad7f7 assets/trading_station/blockstates/trading_station_unbreakable.json
+0c81c7e05439d4a65bccdcf5ca8186cd4ff0408a assets/trading_station/lang/en_ud.json
+6b6dc1dbc958324a3125f35897ef91d0d5b1ae97 assets/trading_station/lang/en_us.json
+373be6ce42eee460888161c967f098e5943e3778 assets/trading_station/models/item/powered_trading_station.json
+77bf5b94b46ff3ecdfec5e8edff0676571d9ed1b assets/trading_station/models/item/powered_trading_station_unbreakable.json
+7ddda578b6d6072db924599a9959579470354897 assets/trading_station/models/item/trading_station.json
+84ad64215c6c13c1dbe223941a19b03fbf5dd5e6 assets/trading_station/models/item/trading_station_unbreakable.json
+57e5c2fe09fbf0551277c17fad65ae56a7f45d15 data/minecraft/tags/block/mineable/pickaxe.json
+2db17805122179bab1bfe1e91a1c85508a90bf7b data/trading_station/loot_table/blocks/powered_trading_station.json
+2ea7a743b4965109538057104dce6bb63bc35d0e data/trading_station/loot_table/blocks/powered_trading_station_unbreakable.json
+d736184112435ac9e4b4dbb8da0aae4342072576 data/trading_station/loot_table/blocks/trading_station.json
+100c374addadafe0d3dd53ed04a1a98202c21537 data/trading_station/loot_table/blocks/trading_station_unbreakable.json

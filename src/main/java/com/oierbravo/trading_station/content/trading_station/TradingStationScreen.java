@@ -1,27 +1,29 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.menu.AbstractSimiContainerScreen;
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.EnergyDisplay;
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.IconButton;
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.ProgressArrow;
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.ToggleIconButton;
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.FakeItemRenderer;
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.ScreenElement;
-import com.oierbravo.mechanical_lemon_ui.register.LibGuiTextures;
-import com.oierbravo.mechanical_lemon_ui.register.LibIcons;
+import com.oierbravo.mechanicals.foundation.ingredient.CountableIngredient;
+import com.oierbravo.mechanicals_ui.foundation.gui.menu.AbstractSimiContainerScreen;
+import com.oierbravo.mechanicals_ui.foundation.gui.widget.EnergyDisplay;
+import com.oierbravo.mechanicals_ui.foundation.gui.widget.IconButton;
+import com.oierbravo.mechanicals_ui.foundation.gui.widget.ProgressArrow;
+import com.oierbravo.mechanicals_ui.foundation.gui.widget.ToggleIconButton;
+import com.oierbravo.mechanicals_ui.foundation.utility.FakeItemRenderer;
+import com.oierbravo.mechanicals_ui.register.LibGuiTextures;
+import com.oierbravo.mechanicals_ui.register.LibIcons;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.foundation.util.ModLang;
-import com.oierbravo.trading_station.network.packets.LockInputSyncC2SPacket;
-import com.oierbravo.trading_station.network.packets.RedstoneModeSyncC2SPacket;
+import com.oierbravo.trading_station.ModLang;
+import com.oierbravo.trading_station.network.packets.data.LockInputSyncPayload;
+import com.oierbravo.trading_station.network.packets.data.RedstoneModeSyncPayload;
 import com.oierbravo.trading_station.registrate.ModGuiTextures;
 import com.oierbravo.trading_station.registrate.ModMessages;
+import com.oierbravo.trading_station.registrate.ModRecipes;
+import net.createmod.catnip.gui.element.ScreenElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.Optional;
 
@@ -46,6 +48,9 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
     private EnergyDisplay energyInfoArea;
 
     private ProgressArrow progressArrow;
+
+    private int titleXOffset;
+    private int titleYOffset;
 
 
     public TradingStationScreen(TradingStationMenu container, Inventory inv, Component title) {
@@ -89,7 +94,7 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
             isLocked = !isLocked;
             lockButton.setCurrentIndex((isLocked)? 1:0);
             this.menu.contentHolder.setInputLock(isLocked);
-            ModMessages.sendToServer(new LockInputSyncC2SPacket(isLocked,this.menu.contentHolder.getBlockPos()));
+            ModMessages.sendToServer(new LockInputSyncPayload(isLocked,this.menu.contentHolder.getBlockPos()));
         });
 
         lockButton.setToolTip(ModLang.translate("lock_target.button").component());
@@ -103,6 +108,8 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
             TradingStationTargetSelectScreen screen = new TradingStationTargetSelectScreen( this.menu.contentHolder, this.menu.contentHolder.getBlockPos());
             Minecraft.getInstance().pushGuiLayer(screen);
         });
+        targetButton.setToolTip(ModLang.translate("select_target.button").component());
+
 
 
         addRenderableWidget(targetButton);
@@ -124,18 +131,16 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
             this.menu.contentHolder.setRedstoneMode(currentRedstoneMode);
             redstoneButton.setCurrentIndex(currentRedstoneMode);
 
-            ModMessages.sendToServer(new RedstoneModeSyncC2SPacket(currentRedstoneMode,this.menu.contentHolder.getBlockPos()));
+            ModMessages.sendToServer(new RedstoneModeSyncPayload(currentRedstoneMode,this.menu.contentHolder.getBlockPos()));
 
 
         });
-        //redstoneButton.setToolTip(ModLang.translate("screen.redstone.redstoneMode"));
         addRenderableWidget(redstoneButton);
 
-        this.menu.contentHolder.getEnergyStorageHandler().ifPresent((iEnergyStorage -> {
-            energyInfoArea = new EnergyDisplay(leftPos + 30 + BG.width - 50, topPos + BG.height - 40, iEnergyStorage);
+        if(this.menu.contentHolder.getEnergyStorageHandler() != null){
+            energyInfoArea = new EnergyDisplay(leftPos + 30 + BG.width - 50, topPos + BG.height - 40, this.menu.contentHolder.getEnergyStorageHandler());
             addRenderableWidget(energyInfoArea);
-        }));
-
+        }
 
         progressArrow = new ProgressArrow(leftPos + BG.width/2 - 8,topPos + BG.height/2 + 13);
         addRenderableWidget(progressArrow);
@@ -166,15 +171,16 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
         renderPlayerInventory(pGuiGraphics, invX, invY);
 
         if(!menu.contentHolder.getTargetedRecipeId().isEmpty()){
-            Optional<TradingRecipe> recipe = menu.contentHolder.getRecipe();
-            if(recipe.isPresent()){
-                for(int index = 0; index < recipe.get().getIngredients().size(); index++){
-                    Ingredient ingredient = recipe.get().getIngredients().get(index);
+            Optional<RecipeHolder<?>> recipeHolder = ModRecipes.findById(menu.contentHolder.getLevel(), menu.contentHolder.getTargetedRecipeId());
+            if(recipeHolder.isPresent()){
+                TradingRecipe recipe = (TradingRecipe) recipeHolder.get().value();
+                for(int index = 0; index < recipe.getIngredients().size(); index++){
+                    CountableIngredient ingredient = recipe.getCountableIngredients().get(index);
 
-                    if(!ingredient.isEmpty()) {
-                        FakeItemRenderer.renderFakeItem(pGuiGraphics,ingredient.getItems()[0], leftPos + 20 + 23*index, topPos + 38, true,false);
-                        ItemStack slotStack = menu.contentHolder.getInputInventory().getItem(index);
-                        if(slotStack.isEmpty() || !slotStack.is(ingredient.getItems()[0].getItem())){
+                    if(!ingredient.ingredient().isEmpty()) {
+                        FakeItemRenderer.renderFakeItem(pGuiGraphics,ingredient.ingredient().getItems()[0], leftPos + 20 + 23*index, topPos + 38, true,false);
+                        ItemStack slotStack = menu.contentHolder.getInputItemHandler().getStackInSlot(index);
+                        if(slotStack.isEmpty() || !slotStack.is(ingredient.ingredient().getItems()[0].getItem())){
                             drawExclamation(pGuiGraphics,leftPos + 20 + 23*index, topPos + 20);
                         }
                     }

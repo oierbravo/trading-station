@@ -1,28 +1,26 @@
 package com.oierbravo.trading_station.content.trading_station.powered;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.createmod.catnip.config.ConfigBase;
+import org.jetbrains.annotations.NotNull;
 
-public class PoweredTradingStationConfig {
-    public static ForgeConfigSpec.IntValue PROGRESS_PER_TICK;
-    public static ForgeConfigSpec.IntValue ENERGY_CAPACITY;
-    public static ForgeConfigSpec.IntValue ENERGY_TRANSFER;
-    public static ForgeConfigSpec.IntValue ENERGY_PER_TICK;
+public class PoweredTradingStationConfig extends ConfigBase {
 
-    public static void registerCommonConfig(ForgeConfigSpec.Builder COMMON_BUILDER) {
-       COMMON_BUILDER.comment("Settings for the Powered Trading Station").push("powered_trading_station");
-        PROGRESS_PER_TICK = COMMON_BUILDER
-                .comment("How much progress per tick")
-                .defineInRange("progressPerTick", 5, 1, Integer.MAX_VALUE);
-        ENERGY_CAPACITY = COMMON_BUILDER
-                .comment("How much energy capacity has")
-                .defineInRange("energyCapacity", 64000, 1, Integer.MAX_VALUE);
-        ENERGY_TRANSFER = COMMON_BUILDER
-                .comment("How much energy can transfer")
-                .defineInRange("energyTransfer", 2000, 1, Integer.MAX_VALUE);
-        ENERGY_PER_TICK = COMMON_BUILDER
-                .comment("How much energy consumens per tick")
-                .defineInRange("energyPerTick", 500, 1, Integer.MAX_VALUE);
-        COMMON_BUILDER.pop();
+    public final ConfigBase.ConfigInt progressPerTick = i(5,1,"progressPerTick", PoweredTradingStationConfig.Comments.progressPerTick);
+    public final ConfigBase.ConfigInt energyCapacity = i(64000,1,"energyCapacity", PoweredTradingStationConfig.Comments.energyCapacity);
+    public final ConfigBase.ConfigInt energyTransfer = i(2000,1,"energyTransfer", PoweredTradingStationConfig.Comments.energyTransfer);
+    public final ConfigBase.ConfigInt energyPerTick = i(500,1,"energyPerTick", PoweredTradingStationConfig.Comments.energyPerTick);
+
+
+    private static class Comments {
+        static String progressPerTick = "How much progress per tick.";
+        static String energyCapacity = "How much energy capacity has.";
+        static String energyTransfer = "How much energy can transfer.";
+        static String energyPerTick = "How much energy consumens per tick.";
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "Powered Trading station";
     }
 
 }

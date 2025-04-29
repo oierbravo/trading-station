@@ -1,75 +1,33 @@
 package com.oierbravo.trading_station.registrate;
 
-import com.oierbravo.trading_station.TradingStation;
-import com.oierbravo.trading_station.network.packets.*;
-import net.minecraft.resources.ResourceLocation;
+import com.oierbravo.trading_station.ModConstants;
+import com.oierbravo.trading_station.network.packets.data.*;
+import com.oierbravo.trading_station.network.packets.handler.*;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class ModMessages {
-    private static SimpleChannel INSTANCE;
+    public static void registerNetworking(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar(ModConstants.MODID);
 
-    private static int packetId = 0;
-    private static int id() {
-        return packetId++;
-    }
+        //Going to Client
+        registrar.playToClient(ItemSyncPayload.TYPE, ItemSyncPayload.STREAM_CODEC, ItemSyncPacket.get()::handle);
 
-    public static void register() {
-        SimpleChannel net = NetworkRegistry.ChannelBuilder
-                .named(new ResourceLocation(TradingStation.MODID, "messages"))
-                .networkProtocolVersion(() -> "1.0")
-                .clientAcceptedVersions(s -> true)
-                .serverAcceptedVersions(s -> true)
-                .simpleChannel();
-
-        INSTANCE = net;
-
-
-        net.messageBuilder(ItemStackSyncS2CPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(ItemStackSyncS2CPacket::new)
-                .encoder(ItemStackSyncS2CPacket::toBytes)
-                .consumerMainThread(ItemStackSyncS2CPacket::handle)
-                .add();
-
-
-        net.messageBuilder(RedstoneModeSyncC2SPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(RedstoneModeSyncC2SPacket::new)
-                .encoder(RedstoneModeSyncC2SPacket::toBytes)
-                .consumerMainThread(RedstoneModeSyncC2SPacket::handle)
-                .add();
-
-        net.messageBuilder(LockInputSyncC2SPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(LockInputSyncC2SPacket::new)
-                .encoder(LockInputSyncC2SPacket::toBytes)
-                .consumerMainThread(LockInputSyncC2SPacket::handle)
-                .add();
-
-
-        net.messageBuilder(RecipeSelectC2SPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(RecipeSelectC2SPacket::new)
-                .encoder(RecipeSelectC2SPacket::toBytes)
-                .consumerMainThread(RecipeSelectC2SPacket::handle)
-                .add();
-        net.messageBuilder(RecipeClearC2SPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
-                .decoder(RecipeClearC2SPacket::new)
-                .encoder(RecipeClearC2SPacket::toBytes)
-                .consumerMainThread(RecipeClearC2SPacket::handle)
-                .add();
+        //Going to server
+        registrar.playToServer(LockInputSyncPayload.TYPE, LockInputSyncPayload.STREAM_CODEC, LockInputSyncPacket.get()::handle);
+        registrar.playToServer(RecipeClearSyncPayload.TYPE, RecipeClearSyncPayload.STREAM_CODEC, RecipeClearSyncPacket.get()::handle);
+        registrar.playToServer(RecipeSelectSyncPayload.TYPE, RecipeSelectSyncPayload.STREAM_CODEC, RecipeSelectSyncPacket.get()::handle);
+        registrar.playToServer(RedstoneModeSyncPayload.TYPE, RedstoneModeSyncPayload.STREAM_CODEC, RedstoneModeSyncPacket.get()::handle);
 
     }
-
-    public static <MSG> void sendToServer(MSG message) {
-        INSTANCE.sendToServer(message);
+    public static void sendToAllClients(CustomPacketPayload message) {
+        PacketDistributor.sendToAllPlayers(message);
     }
-
-    public static <MSG> void sendToPlayer(MSG message, ServerPlayer player) {
-        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+    public static void sendToServer(CustomPacketPayload message){
+        PacketDistributor.sendToServer(message);
     }
-
-    public static <MSG> void sendToClients(MSG message) {
-        INSTANCE.send(PacketDistributor.ALL.noArg(), message);
-    }
+    public static void register() {}
 }

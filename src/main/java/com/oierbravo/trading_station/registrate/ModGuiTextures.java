@@ -1,18 +1,23 @@
 package com.oierbravo.trading_station.registrate;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.UIRenderHelper;
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.Color;
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.ScreenElement;
+import com.oierbravo.trading_station.ModConstants;
 import com.oierbravo.trading_station.TradingStation;
+import net.createmod.catnip.gui.UIRenderHelper;
+import net.createmod.catnip.gui.element.ScreenElement;
+import net.createmod.catnip.theme.Color;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public enum ModGuiTextures implements ScreenElement {
-    TRADING_STATION("trading_station", 0, 0, 175, 68);
+    TRADING_STATION("trading_station", 0, 0, 175, 68),
 
+    TRADING_SELECT("trade_select", 0, 0, 165,83),
+    TRADING_SELECT_SCROLL_INACTIVE("trade_select", 0, 84, 7,9),
+    TRADING_SELECT_SCROLL_ACTIVE("trade_select", 0, 93, 7,9),
+    TRADING_SELECT_SELECTED("trade_select", 0, 102, 16,16);
 
     public static final int FONT_COLOR = 0x575F7A;
 
@@ -30,11 +35,11 @@ public enum ModGuiTextures implements ScreenElement {
     }
 
     private ModGuiTextures(String location, int startX, int startY, int width, int height) {
-        this(TradingStation.MODID, location, startX, startY, width, height);
+        this(ModConstants.MODID, location, startX, startY, width, height);
     }
 
     private ModGuiTextures(String namespace, String location, int startX, int startY, int width, int height) {
-        this.location = new ResourceLocation(namespace, "textures/gui/" + location + ".png");
+        this.location = ResourceLocation.fromNamespaceAndPath(namespace, "textures/gui/" + location + ".png");
         this.width = width;
         this.height = height;
         this.startX = startX;

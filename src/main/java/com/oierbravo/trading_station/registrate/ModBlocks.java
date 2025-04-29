@@ -10,7 +10,7 @@ import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 
 public class ModBlocks {
     private static final Registrate REGISTRATE = TradingStation.registrate();//.defaultCreativeTab(MechanicalLemonLib);
@@ -59,6 +59,7 @@ public class ModBlocks {
     public static final BlockEntry<PoweredTradingStationBlock> POWERED_TRADING_STATION = TradingStation.registrate()
             .block("powered_trading_station", PoweredTradingStationBlock::new)
             .lang("Powered Trading Station")
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .blockstate((ctx, prov) ->
                     prov.getVariantBuilder(ctx.getEntry()).forAllStates(state -> {
                         String modelFileName = "trading_station:block/powered_trading_station";

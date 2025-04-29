@@ -1,182 +1,134 @@
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public' }
-        maven { url = 'https://maven.parchmentmc.org' }
-
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${forgegradle_version}", changing: false
-        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath "org.parchmentmc:librarian:1.+"
-    }
-}
-
 plugins {
-    id 'maven-publish'
-    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
-    id "com.modrinth.minotaur" version "2.+"
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-
+    id "idea"
+    id "net.neoforged.moddev" version "2.0.74"
+    id "dev.ithundxr.silk" version "0.11.15"
+    id "me.modmuss50.mod-publish-plugin" version "0.8.3"
+    id "maven-publish"
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-apply plugin: 'com.matthewprenger.cursegradle'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'idea'
-apply plugin: 'maven-publish'
+apply from: "./gradle/java.gradle"
+apply from: "gradle/property_loader.gradle"
 
-jarJar.enable()
-
-group = "com.${author}.${modid}"
+group = "com.${mod_author}.${mod_id}"
 version = "${minecraft_version}-${mod_version}"
-archivesBaseName = "${modid}"
+archivesBaseName = mod_id
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-
-boolean MechanicalLemonLibInWorkspace = findProject(':MechanicalLemonLib') != null
-
-
-minecraft {
-
-    if (Boolean.parseBoolean(project.use_parchment)) {
-        mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
-    } else {
-        mappings channel: 'official', version: "${minecraft_version}"
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
     }
-    copyIdeResources = true
+}
 
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+neoForge {
+    version = project.neo_version
 
+    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    parchment {
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_version
+    }
+    mods {
+        "$mod_id" {
+            sourceSet sourceSets.main
+        }
+    }
     runs {
+        // applies to all the run configs below
+        configureEach {
+            systemProperty 'forge.logging.markers', ''
+            systemProperty 'forge.logging.console.level', 'info'
+            jvmArguments = ["-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition"]
+            //jvmArgs("-XX:-OmitStackTraceInFastThrow") // uncomment when you get exceptions with null messages etc
+            //jvmArgs '-XX:+UnlockCommercialFeatures' // uncomment for profiling
+
+            systemProperty 'mixin.debug.export', 'true'
+            systemProperty 'mixin.debug.verbose', 'true'
+            //programArgument '-mixin.config=create.mixins.json'
+            //programArgument '-mixin.config=ponder.mixins.json'
+            //systemProperty("mixin.env.remapRefMap", "true")
+            //systemProperty("mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg")
+
+        }
+
         client {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'trading_station'
-
-            mods {
-                trading_station {
-                    source sourceSets.main
-                }
-            }
+            client()
+            gameDirectory = project.file('run')
         }
 
         server {
-            workingDirectory project.file('run')
+            server()
 
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'trading_station'
-
-            mods {
-                trading_station {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'trading_station'
-
-            mods {
-                trading_station {
-                    source sourceSets.main
-                }
-            }
+            gameDirectory = project.file('run/server')
         }
 
         data {
-            workingDirectory project.file('run')
+            data()
 
-            property 'forge.logging.markers', 'REGISTRIES'
+            gameDirectory = project.file('run')
+            systemProperty 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
+            systemProperty 'forge.logging.console.level', 'debug'
+            programArguments.addAll("--mod", mod_id as String, "--all", "--output", file("src/generated/resources/").getAbsolutePath(), "--existing", file("src/main/resources").getAbsolutePath())
+        }
 
-            property 'forge.logging.console.level', 'debug'
+        gameTestServer {
+            type = "gameTestServer"
 
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'trading_station', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                trading_station {
-                    source sourceSets.main
-                }
-            }
+            gameDirectory = project.file('run/gametest')
+            // setForceExit false <- FIXME 1.20
         }
     }
 }
 
-// Include resources generated by data generators.
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main {
+    resources {
+        srcDir 'src/generated/resources'
+        exclude '.cache/'
+    }
+}
 
 repositories {
-    mavenLocal()
+    maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // ForgeConfigAPIPort
+    maven { url = "https://mvn.devos.one/snapshots" } // Registrate
+    maven { url = "https://maven.blamejared.com" } // JEI, Vazkii's Mods
 
     maven {
-        // Location of the maven that hosts JEI files (and TiC)
-        name 'Progwml6 maven'
-        url 'https://dvs1.progwml6.com/files/maven'
+        // location of the maven for Curios API
+        url = "https://maven.theillusivec4.top/"
     }
     maven {
-        name = 'tterrag maven'
-        url = 'https://maven.tterrag.com/'
+        // location of maven for CC: Tweaked
+        name = "squiddev"
+        url = "https://squiddev.cc/maven/"
     }
+
     maven {
-        url "https://www.cursemaven.com"
+        url = 'https://www.cursemaven.com'
         content {
             includeGroup "curse.maven"
         }
     }
     maven {
-        url "https://jitpack.io"
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
         content {
-            includeGroup "com.github.llamalad7.mixinextras"
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
         }
     }
 
     maven {
-        url "https://maven.saps.dev/minecraft"
+        url "https://maven.latvian.dev/releases"
         content {
             includeGroup "dev.latvian.mods"
-            includeGroup "dev.ftb.mods"
+            includeGroup "dev.latvian.apps"
         }
     }
     maven {
@@ -185,60 +137,50 @@ repositories {
             includeGroup "dev.architectury"
         }
     }
-    maven {
-        url "https://maven.blamejared.com"
-    }
-    maven { // LDLib Configuration
-        name "firstdarkdev"
-        url "https://maven.firstdarkdev.xyz/snapshots"
-    }
-    maven {
-        // Location of the maven for Ponder, Catnip
-        name = 'createmod maven'
-        url 'https://maven.createmod.net'
+    mavenLocal()
+    flatDir {
+        dirs 'libs'
     }
 }
 
-
 dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    //jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},MC1.21)")
+    jarJar(implementation("com.oierbravo.mechanicals:Mechanicals:${minecraft_version}-${mechanicals}"))
+    jarJar(implementation("com.oierbravo.mechanicals_ui:MechanicalsUI:${minecraft_version}-${mechanicals_ui}"))
 
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},)") {
-        jarJar.ranged(it, "[${registrate_version},)")
 
-    }
-    implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
+    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},)")
+    implementation "com.tterrag.registrate:Registrate:${registrate_version}"
 
-    compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-common-api:${jei_version}")
-    compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge-api:${jei_version}")
-    implementation fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge:${jei_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${flywheel_minecraft_version}:${flywheel_version}")
+    runtimeOnly(jarJar("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_version}") {
+        version {
+            strictly "[1.0,2.0)"
+            prefer flywheel_version
+        }
+    })
 
+
+
+    implementation "curse.maven:jade-324717:${jade_id}"
+
+    jarJar("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+
+    implementation("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+
+    implementation("mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}")
 
 
     if (kubejs_enabled.toBoolean()) {
-        implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
-        implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
-        implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
-        annotationProcessor "com.github.llamalad7.mixinextras:mixinextras-common:${mixin_extras}"
-        implementation fg.deobf("com.github.llamalad7.mixinextras:mixinextras-forge:${mixin_extras}")
+        compileOnly("dev.architectury:architectury-neoforge:$architectury_version")
+        api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
+        interfaceInjectionData("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
     }
-    implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
+    implementation("curse.maven:jade-324717:${jade_id}")
 
-    if (ct_enabled.toBoolean()) {
-        def minecraftVersion= "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-        def ctDep = "com.blamejared.crafttweaker:CraftTweaker-forge-${ct_minecraft_version}:${ct_version}"
-        compileOnly(ctDep)
-        runtimeOnly(fg.deobf(ctDep))
 
-        annotationProcessor "com.blamejared.crafttweaker:Crafttweaker_Annotation_Processors:${ct_annotation_processor_version}"
-        annotationProcessor minecraftVersion
-        annotationProcessor ctDep
-    }
-
-    jarJar(group: 'com.oierbravo.mechanical_lemon_ui', name: 'MechanicalLemonUI', version: "[${mechanical_lemon_ui_version},)") {
+    /*jarJar(group: 'com.oierbravo.mechanical_lemon_ui', name: 'MechanicalLemonUI', version: "[${mechanical_lemon_ui_version},)") {
         jarJar.pin(it, "[${project.mechanical_lemon_ui_version},)")
     }
     implementation fg.deobf("com.oierbravo.mechanical_lemon_ui:MechanicalLemonUI:${mechanical_lemon_ui_version}")
@@ -246,167 +188,75 @@ dependencies {
     jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[${mechanical_lemon_lib_version},)") {
         jarJar.pin(it, "[${project.mechanical_lemon_lib_version},)")
     }
+*/
+    //implementation fg.deobf("com.oierbravo.mechanical_lemon_lib:MechanicalLemonLib:${mechanical_lemon_lib_version}")
 
-    implementation fg.deobf("com.oierbravo.mechanical_lemon_lib:MechanicalLemonLib:${mechanical_lemon_lib_version}")
-
-    runtimeOnly fg.deobf("curse.maven:generatorgalore-691049:5318306")
-    runtimeOnly fg.deobf("curse.maven:pipez-443900:4916633")
+    runtimeOnly("curse.maven:generatorgalore-691049:5797691")
+    runtimeOnly("curse.maven:pipez-443900:5609056")
     //annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 }
 
-compileJava.options.encoding = 'UTF-8'
+processResources {
+    def buildProps = project.properties.clone()
+
+    // Replaces FML's magic file.jarVersion string with the correct version at build time.
+    buildProps.put('file', [jarVersion: project.version])
+
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand buildProps
+    }
+}
 compileJava {
     options.compilerArgs = ['-Xdiags:verbose']
 }
 
-/*tasks.named('processResources', ProcessResources).configure {
-    var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
-                             forge_version       : forge_version, forge_version_range: forge_version_range,
-                             loader_version_range: loader_version_range,
-                             modid              : modid, mod_name: display_name, mod_license: mod_license, mod_version: mod_version,
-                             author        : author
-                           ]
-
-    inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
-    }
-}*/
-
-tasks.withType(Jar) {
-    //from tasks.createChangelog.outputFile
-    archiveClassifier = 'slim'
-    manifest {
-        attributes([
-                "Specification-Title"     : modid,
-                "Specification-Vendor"    : author,
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.version,
-                "Implementation-Vendor"   : author,
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs"            : "${modid}.mixins.json"
-        ])
+jar {
+    from('LICENSE') {
+        rename { "${it}_${archivesBaseName}" }
     }
 
-    if(file("./src/main/resources/${modid}.mixins.json").exists()) {
-        manifest {
-            attributes 'MixinConfigs': "${modid}.mixins.json"
+}
+
+publishMods {
+    file = jar.archiveFile
+    changelog = rootProject.file("changes/${minecraft_version}-${mod_version}.md").text
+    type = BETA
+    version = "$minecraft_version-$mod_version"
+    displayName = "$mod_name $mod_version for mc$minecraft_version"
+    modLoaders.add("neoforge")
+
+    var cfToken = System.getenv("CF_TOKEN")
+    if(cfToken != null) {
+        curseforge {
+            accessToken = providers.environmentVariable("CF_TOKEN")
+            projectId = "${curseforge_id}"
+            minecraftVersions.add(minecraft_version)
+            clientRequired = true
+            serverRequired = true
+            optional("jei")
+            optional("kubejs")
+
+        }
+    }
+    var mrToken = System.getenv("MODRINTH_TOKEN")
+    if(mrToken != null) {
+        modrinth {
+            accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+            projectId = "${modrinth_id}"
+            minecraftVersions.add(minecraft_version)
+            optional("jei")
+            optional("kubejs")
+
         }
     }
 }
-task jarJarRelease {
-    group = 'jarjar'
-    doLast {
-        tasks.jarJar {
-            archiveClassifier = ''
-        }
-    }
-    finalizedBy tasks.jarJar
-}
-tasks.jarJar {
-    archiveClassifier = ''
-}
-void addLicense(jarTask) {
-    jarTask.from('LICENSE.txt') {
-        rename { "${it}" }
-    }
-}
-addLicense(jar)
-addLicense(tasks.jarJar)
 
-mixin {
-    add sourceSets.main, "${modid}.refmap.json"
-}
-afterEvaluate {
-    tasks.configureReobfTaskForReobfJar.mustRunAfter(tasks.compileJava)
-    tasks.configureReobfTaskForReobfJarJar.mustRunAfter(tasks.compileJava)
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-}
-compileJava {
-    options.compilerArgs = ['-Xdiags:verbose']
-}
-reobf {
-    jarJar { }
-}
-
-
-jar.finalizedBy('reobfJar')
-tasks.jarJar.finalizedBy('reobfJarJar')
-
-//from components.java
-//def getArtifact = {  ->
-//    from components.java
-//    return jarJar.component(it)
-    // Method body here
-//}
-if(System.getenv('MODRINTH_TOKEN') != null) {
-
-    modrinth {
-        token = System.getenv("MODRINTH_TOKEN")
-        projectId = "trading-station"
-        versionNumber = "${version}"
-        versionName = "${display_name} - v${mod_version} for Minecraft ${minecraft_version}"
-        versionType = "release" // This is the default -- can also be `beta` or `alpha`
-        uploadFile = tasks.jarJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
-        gameVersions = ["${minecraft_version}"] // Must be an array, even with only one version
-        loaders = ["forge"] // Must also be an array - no need to specify this if you're using Loom or ForgeGradle
-        dependencies { // A special DSL for creating dependencies
-            optional.project "kubejs"
-            optional.project "jei"
-            optional.project "jade"
-        }
-        changelog = rootProject.file("changes/${minecraft_version}-${mod_version}.md").text
-        syncBodyFrom = rootProject.file("README.md").text
-    }
-    tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
-
-}
-
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-// publish.dependsOn('reobfJar')
-
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-}
-/*publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
-    }
-}*/
 publishing {
     // other settings of publication
     publications {
         mavenJava(MavenPublication) {
             artifact jar
-        }
-    }
-    repositories {
-        maven {
-            name = "Gitea"
-            url = uri("https://git.fosil.eu/api/packages/oier/maven")
-
-            credentials(HttpHeaderCredentials) {
-                name = "Authorization"
-                value = "token ${System.getenv("FOSIL_TOKEN")}"
-            }
-
-            authentication {
-                header(HttpHeaderAuthentication)
-            }
         }
     }
 }

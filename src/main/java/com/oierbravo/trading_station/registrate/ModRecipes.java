@@ -1,86 +1,70 @@
 package com.oierbravo.trading_station.registrate;
 
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.BiomeRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.MaxHeightRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.MinHeightRequirement;
-import com.oierbravo.trading_station.TradingStation;
+import com.oierbravo.trading_station.ModConstants;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipeSerializer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class ModRecipes {
     public static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS =
-            DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, TradingStation.MODID);
-    public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(ForgeRegistries.RECIPE_TYPES, TradingStation.MODID);
-
-    public static final RegistryObject<RecipeType<TradingRecipe>> TRADING_TYPE =
-            RECIPE_TYPES.register("trading",() -> TradingRecipe.Type.INSTANCE);
-
-    public static final RegistryObject<RecipeSerializer<TradingRecipe>> TRADING_SERIALIZER =
-            SERIALIZERS.register("trading", () -> new TradingRecipe.TradingRecipeSerializer(TradingRecipe.enabledRecipeRequirements));
+            DeferredRegister.create(Registries.RECIPE_SERIALIZER, ModConstants.MODID);
+    public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, ModConstants.MODID);
 
 
-    public static List<TradingRecipe> getAllRecipesForMachine(Level pLevel, BlockEntity pBlockEntity) {
+    public static final Supplier<RecipeType<TradingRecipe>> TRADING_TYPE =
+            RECIPE_TYPES.register("trading",() -> new RecipeType<>() {
+                @Override
+                public String toString() {
+                    return TradingRecipe.Type.ID;
+                }
+            });
+
+    public static final Supplier<TradingRecipeSerializer> TRADING_SERIALIZER =
+            SERIALIZERS.register(TradingRecipe.Type.ID, () -> TradingRecipeSerializer.INSTANCE);
+
+
+    public static List<RecipeHolder<TradingRecipe>> getAllRecipesForMachine(Level pLevel, BlockEntity pBlockEntity) {
         return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
-                .filter((tradingRecipe -> tradingRecipe.checkRequirements(pLevel, pBlockEntity)))
-                .sorted((recipe1, recipe2) -> recipe1.getId().compareNamespaced(recipe2.getId()))
+                .filter((tradingRecipeHolder -> tradingRecipeHolder.value().meetsRequirements(pBlockEntity)))
                 .toList();
-    }
-    public static CompoundTag getItemTagWithRecipeId(ItemStack item, String tradingRecipeId){
-        CompoundTag tag = item.getOrCreateTag();
-        if(!tradingRecipeId.isEmpty()){
-            tag.putString("tradingRecipeId", tradingRecipeId);
-        }
-        return tag;
     }
 
     public static void register(IEventBus eventBus) {
-
         SERIALIZERS.register(eventBus);
-
         RECIPE_TYPES.register(eventBus);
     }
 
 
-    public static Optional<TradingRecipe> findById(Level pLevel, ResourceLocation recipeId) {
+    public static Optional<RecipeHolder<?>> findById(Level pLevel, ResourceLocation recipeId) {
         if(pLevel == null)
             return Optional.empty();
-
-        return pLevel.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
-                .filter(tradingRecipe -> tradingRecipe.matchesId(recipeId))
-                .findFirst();
+        return pLevel.getRecipeManager().byKey(recipeId);
     }
-    public static Optional<TradingRecipe> findById(Level pLevel,String pRecipeId) {
+    public static Optional<RecipeHolder<?>> findById(Level pLevel, String pRecipeId) {
         if(pLevel == null)
             return Optional.empty();
         if(pRecipeId.isEmpty())
             return Optional.empty();
-        ResourceLocation recipeId = ResourceLocation.tryParse(pRecipeId);
-        return findById(pLevel, recipeId);
+        return findById(pLevel, ResourceLocation.tryParse(pRecipeId));
     }
 
-    public static List<TradingRecipe> getAll() {
+    public static List<RecipeHolder<TradingRecipe>> getAll() {
         RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
-        List<TradingRecipe> list = rm.getAllRecipesFor(ModRecipes.TRADING_TYPE.get());
-        return rm.getAllRecipesFor(ModRecipes.TRADING_TYPE.get());
+        return rm.getAllRecipesFor(TradingRecipe.Type.INSTANCE);
     }
 }

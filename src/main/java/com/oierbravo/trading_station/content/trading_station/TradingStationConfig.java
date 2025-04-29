@@ -1,17 +1,20 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.createmod.catnip.config.ConfigBase;
+import org.jetbrains.annotations.NotNull;
 
-public class TradingStationConfig {
-    public static ForgeConfigSpec.IntValue PROGRESS_PER_TICK;
+public class TradingStationConfig extends ConfigBase {
 
-    public static void registerCommonConfig(ForgeConfigSpec.Builder COMMON_BUILDER) {
-       COMMON_BUILDER.comment("Settings for the trading_station").push("trading_station");
-        PROGRESS_PER_TICK = COMMON_BUILDER
-                .comment("How much progress per tick")
-                .defineInRange("progressPerTick", 1, 1, Integer.MAX_VALUE);
-        COMMON_BUILDER.pop();
+    public final ConfigBase.ConfigInt progressPerTick = i(1,1,"progressPerTick", Comments.progressPerTick);
+
+
+    private static class Comments {
+        static String progressPerTick = "How much progress per tick.";
     }
 
+    @Override
+    public @NotNull String getName() {
+        return "Trading Station";
+    }
 
 }

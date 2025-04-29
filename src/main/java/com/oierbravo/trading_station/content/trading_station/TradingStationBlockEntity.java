@@ -1,51 +1,40 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.mechanical_lemon_lib.jade.IHavePercent;
 import com.oierbravo.trading_station.content.trading_recipe.IHaveMachineId;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
-import com.oierbravo.trading_station.registrate.ModMessages;
-import com.oierbravo.trading_station.registrate.ModRecipes;
+import com.oierbravo.trading_station.infrastructure.config.MConfigs;
+import com.oierbravo.trading_station.registrate.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.util.Lazy;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider, ITradingStationBlockEntity, IHaveMachineId, IHavePercent {
+public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider, ITradingStationBlockEntity, IHaveMachineId {
 
 
     private CompoundTag updateTag;
@@ -53,31 +42,24 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     public final ItemStackHandler outputItems = createOutputItemHandler();
 
     public final ItemStackHandler targetItemHandler = createTargetItemHandler();
-    private final LazyOptional<IItemHandler> inputItemHandler = LazyOptional.of(() -> inputItems);
-    private final LazyOptional<IItemHandler> outputItemHandler = LazyOptional.of(() -> outputItems);
+    private final Lazy<IItemHandler> inputItemHandler = Lazy.of(() -> inputItems);
+    private final Lazy<IItemHandler> outputItemHandler = Lazy.of(() -> outputItems);
 
     public int progress = 0;
     public int maxProgress = 1;
 
-    private int lastProgress = 0;
     private boolean isWorking = false;
-    private BlockState lastBlockState;
 
     protected final ContainerData containerData;
 
     byte currentRedstoneMode = 0;
-
-    Optional<TradingRecipe> targetedRecipe;
-    String targetedRecipeId;
 
     protected boolean inputLocked = false;
 
     public TradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
         updateTag = getPersistentData();
-        lastBlockState = this.getBlockState();
         containerData = createContainerData();
-        targetedRecipe = Optional.empty();
     }
     public ContainerData createContainerData(){
         return new ContainerData(){
@@ -115,13 +97,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
             protected void onContentsChanged(int slot) {
                 setChanged();
                 resetProgress();
-                if(!level.isClientSide()) {
-                    ModMessages.sendToClients(new ItemStackSyncS2CPacket(slot,this.getStackInSlot(0), worldPosition, ItemStackSyncS2CPacket.SlotType.TARGET));
-                }
-                if(!level.isClientSide()) {
-                    level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-                }
-               // clientSync();
             }
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
@@ -143,26 +118,18 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
 
     private ItemStackHandler createInputItemHandler() {
         return new ItemStackHandler(2) {
-
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
-                //resetProgress();
-                /*if(!level.isClientSide()) {
-                    ModMessages.sendToClients(new ItemStackSyncS2CPacket(slot,this.getStackInSlot(0), worldPosition, ItemStackSyncS2CPacket.SlotType.INPUT));
-                }
-                if(!level.isClientSide()) {
-                    level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-                }*/
             }
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
                 if(!isLocked())
                     return true;
-                Optional<TradingRecipe> recipe = getRecipe();
+                Optional<RecipeHolder<?>> recipe = getRecipe();
                 if(recipe.isEmpty())
                     return true;
-                return recipe.get().matchIngredient(slot, stack);
+                return ((TradingRecipe) recipe.get().value()).matchIngredient(slot, stack);
             }
         };
     }
@@ -172,27 +139,10 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     private ItemStackHandler createOutputItemHandler() {
         return new ItemStackHandler(1) {
             @Override
-            protected void onContentsChanged(int slot) {
-                setChanged();
-            }
-            @Override
             public boolean isItemValid(int slot, ItemStack stack) {
                 return canProcess(stack) && super.isItemValid(slot, stack);
             }
         };
-    }
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if(side == Direction.UP)
-            return  super.getCapability(cap, side);
-        if(cap == ForgeCapabilities.ITEM_HANDLER){
-            if(side == Direction.DOWN)
-                return outputItemHandler.cast();
-
-            return inputItemHandler.cast();
-        }
-
-        return super.getCapability(cap, side);
     }
 
     @Override
@@ -201,70 +151,60 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         inputItemHandler.invalidate();
         outputItemHandler.invalidate();
     }
-    public LazyOptional<IItemHandler>  getInputItemHandler(){
-        return inputItemHandler;
+    public ItemStackHandler  getInputItemHandler(){
+        return inputItems;
     }
-    public LazyOptional<IItemHandler>  getOutputItemHandler(){
-        return outputItemHandler;
+    public ItemStackHandler getOutputItemHandler(){
+        return outputItems;
     }
-    @Override
-    public void onLoad() {
-        super.onLoad();
-    }
+    public ItemStackHandler getTargetItemHandler(){ return targetItemHandler;}
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        inputItemHandler.invalidate();
-        outputItemHandler.invalidate();
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.TRADING_STATION_BLOCK_ENTITY.get(),
+                (be, context) -> {
+                    Direction localDir = be.getBlockState().getValue(TradingStationBlock.HORIZONTAL_FACING);
+                    if(context != null && localDir == context.getCounterClockWise())
+                        return be.getInputItemHandler();
+                    if(context != null && localDir == context.getClockWise())
+                        return be.getOutputItemHandler();
+                    if(context == null)
+                        return null;
+                    return null;
+                }
+        );
     }
-
     @Override
-    protected void saveAdditional(@NotNull CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("input", inputItems.serializeNBT());
-        tag.put("output", outputItems.serializeNBT());
-        tag.put("target", targetItemHandler.serializeNBT());
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.put("input", inputItems.serializeNBT(registries));
+        tag.put("output", outputItems.serializeNBT(registries));
+        tag.put("target", targetItemHandler.serializeNBT(registries));
         tag.putInt("progress", progress);
         tag.putInt("maxProgress", maxProgress);
         tag.putByte("redstoneMode", currentRedstoneMode);
         tag.putBoolean("isWorking", isWorking);
-        if(targetedRecipeId != null){
-            tag.putString("targetedRecipeId", targetedRecipeId);
-        }
         tag.putBoolean("inputLocked",inputLocked);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        inputItems.deserializeNBT(tag.getCompound("input"));
-        outputItems.deserializeNBT(tag.getCompound("output"));
-        targetItemHandler.deserializeNBT(tag.getCompound("target"));
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag,registries);
+        inputItems.deserializeNBT(registries,tag.getCompound("input"));
+        outputItems.deserializeNBT(registries,tag.getCompound("output"));
+        targetItemHandler.deserializeNBT(registries,tag.getCompound("target"));
         progress = tag.getInt("progress");
         maxProgress = tag.getInt("maxProgress");
         currentRedstoneMode = tag.getByte("redstoneMode");
         isWorking = tag.getBoolean("isWorking");
-        setTargetedRecipeById(tag.getString("targetedRecipeId"));
         inputLocked = tag.getBoolean("inputLocked");
     }
-
-    public void drops() {
-        SimpleContainer inventory = new SimpleContainer(inputItems.getSlots() + 1);
-        for (int i = 0; i < inputItems.getSlots(); i++) {
-            inventory.setItem(i, inputItems.getStackInSlot(i));
-        }
-        inventory.setItem(inputItems.getSlots(), inputItems.getStackInSlot(0));
-
-        Containers.dropContents(this.level, this.worldPosition, inventory);
-    }
-
 
     public void resetProgress() {
         this.progress = 0;
         this.maxProgress = 1;
     }
-
 
     public void tick(Level pLevel, BlockPos pPos, BlockState pState) {
 
@@ -291,7 +231,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     public void setWorking(boolean value){
             isWorking = value;
             BlockState pState = getBlockState().setValue(TradingStationBlock.LIT, isWorking());
-
             getLevel().setBlock(getBlockPos(), pState, 2);
             setChanged(getLevel(), getBlockPos(), pState);
     }
@@ -301,92 +240,12 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     }
 
     protected void updateProgress(){
-        this.progress += TradingStationConfig.PROGRESS_PER_TICK.get();
+        this.progress += MConfigs.server().tradingStation.progressPerTick.get();
         setChanged();
-
-    }
-    public boolean isPowered() {
-        if(currentRedstoneMode == REDSTONE_MODES.IGNORE.ordinal())
-            return true;
-        if(currentRedstoneMode == REDSTONE_MODES.LOW.ordinal())
-            return !this.getLevel().getBlockState(getBlockPos())
-                    .getValue(BlockStateProperties.POWERED);
-
-        return this.getLevel().getBlockState(getBlockPos())
-                .getValue(BlockStateProperties.POWERED);
-    }
-
-
-
-
-
-    public boolean canCraftItem() {
-        SimpleContainer inputInventory = getInputInventory();
-        Optional<TradingRecipe> match = getRecipe();
-
-        if(!match.isPresent()) {
-            return false;
-        }
-        ArrayList<ItemStack> currentStackList = new ArrayList<>();
-        for(int i = 0; i< 2; i++){
-            ItemStack currentStack = inputInventory.getItem(i);
-            if(!currentStack.isEmpty())
-                currentStackList.add(currentStack);
-        }
-        if(match.get().getIngredients().size() != currentStackList.size()){
-            return false;
-        }
-        return hasEnoughInputItems(inputInventory, match.get().getIngredients())
-                && hasEnoughOutputSpace(this.outputItems, match.get().getResult());
     }
 
     public boolean canProcess(ItemStack stack) {
-
         return getRecipe().isPresent();
-    }
-    protected boolean hasEnoughInputItems(SimpleContainer inventory, NonNullList<Ingredient> ingredients){
-        int enough = 0;
-        for(int ingredientIndex = 0; ingredientIndex < ingredients.size();ingredientIndex ++){
-            Ingredient ingredient = ingredients.get(ingredientIndex);
-            for(int slot = 0; slot < inventory.getContainerSize(); slot++){
-                if(ingredient.test(inventory.getItem(slot))){
-                    if(inventory.getItem(slot).getCount() >= ingredient.getItems()[0].getCount() )
-                        enough++;
-                }
-            }
-        }
-        return ingredients.size() == enough;
-    }
-
-    protected boolean hasEnoughOutputSpace(ItemStackHandler stackHandler,ItemStack resultItemStack){
-        return stackHandler.getStackInSlot(0).isEmpty() || stackHandler.getStackInSlot(0).is(resultItemStack.getItem()) &&  stackHandler.getStackInSlot(0).getMaxStackSize() - stackHandler.getStackInSlot(0).getCount()  >= resultItemStack.getCount() ;
-    }
-
-    @Override
-    public CompoundTag getUpdateTag() {
-        return writeClient(new CompoundTag());
-    }
-
-
-    @Nullable
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag) {
-        readClient(tag);
-    }
-
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-        CompoundTag tag = packet.getTag();
-        readClient(tag == null ? new CompoundTag() : tag);
-    }
-
-    public int getProgressPercent() {
-        return this.progress * 100 / this.maxProgress;
     }
 
     @Override
@@ -399,39 +258,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return this.maxProgress;
     }
 
-    @Override
-    public void craftItem() {
-        SimpleContainer inputInventory = getInputInventory();
-
-        Optional<TradingRecipe> recipe = getRecipe();
-
-        if(recipe.isPresent()){
-            for (int i = 0; i < recipe.get().getIngredients().size(); i++) {
-                Ingredient ingredient = recipe.get().getIngredients().get(i);
-
-                for (int slot = 0; slot < getInputItems().getSlots(); slot++) {
-                    ItemStack itemStack = getInputItems().getStackInSlot(slot);
-                    if(ingredient.test(itemStack)){
-                        getInputItems().extractItem(slot,ingredient.getItems()[0].getCount(),false);
-                        inputInventory.setChanged();
-                    }
-                }
-            }
-            getOutputItems().insertItem(0, recipe.get().getResult(), false);
-        }
-
-        this.resetProgress();
-    }
-
-    @Override
-    public ItemStackHandler getInputItems() {
-        return inputItems;
-    }
-
-    @Override
-    public ItemStackHandler getOutputItems() {
-        return outputItems;
-    }
 
     @Override
     public void setRedstoneMode(byte mode) {
@@ -442,22 +268,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     @Override
     public byte getCurrentRedstoneMode() {
         return currentRedstoneMode;
-    }
-
-
-    public void setItemStack(int slot, ItemStack itemStack,ItemStackSyncS2CPacket.SlotType slotType) {
-        if(slotType == ItemStackSyncS2CPacket.SlotType.INPUT)
-            inputItems.setStackInSlot(slot,itemStack);
-        else if (slotType == ItemStackSyncS2CPacket.SlotType.OUTPUT)
-            outputItems.setStackInSlot(slot,itemStack);
-        else if (slotType == ItemStackSyncS2CPacket.SlotType.TARGET)
-            targetItemHandler.setStackInSlot(slot,itemStack);
-
-    }
-
-    @Override
-    public LazyOptional<IEnergyStorage> getEnergyStorageHandler() {
-        return LazyOptional.empty();
     }
 
     @Override
@@ -477,67 +287,25 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
         return TradingStationMenu.create(pContainerId, pPlayerInventory, this, this.containerData);
 
     }
-    public void sendToMenu(FriendlyByteBuf buffer) {
-        buffer.writeBlockPos(this.getBlockPos());
-        buffer.writeNbt(this.getUpdateTag());
+    public void sendToMenu(RegistryFriendlyByteBuf buffer) {
+        buffer.writeBlockPos(getBlockPos());
+        buffer.writeNbt(getUpdateTag(buffer.registryAccess()));
     }
 
     @Override
-    public void clearTargetedRecipe() {
-        targetedRecipeId = "";
-        targetItemHandler.setStackInSlot(0, ItemStack.EMPTY);
+    public void setChangedInternal() {
         setChanged();
     }
 
-    public void setPreferedItem(ItemStack itemStack) {
-        this.targetItemHandler.setStackInSlot(0,itemStack);
-    }
 
 
-    public ItemStack getTargetItemStack() {
-        return targetItemHandler.getStackInSlot(0);
-    }
-    public ItemStackHandler getTargetItemHandler(){ return targetItemHandler;}
 
-    @Override
-    public void setTargetedRecipeById(ResourceLocation recipeId){
-        Optional<TradingRecipe> recipe = ModRecipes.findById(this.getLevel(),recipeId);
-        targetedRecipe = recipe;
-        recipe.ifPresent(tradingRecipe -> targetItemHandler.setStackInSlot(0, tradingRecipe.getResultWithRecipeId()));
-        targetedRecipeId = recipeId.toString();
-        setChanged();
-    }
-    public void setTargetedRecipeById(String recipeId){
-        ResourceLocation resourceLocation = ResourceLocation.tryParse(recipeId);
-        this.setTargetedRecipeById(resourceLocation);
+    public final void readClient(CompoundTag tag,HolderLookup.Provider registries) {
+        loadAdditional(tag,registries);
     }
 
-    @Override
-    public String getTargetedRecipeId() {
-        if(targetedRecipe.isPresent())
-            return targetedRecipe.get().getId().toString();
-        if(updateTag.contains("targetedRecipeId"))
-            return updateTag.getString("targetedRecipeId");
-        return "";
-    }
-
-     public Optional<TradingRecipe> getRecipe(){
-        if(targetedRecipeId == null)
-            return Optional.empty();
-        if(!targetedRecipeId.isEmpty())
-            targetedRecipe = ModRecipes.findById(this.level,targetedRecipeId);
-        return targetedRecipe;
-    };
-
-    public int getProcessingTime(){
-        return getRecipe().map(TradingRecipe::getProcessingTime).orElse(1);
-    }
-    public final void readClient(CompoundTag tag) {
-        load(tag);
-    }
-
-    public CompoundTag writeClient(CompoundTag tag) {
-        saveAdditional(tag);
+    public CompoundTag writeClient(CompoundTag tag, HolderLookup.Provider registries) {
+        saveAdditional(tag, registries);
         return tag;
     }
 
@@ -555,4 +323,30 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
     public boolean isLocked() {
         return inputLocked;
     }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return writeClient(new CompoundTag(), registries);
+    }
+
+
+    @Nullable
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        readClient(tag, registries);
+    }
+
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
+        CompoundTag tag = pkt.getTag();
+        readClient(tag == null ? new CompoundTag() : tag, registries);
+    }
+
 }

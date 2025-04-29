@@ -1,6 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.mechanical_lemon_ui.foundation.gui.menu.MenuBase;
+import com.oierbravo.mechanicals_ui.foundation.gui.menu.MenuBase;
 import com.oierbravo.trading_station.foundation.gui.TradingRecipeSlot;
 import com.oierbravo.trading_station.registrate.ModMenus;
 import net.minecraft.client.Minecraft;
@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
@@ -16,17 +17,17 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
     public final ContainerData containerData;
 
 
-    public TradingStationMenu(MenuType<?> type, int id, Inventory inv, FriendlyByteBuf extraData) {
+    public TradingStationMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData) {
         this(type, id, inv, extraData, new SimpleContainerData(3));
     }
 
-    public TradingStationMenu(MenuType<?> type, int id, Inventory inv, FriendlyByteBuf extraData, ContainerData pData) {
+    public TradingStationMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData, ContainerData pData) {
         super(type, id, inv, extraData);
         this.containerData = pData;
         checkContainerSize(inv, 3);
@@ -48,15 +49,16 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
 
     }
 
-    @Override
-    protected ITradingStationBlockEntity createOnClient(FriendlyByteBuf extraData) {
-        BlockPos readBlockPos = extraData.readBlockPos();
-        CompoundTag readNbt = extraData.readNbt();
+    public static TradingStationMenu create(int id, Inventory inv, ITradingStationBlockEntity be, ContainerData containerData) {
+        return new TradingStationMenu(ModMenus.TRADING_STATION.get(), id, inv, be, containerData);
+    }
 
+    @Override
+    protected ITradingStationBlockEntity createOnClient(RegistryFriendlyByteBuf extraData) {
         ClientLevel world = Minecraft.getInstance().level;
-        BlockEntity blockEntity = world.getBlockEntity(readBlockPos);
+        BlockEntity blockEntity = world.getBlockEntity(extraData.readBlockPos());
         if (blockEntity instanceof ITradingStationBlockEntity tradingStationBlockEntity) {
-            tradingStationBlockEntity.readClient(readNbt);
+            tradingStationBlockEntity.readClient(extraData.readNbt(), extraData.registryAccess());
             return tradingStationBlockEntity;
         }
 
@@ -74,13 +76,16 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
 
         addPlayerSlots(8, 86);
 
-        addSlot(new SlotItemHandler(contentHolder.getInputItems(), 0, 20, 38));
-        addSlot(new SlotItemHandler(contentHolder.getInputItems(), 1, 43, 38));
+        addSlot(new SlotItemHandler(contentHolder.getInputItemHandler(), 0, 20, 38));
+        addSlot(new SlotItemHandler(contentHolder.getInputItemHandler(), 1, 43, 38));
 
-        contentHolder.getOutputItemHandler().ifPresent((iItemHandler -> {
+        //Todo: check if correct
+        addSlot(new SlotItemHandler(contentHolder.getOutputItemHandler(),0,132,38));
+
+        /*contentHolder.getOutputItemHandler().ifPresent((iItemHandler -> {
             addSlot(new SlotItemHandler(iItemHandler,0,132,38));
-        }));
-        addSlot(new TradingRecipeSlot( this.contentHolder.getTargetItemHandler(),0,85,28));
+        }));*/
+        addSlot(new SlotItemHandler( this.contentHolder.getTargetItemHandler(),0,85,28));
     }
 
     @Override
@@ -139,8 +144,6 @@ public class TradingStationMenu extends MenuBase<ITradingStationBlockEntity> {
         return copyOfSourceStack;
     }
 
-    public static TradingStationMenu create(int id, Inventory inv, ITradingStationBlockEntity be, ContainerData containerData) {
-        return new TradingStationMenu(ModMenus.TRADING_STATION.get(), id, inv, be, containerData);
-    }
+
 
 }

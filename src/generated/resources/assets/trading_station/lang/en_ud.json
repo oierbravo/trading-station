@@ -3,9 +3,12 @@
   "block.trading_station.powered_trading_station_unbreakable": ")ǝןqɐʞɐǝɹqu∩( uoıʇɐʇS buıpɐɹ⟘ pǝɹǝʍoԀ",
   "block.trading_station.trading_station": "uoıʇɐʇS buıpɐɹ⟘",
   "block.trading_station.trading_station_unbreakable": ")ǝןqɐʞɐǝɹqu∩( uoıʇɐʇS buıpɐɹ⟘",
-  "config.jade.plugin_trading_station.trading_station_data": "ɐʇɐp uoıʇɐʇS buıpɐɹ⟘",
-  "itemGroup.trading_station": "uoıʇɐʇS buıpɐɹ⟘",
+  "config.jade.plugin_trading_station.data": "ɐʇɐp uoıʇɐʇS buıpɐɹ⟘",
+  "mechanicals.ui.recipe_requirement.machine_id.tooltip.missing": "ǝuıɥɔɐɯ ʇɔǝɹɹoɔuI",
+  "mechanicals.ui.recipe_requirement.machine_id.tooltip.title": ":sǝuıɥɔɐW",
+  "mechanicals.ui.recipe_requirement.machine_id.tooltip.value": "%s",
   "trading_station.confirm.button": "ɯɹıɟuoƆ",
+  "trading_station.itemGroup:main": "uoıʇɐʇS buıpɐɹ⟘",
   "trading_station.screen.lock.lock": "ǝdıɔǝɹ oʇ sʇoןs ʇnduı ʞɔoꞀ",
   "trading_station.screen.lock.unlock": "sʇoןs ʇnduı ʞɔoןu∩",
   "trading_station.screen.redstone.high": "ɥbıH :ǝuoʇspǝᴚ",
@@ -17,6 +20,5 @@
   "trading_station.select_target.title": "ʇǝbɹɐʇ ʇndʇno uɐ ʇɔǝןǝS",
   "trading_station.tooltip.progress": "%d%% :ssǝɹboɹԀ",
   "trading_station.trading.recipe": "ǝdıɔǝɹ buıpɐɹ⟘",
-  "trading_station.trading.recipe.biome": "pǝɹınbǝɹ ǝɯoıq %s",
-  "trading_station.trading.recipe.biomeRequired": "ʇuǝɯıɹǝnbǝɹ ǝɯoıq ɔıɟıɔǝdS"
+  "trading_station.ui.recipe_requirement.machine_id.any": "ʎuⱯ"
 }

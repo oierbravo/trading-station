@@ -1,40 +1,32 @@
 package com.oierbravo.trading_station.content.trading_station.powered;
 
-import com.oierbravo.mechanical_lemon_lib.foundation.energy.AbstractEnergyStorage;
+import com.oierbravo.mechanicals.foundation.energy.AbstractEnergyStorage;
+import com.oierbravo.trading_station.content.trading_station.TradingStationBlock;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
+import com.oierbravo.trading_station.infrastructure.config.MConfigs;
+import com.oierbravo.trading_station.registrate.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity {
 
     private final AbstractEnergyStorage energyStorage = createEnergyStorage();
-    private LazyOptional<IEnergyStorage> lazyEnergyHandler = LazyOptional.empty();
-
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if(cap == ForgeCapabilities.ENERGY) {
-            return lazyEnergyHandler.cast();
-        }
-
-        return super.getCapability(cap, side);
-    }
 
     public PoweredTradingStationBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);
     }
     private AbstractEnergyStorage createEnergyStorage() {
-        return new AbstractEnergyStorage(PoweredTradingStationConfig.ENERGY_CAPACITY.get(), PoweredTradingStationConfig.ENERGY_TRANSFER.get()) {
+        return new AbstractEnergyStorage(MConfigs.server().poweredTradingStation.energyCapacity.get(), MConfigs.server().poweredTradingStation.energyTransfer.get()) {
             @Override
             public void onEnergyChanged() {
                 setChanged();
@@ -42,39 +34,47 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
             }
         };
     }
-    public IEnergyStorage getEnergyStorage() {
-        return this.energyStorage;
-    }
+
     @Override
-    public LazyOptional<IEnergyStorage> getEnergyStorageHandler() {
-
-        return lazyEnergyHandler;
+    public IEnergyStorage getEnergyStorageHandler() {
+        return energyStorage;
     }
 
+    @Override
     public void setRemoved() {
         super.setRemoved();
+        invalidateCapabilities();
     }
-    public void onLoad() {
-        super.onLoad();
-        lazyEnergyHandler = LazyOptional.of(() -> energyStorage);
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.POWERED_TRADING_STATION_BLOCK_ENTITY.get(),
+                (be, context) -> {
+                    Direction localDir = be.getBlockState().getValue(TradingStationBlock.HORIZONTAL_FACING);
+                    if(context != null && localDir == context.getCounterClockWise())
+                        return be.getInputItemHandler();
+                    if(context != null && localDir == context.getClockWise())
+                        return be.getOutputItemHandler();
+                    if(context == null)
+                        return null;
+                    return null;
+                }
+        );
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.POWERED_TRADING_STATION_BLOCK_ENTITY.get(), (be, context) -> be.getEnergyStorageHandler());
+
+
     }
 
     @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        lazyEnergyHandler.invalidate();
-    }
-
-    @Override
-    protected void saveAdditional(@NotNull CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag,registries);
         tag.putInt("energy", energyStorage.getEnergyStored());
 
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag,registries);
         energyStorage.setEnergy(tag.getInt("energy"));
 
     }
@@ -91,11 +91,11 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
 
     @Override
     protected void updateProgress() {
-        this.progress += PoweredTradingStationConfig.PROGRESS_PER_TICK.get();
+        this.progress += MConfigs.server().poweredTradingStation.progressPerTick.get();
         extractEnergy();
     }
     private void extractEnergy() {
-        this.energyStorage.extractEnergy(PoweredTradingStationConfig.ENERGY_PER_TICK.get(), false);
+        this.energyStorage.extractEnergy(MConfigs.server().poweredTradingStation.energyPerTick.get(), false);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class PoweredTradingStationBlockEntity extends TradingStationBlockEntity 
         if(level == null)
             return false;
 
-        if(this.energyStorage.getEnergyStored() < PoweredTradingStationConfig.ENERGY_PER_TICK.get()){
+        if(this.energyStorage.getEnergyStored() < MConfigs.server().poweredTradingStation.energyPerTick.get()){
             return false;
         }
         return super.canCraftItem();

@@ -1,13 +1,10 @@
 package com.oierbravo.trading_station.compat.jei;
 
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirementType;
-import com.oierbravo.mechanical_lemon_lib.utility.Components;
-import com.oierbravo.mechanical_lemon_lib.utility.LibLang;
-import com.oierbravo.mechanical_lemon_ui.foundation.utility.Color;
-import com.oierbravo.trading_station.TradingStation;
+import com.oierbravo.mechanicals.compat.jei.RecipeRequirementRenderer;
+import com.oierbravo.mechanicals.foundation.gui.MechanicalGUITextures;
+import com.oierbravo.mechanicals.foundation.ingredient.CountableIngredient;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.foundation.util.ModLang;
+import com.oierbravo.trading_station.ModLang;
 import com.oierbravo.trading_station.registrate.ModBlocks;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -24,17 +21,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 
-import static com.oierbravo.trading_station.compat.jei.JEIPlugin.TRAING_RECIPE;
+import static com.oierbravo.trading_station.compat.jei.TradingStationJEIPlugin.TRADING_RECIPE;
 
 public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
-    public final static ResourceLocation UID = new ResourceLocation(TradingStation.MODID, "trading");
     //private final LoadingCache<Integer, IDrawableAnimated> cachedArrows;
     private final IDrawable background;
 
@@ -63,7 +56,7 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
 
     @Override
     public RecipeType<TradingRecipe> getRecipeType() {
-        return TRAING_RECIPE;
+        return TRADING_RECIPE;
     }
 
     @Override
@@ -73,12 +66,12 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
 
     @Override
     public int getWidth() {
-        return 176;
+        return 180;
     }
 
     @Override
     public int getHeight() {
-        return 51;
+        return 70;
     }
 
     @Override
@@ -88,45 +81,31 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
 
     @Override
     public void setRecipe(@Nonnull IRecipeLayoutBuilder builder, @Nonnull TradingRecipe recipe, @Nonnull IFocusGroup focusGroup) {
-        NonNullList<Ingredient> ingredients = recipe.getIngredients();
+        NonNullList<CountableIngredient> ingredients = recipe.getCountableIngredients();
         for(int index = 0; index < ingredients.size(); index++) {
-            Ingredient ing = ingredients.get(index);
-            builder.addSlot(RecipeIngredientRole.INPUT, 41 + index * 18, 2)
-                    .addIngredients(ingredients.get(index))
+            builder.addSlot(RecipeIngredientRole.INPUT, 0 + index * 18, 0)
+                    .addItemStack(ingredients.get(index).asItemStack())
+                    .setStandardSlotBackground()
                     .setSlotName("input_" + index);
         }
 
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 113, 2)
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 35, 23)
                 .addItemStack(recipe.getResult())
+                .setStandardSlotBackground()
                 .setSlotName("output");
     }
 
     @Override
     public void draw(TradingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         IRecipeCategory.super.draw(recipe, recipeSlotsView, graphics, mouseX, mouseY);
-        drawRequirements(graphics, recipe,2, 25);
-        drawProcessingTime(recipe, graphics, 81,4);
-
+        drawRequirements(graphics, recipe,60, 2);
+        drawProcessingTime(recipe, graphics, 16,38);
+        MechanicalGUITextures.JEI_DOWN_RIGHT_ARROW.render(graphics, 16, 23);
 
     }
 
     private void drawRequirements( GuiGraphics pGuiGraphics,TradingRecipe recipe, int pX, int pY) {
-
-        MutableComponent recipeRequirementComponent = Components.empty();
-        Map<RecipeRequirementType<?>, RecipeRequirement> recipeRequirements = recipe.getRecipeRequirements();
-        recipeRequirements.forEach((recipeRequirementType, recipeRequirement) -> {
-            if(recipeRequirement.isPresent())
-                recipeRequirementComponent.append(recipeRequirement.toRequirementComponent());
-
-        });
-        Minecraft minecraft = Minecraft.getInstance();
-        Font fontRenderer = minecraft.font;
-        if(recipeRequirements.isEmpty())
-          pGuiGraphics.drawString(fontRenderer, LibLang.translate("ui.recipe_requirement.none.tooltip").component(),pX, pY, Color.BLACK.getRGB(), false);
-        int yOffset = 10;
-        for(int count = 0; count < recipeRequirementComponent.getSiblings().size(); count++){
-            pGuiGraphics.drawString(fontRenderer, recipeRequirementComponent.getSiblings().get(count),pX, pY + count * yOffset, Color.BLACK.getRGB(), false);
-        }
+        RecipeRequirementRenderer.drawRequirements(recipe,pGuiGraphics, pX,pY);
     }
 
     protected void drawProcessingTime(TradingRecipe recipe, GuiGraphics graphics, int x, int y) {

@@ -3,9 +3,12 @@
   "block.trading_station.powered_trading_station_unbreakable": "Powered Trading Station (Unbreakable)",
   "block.trading_station.trading_station": "Trading Station",
   "block.trading_station.trading_station_unbreakable": "Trading Station (Unbreakable)",
-  "config.jade.plugin_trading_station.trading_station_data": "Trading Station data",
-  "itemGroup.trading_station": "Trading Station",
+  "config.jade.plugin_trading_station.data": "Trading Station data",
+  "mechanicals.ui.recipe_requirement.machine_id.tooltip.missing": "Incorrect machine",
+  "mechanicals.ui.recipe_requirement.machine_id.tooltip.title": "Machines:",
+  "mechanicals.ui.recipe_requirement.machine_id.tooltip.value": "%s",
   "trading_station.confirm.button": "Confirm",
+  "trading_station.itemGroup:main": "Trading Station",
   "trading_station.screen.lock.lock": "Lock input slots to recipe",
   "trading_station.screen.lock.unlock": "Unlock input slots",
   "trading_station.screen.redstone.high": "Redstone: High",
@@ -17,6 +20,5 @@
   "trading_station.select_target.title": "Select an output target",
   "trading_station.tooltip.progress": "Progress: %d%%",
   "trading_station.trading.recipe": "Trading recipe",
-  "trading_station.trading.recipe.biome": "%s biome required",
-  "trading_station.trading.recipe.biomeRequired": "Specific biome requeriment"
+  "trading_station.ui.recipe_requirement.machine_id.any": "Any"
 }
