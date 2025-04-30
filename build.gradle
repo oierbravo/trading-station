@@ -226,13 +226,13 @@ publishMods {
             minecraftVersions.add(minecraft_version)
             clientRequired = true
             serverRequired = true
-            required("mechanicals-lib")
+            requires("mechanicals-lib")
             optional("jei")
             optional("kubejs")
 
         }
     }
-    /*var mrToken = System.getenv("MODRINTH_TOKEN")
+    var mrToken = System.getenv("MODRINTH_TOKEN")
     if(mrToken != null) {
         modrinth {
             accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -242,7 +242,7 @@ publishMods {
             optional("kubejs")
 
         }
-    }*/
+    }
 }
 
 publishing {
