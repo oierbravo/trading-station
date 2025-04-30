@@ -45,6 +45,7 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
                 .orElse(null);
     }
 
+
     public TradingRecipeCategory(IGuiHelper helper) {
         this.background = new IDrawable() {
             @Override
