@@ -3,8 +3,8 @@ package com.oierbravo.trading_station.compat.jei;
 import com.oierbravo.mechanicals.compat.jei.RecipeRequirementRenderer;
 import com.oierbravo.mechanicals.foundation.gui.MechanicalGUITextures;
 import com.oierbravo.mechanicals.foundation.ingredient.CountableIngredient;
-import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.ModLang;
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.registrate.ModBlocks;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -21,7 +21,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 
@@ -32,6 +35,15 @@ public class TradingRecipeCategory implements IRecipeCategory<TradingRecipe> {
     private final IDrawable background;
 
     private final IDrawable icon;
+
+    public @Nullable ResourceLocation getRegistryName(TradingRecipe recipe) {
+        assert Minecraft.getInstance().level != null;
+        return Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(TradingRecipe.Type.INSTANCE).stream()
+                .filter(recipeHolder -> recipeHolder.value().equals(recipe))
+                .map(RecipeHolder::id)
+                .findFirst()
+                .orElse(null);
+    }
 
     public TradingRecipeCategory(IGuiHelper helper) {
         this.background = new IDrawable() {
