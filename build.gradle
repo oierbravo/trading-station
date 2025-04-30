@@ -232,7 +232,7 @@ publishMods {
 
         }
     }
-    var mrToken = System.getenv("MODRINTH_TOKEN")
+    /*var mrToken = System.getenv("MODRINTH_TOKEN")
     if(mrToken != null) {
         modrinth {
             accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -242,11 +242,20 @@ publishMods {
             optional("kubejs")
 
         }
-    }
+    }*/
 }
 
 publishing {
-    // other settings of publication
+    repositories {
+        maven {
+            name = "fosilRepository"
+            url = uri("https://maven.fosil.eu/releases")
+            credentials {
+                username = System.getenv()["MAVEN_USER"]
+                password = System.getenv()["MAVEN_PASS"]
+            }
+        }
+    }
     publications {
         mavenJava(MavenPublication) {
             artifact jar
