@@ -137,6 +137,10 @@ repositories {
             includeGroup "dev.architectury"
         }
     }
+    maven {
+        url "https://maven.fosil.eu/releases"
+
+    }
     mavenLocal()
     flatDir {
         dirs 'libs'
@@ -146,7 +150,7 @@ repositories {
 dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
 
-    jarJar(implementation("com.oierbravo.mechanicals:Mechanicals:${minecraft_version}-${mechanicals}"))
+    implementation("com.oierbravo.mechanicals:Mechanicals:${minecraft_version}-${mechanicals}")
     jarJar(implementation("com.oierbravo.mechanicals_ui:MechanicalsUI:${minecraft_version}-${mechanicals_ui}"))
 
 
@@ -178,18 +182,6 @@ dependencies {
         interfaceInjectionData("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
     }
     implementation("curse.maven:jade-324717:${jade_id}")
-
-
-    /*jarJar(group: 'com.oierbravo.mechanical_lemon_ui', name: 'MechanicalLemonUI', version: "[${mechanical_lemon_ui_version},)") {
-        jarJar.pin(it, "[${project.mechanical_lemon_ui_version},)")
-    }
-    implementation fg.deobf("com.oierbravo.mechanical_lemon_ui:MechanicalLemonUI:${mechanical_lemon_ui_version}")
-
-    jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[${mechanical_lemon_lib_version},)") {
-        jarJar.pin(it, "[${project.mechanical_lemon_lib_version},)")
-    }
-*/
-    //implementation fg.deobf("com.oierbravo.mechanical_lemon_lib:MechanicalLemonLib:${mechanical_lemon_lib_version}")
 
     runtimeOnly("curse.maven:generatorgalore-691049:5797691")
     runtimeOnly("curse.maven:pipez-443900:5609056")
@@ -234,6 +226,7 @@ publishMods {
             minecraftVersions.add(minecraft_version)
             clientRequired = true
             serverRequired = true
+            required("mechanicals-lib")
             optional("jei")
             optional("kubejs")
 
