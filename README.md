@@ -1,144 +1,68 @@
-<!-- modrinth_exclude.start -->
-Trading Station
-=============
-<!-- modrinth_exclude.end -->
-Item trading machine.
-Made for modpacks. It doesn't add any recipe.
+# Trading Station
+- Item trading machine. 
+- Made for modpacks. __It doesn't add any recipe.__
 
-Features
---------
 
+## 1.21.1-1.x Version Requires Mechanicals Lib
+- [Curseforge](https://www.curseforge.com/minecraft/mc-mods/mechanicals-lib "Curseforge")
+- [Modrinth](https://modrinth.com/mod/mechanicals-lib "Modrinth")
+
+## [Dedicated wiki](https://wiki.mechanicalmods.net/mods/trading-station/)
+
+## Features
 - Basic station with no power requirements.
 - Powered station with RF power requirements.
 - Custom *Trading recipe*
-  - Optional biome and required machine.
+- Custom recipe requirements per recipe.
 - Indestructible variant for each station.
 - Configurable consumption & progress.
-- Mechanical (Create Addon) station available with companion mod.
+- Mechanical (Create Addon) station available with companion mod.[Link](https://modrinth.com/mod/mechanical-trading-station)
 
-Pending features
-----------------
-- In world Structure
-- CraftTweaker support
-- Port to 1.20.1
-- Recipe requirements
-  - Distance from spawn
-  - minHeight & maxHeight
-- Patchouli book
-
-Known bugs
----------
-- Screen resizing and JEI alters the menu slot positions.
-  
-Trading recipe
----------------
-
-- `ingredients` (required). An array/list of 1 or 2 ingredients.
-- `result` (required). Single output item/block
-- `processingTime` (optional). Ticks required to process. Default to 1. Powered machine has a 5x speed.
-- `biome` (optional). Biome requirement for the recipe. Default any.
-- `exclusiveTo` (optional). Required station. Defaults any. Possible values: `basic`, `powered`, `mechanical`
-
-### Example (basic input & output)
-```
-{
-  "type": "trading_station:trading",
-  "ingredients": [
-    {"item": "minecraft:emerald", "count": 5}
-  ],
-  "result": {
-    "item": "minecraft:diamond",
-    "count": 5
-  },
-  "processingTime": 500
-}
-```
-### Example (output item with NBT)
-```
-{
-  "type": "trading_station:trading",
-  "ingredients": [
-    {"item": "minecraft:diamond", "count": 5}
-  ],
-  "result": {
-    "item": "minecraft:enchanted_book",
-    "nbt": "{StoredEnchantments: [{id:\"looting\",lvl:3s}]}"
-  },
-  "processingTime": 100
-}
-
-```
-### Example (biome requirement)
-```
+## Trading recipe
+- `"type": "trading_station:trading"`
+- `result`:Output item. Item `components` allowed.
+- `ingredients`: Required items.
+- `processingTime`: Required time in ticks.
+- `recipeRequirements`: Custom recipe requirements. [WIKI](https://wiki.mechanicalmods.net/mods/mechanicals-lib/recipe-requirements/)
+### Example
+```json
 {
 	"type": "trading_station:trading",
 	"result": {
-		"item": "minecraft:diamond_sword",
+		"id": "minecraft:enchanted_book",
 		"count": 1,
-		"nbt": "{Damage:0,Enchantments:[{id:\"mending\",lvl:1s}]}"
+		"components": {
+			"minecraft:stored_enchantments": {
+				"levels": {
+					"minecraft:density": 3
+				}
+			}
+		}
 	},
 	"ingredients": [
 		{
-			"item": "minecraft:diamond",
+			"ingredient": {
+				"item": "minecraft:diamond"
+			},
 			"count": 5
 		}
 	],
-	"processingTime": 100,
-	"biome": {
-		"name": "minecraft:plains"
-	}
+	"processingTime": 100
 }
 ```
-### Example (exclusiveTo)
+## KubeJS
+### Some examples
+```js
+// Processing time
+event.recipes.trading_station.trading(Item.of('minecraft:gold_block', 5),[Item.of("5x minecraft:oak_log"),Item.of("10x minecraft:birch_log")]).processingTime(250);
+
+//Enchanted book result
+event.recipes.trading_station.trading(Item.of('minecraft:enchanted_book[stored_enchantments={levels:{"minecraft:unbreaking":3}}]', 1),[Item.of("minecraft:diamond", 5)]).processingTime(100);
+
+//With machine requirement
+event.recipes.trading_station.trading(Item.of('minecraft:emerald_block'),[Item.of("5x minecraft:diamond")]).processingTime(100).requirements(MachineId.of(["powered","mechanical"]));
 ```
-{
-	"type": "trading_station:trading",
-	"result": {
-		"item": "minecraft:diamond_sword",
-		"count": 1,
-		"nbt": "{Damage:0,Enchantments:[{id:\"sharpness\",lvl:1s}]}"
-	},
-	"ingredients": [
-		{
-			"item": "minecraft:diamond",
-			"count": 5
-		}
-	],
-	"processingTime": 100,
-	"exclusiveTo": [
-		"powered"
-	]
-}
-```
-
-KubeJS 6.1 Integration
-----------------------
-```
-ServerEvents.recipes(event => {
-  /**
-  *  event.recipes.tradingStationTrading(Result Item, Input Ingredients[])
-  *  .processingTime(Int) [optional]
-  *  .biome(Biome|BiomeTag) [optional]
-  *  .exclusiveTo(String) [optional]
-  *  .exclusiveTo(String[]) [optional]
-  **/
-
-    // Basic example
-    event.recipes.tradingStationTrading(Item.of('minecraft:emerald', 5),[Item.of("5x minecraft:diamond")]);
-    event.recipes.tradingStationTrading(Item.of('minecraft:emerald', 5),[Item.of("5x minecraft:oak_log"),Item.of("10x minecraft:birch_log")]).processingTime(100);
-    event.recipes.tradingStationTrading(Item.of('minecraft:emerald', 5),[Item.of("5x minecraft:diamond")]).processingTime(100);
-    event.recipes.tradingStationTrading(Item.of('minecraft:andesite',2),[Item.of("2x minecraft:cobblestone")]).processingTime(100);
-
-    //Enchanted book result
-    event.recipes.tradingStationTrading(Item.of('minecraft:enchanted_book', '{StoredEnchantments:[{id:"power",lvl:5s}]}').strongNBT(),[Item.of("minecraft:stone")]).processingTime(100)
-
-    // With biome requirement
-    event.recipes.tradingStationTrading(Item.of('minecraft:diamond_sword', '{Enchantments:[{id:"power",lvl:5s}]}').strongNBT(),[Item.of("5x minecraft:diamond")]).processingTime(100).biome('#minecraft:is_beach');
-    event.recipes.tradingStationTrading(Item.of('minecraft:diamond_sword', '{Enchantments:[{id:"mending",lvl:1s}]}').strongNBT(),[Item.of("5x minecraft:diamond")]).processingTime(100).biome('minecraft:plains');
-
-    //With exclusive to requirement
-    event.recipes.tradingStationTrading(Item.of('minecraft:diamond_sword', '{Enchantments:[{id:"looting",lvl:1s}]}').strongNBT(),[Item.of("5x minecraft:diamond")]).processingTime(100).exclusiveTo('powered');
-    event.recipes.tradingStationTrading(Item.of('minecraft:diamond_sword', '{Enchantments:[{id:"sharpness",lvl:1s}]}').strongNBT(),[Item.of("5x minecraft:diamond")]).processingTime(100).exclusiveTo(['powered','mechanical']);
-
-})
+### Machine ID (binding)
+```js
+MachineId.of(["powered","mechanical"])
 ```
