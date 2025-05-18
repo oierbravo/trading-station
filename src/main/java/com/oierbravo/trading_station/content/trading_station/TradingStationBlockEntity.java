@@ -165,7 +165,6 @@ public class TradingStationBlockEntity extends BlockEntity  implements MenuProvi
                 ModBlockEntities.TRADING_STATION_BLOCK_ENTITY.get(),
                 (be, context) -> {
                     Direction localDir = be.getBlockState().getValue(TradingStationBlock.HORIZONTAL_FACING);
-                    //if(context != null && localDir == context)
                     if(context != null && localDir == context.getOpposite())
                         return be.getInputItemHandler();
                     if(context == Direction.DOWN)
