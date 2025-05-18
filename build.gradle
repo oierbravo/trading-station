@@ -157,6 +157,8 @@ dependencies {
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},)")
     implementation "com.tterrag.registrate:Registrate:${registrate_version}"
 
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${flywheel_minecraft_version}:${flywheel_version}")
     runtimeOnly(jarJar("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_version}") {
         version {

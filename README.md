@@ -24,7 +24,50 @@
 - `ingredients`: Required items.
 - `processingTime`: Required time in ticks.
 - `recipeRequirements`: Custom recipe requirements. [WIKI](https://wiki.mechanicalmods.net/mods/mechanicals-lib/recipe-requirements/)
-### Example
+### Example (One ingredient)
+```json
+{
+	"type": "trading_station:trading",
+	"result": {
+		"id": "minecraft:diamond",
+		"count": 5
+	},
+	"ingredients": [
+		{
+			"ingredient": {
+				"item": "minecraft:emerald"
+			},
+			"count": 5
+		}
+	]
+}
+```
+### Example (Two ingredients)
+```json
+{
+  "type": "trading_station:trading",
+  "result": {
+    "id": "minecraft:gold_block",
+    "count": 5
+  },
+  "ingredients": [
+    {
+      "ingredient": {
+        "item": "minecraft:oak_log"
+      },
+      "count": 5
+    },
+    {
+      "ingredient": {
+        "item": "minecraft:birch_log"
+      },
+      "count": 10
+    }
+  ],
+  "processingTime": 250
+}
+```
+### Example (Enchanted book)
 ```json
 {
 	"type": "trading_station:trading",
@@ -48,6 +91,34 @@
 		}
 	],
 	"processingTime": 100
+}
+```
+## Example (Machine Requirement)
+```json
+{
+	"type": "trading_station:trading",
+	"result": {
+		"id": "minecraft:emerald_block",
+		"count": 1
+	},
+	"ingredients": [
+		{
+			"ingredient": {
+				"item": "minecraft:diamond"
+			},
+			"count": 5
+		}
+	],
+	"processingTime": 100,
+	"requirements": [
+		{
+			"value": [
+				"powered",
+				"mechanical"
+			],
+			"type": "trading_station:machine_id"
+		}
+	]
 }
 ```
 ## KubeJS
