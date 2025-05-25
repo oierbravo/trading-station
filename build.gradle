@@ -19,6 +19,8 @@ plugins {
     id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
     id "com.modrinth.minotaur" version "2.+"
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -37,12 +39,18 @@ archivesBaseName = "${modid}"
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
+boolean MechanicalLemonLibInWorkspace = findProject(':MechanicalLemonLib') != null
+
+
 minecraft {
+
     if (Boolean.parseBoolean(project.use_parchment)) {
         mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
     } else {
         mappings channel: 'official', version: "${minecraft_version}"
     }
+    copyIdeResources = true
 
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
@@ -140,38 +148,21 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    maven {
-        // location of the maven for Registrate and Flywheel
-        name = 'tterrag maven'
-        url = 'https://maven.tterrag.com'
-    }
-    maven {
-        // location of the maven that hosts JEI files since January 2023
-        // location of the maven for Vazkii's mods
-        name = "Jared's maven"
-        url = "https://maven.blamejared.com/"
-    }
-    maven {
-        // location of the maven for Curios API
-        url = "https://maven.theillusivec4.top/"
-    }
-    maven {
-        // location of maven for CC: Tweaked
-        name = "squiddev"
-        url = "https://squiddev.cc/maven/"
-    }
+    mavenLocal()
 
     maven {
-        url = 'https://www.cursemaven.com'
-        content {
-            includeGroup "curse.maven"
-        }
+        // Location of the maven that hosts JEI files (and TiC)
+        name 'Progwml6 maven'
+        url 'https://dvs1.progwml6.com/files/maven'
     }
     maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
+        name = 'tterrag maven'
+        url = 'https://maven.tterrag.com/'
+    }
+    maven {
+        url "https://www.cursemaven.com"
         content {
-            includeGroup "maven.modrinth"
+            includeGroup "curse.maven"
         }
     }
     maven {
@@ -194,9 +185,17 @@ repositories {
             includeGroup "dev.architectury"
         }
     }
-    mavenLocal()
-    flatDir {
-        dirs 'libs'
+    maven {
+        url "https://maven.blamejared.com"
+    }
+    maven { // LDLib Configuration
+        name "firstdarkdev"
+        url "https://maven.firstdarkdev.xyz/snapshots"
+    }
+    maven {
+        // Location of the maven for Ponder, Catnip
+        name = 'createmod maven'
+        url 'https://maven.createmod.net'
     }
 }
 
@@ -205,10 +204,11 @@ dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[MC1.20,MC1.21)")
+    //jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},MC1.21)")
 
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "[${registrate_version},)") {
-        jarJar.pin(it, project.registrate_version)
+        jarJar.ranged(it, "[${registrate_version},)")
+
     }
     implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
 
@@ -216,21 +216,16 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge-api:${jei_version}")
     implementation fg.deobf("mezz.jei:jei-${jei_minecraft_version}-forge:${jei_version}")
 
+
+
     if (kubejs_enabled.toBoolean()) {
         implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
         implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
         implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+        annotationProcessor "com.github.llamalad7.mixinextras:mixinextras-common:${mixin_extras}"
+        implementation fg.deobf("com.github.llamalad7.mixinextras:mixinextras-forge:${mixin_extras}")
     }
     implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
-    if(generators_enabled.toBoolean()){
-        runtimeOnly fg.deobf("curse.maven:generatorgalore-${generators_id}:${generators_file_id}")
-    }
-
-
-    if (create_enabled.toBoolean()) {
-        implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
-        implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
-    }
 
     if (ct_enabled.toBoolean()) {
         def minecraftVersion= "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
@@ -243,6 +238,19 @@ dependencies {
         annotationProcessor ctDep
     }
 
+    jarJar(group: 'com.oierbravo.mechanical_lemon_ui', name: 'MechanicalLemonUI', version: "[${mechanical_lemon_ui_version},)") {
+        jarJar.pin(it, "[${project.mechanical_lemon_ui_version},)")
+    }
+    implementation fg.deobf("com.oierbravo.mechanical_lemon_ui:MechanicalLemonUI:${mechanical_lemon_ui_version}")
+
+    jarJar(group: 'com.oierbravo.mechanical_lemon_lib', name: 'MechanicalLemonLib', version: "[${mechanical_lemon_lib_version},)") {
+        jarJar.pin(it, "[${project.mechanical_lemon_lib_version},)")
+    }
+
+    implementation fg.deobf("com.oierbravo.mechanical_lemon_lib:MechanicalLemonLib:${mechanical_lemon_lib_version}")
+
+    runtimeOnly fg.deobf("curse.maven:generatorgalore-691049:5318306")
+    runtimeOnly fg.deobf("curse.maven:pipez-443900:4916633")
     //annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 }
@@ -251,6 +259,22 @@ compileJava.options.encoding = 'UTF-8'
 compileJava {
     options.compilerArgs = ['-Xdiags:verbose']
 }
+
+/*tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+                             forge_version       : forge_version, forge_version_range: forge_version_range,
+                             loader_version_range: loader_version_range,
+                             modid              : modid, mod_name: display_name, mod_license: mod_license, mod_version: mod_version,
+                             author        : author
+                           ]
+
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}*/
+
 tasks.withType(Jar) {
     //from tasks.createChangelog.outputFile
     archiveClassifier = 'slim'
@@ -335,6 +359,7 @@ if(System.getenv('MODRINTH_TOKEN') != null) {
         dependencies { // A special DSL for creating dependencies
             optional.project "kubejs"
             optional.project "jei"
+            optional.project "jade"
         }
         changelog = rootProject.file("changes/${minecraft_version}-${mod_version}.md").text
         syncBodyFrom = rootProject.file("README.md").text

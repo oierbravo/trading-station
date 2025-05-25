@@ -1,6 +1,7 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.trading_station.registrate.TradingStationRegistrate;
+import com.oierbravo.trading_station.registrate.ModBlockEntities;
+import com.oierbravo.trading_station.registrate.ModShapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +25,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
@@ -36,8 +36,7 @@ public class TradingStationBlock extends BaseEntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-    private static final VoxelShape RENDER_SHAPE = Shapes.box(0, 0, 0, 0.9, 0.9, 0.9);
-    //public static final BooleanProperty BOTTOM = BlockStateProperties.BOTTOM;
+    private static final VoxelShape RENDER_SHAPE = ModShapes.TRADING_STATION;
 
 
     @SuppressWarnings("deprecation")
@@ -80,7 +79,7 @@ public class TradingStationBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return TradingStationRegistrate.BLOCK_ENTITY.create(pPos, pState);
+        return ModBlockEntities.TRADING_STATION_BLOCK_ENTITY.create(pPos, pState);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class TradingStationBlock extends BaseEntityBlock {
         if(pLevel.isClientSide()) {
             return null;
         }
-        return createTickerHelper(pBlockEntityType, TradingStationRegistrate.BLOCK_ENTITY.get(),
+        return createTickerHelper(pBlockEntityType, ModBlockEntities.TRADING_STATION_BLOCK_ENTITY.get(),
                 (pLevel1, pPos, pState1, pBlockEntity) -> pBlockEntity.tick(pLevel1, pPos, pState1));
     }
 
@@ -127,7 +126,8 @@ public class TradingStationBlock extends BaseEntityBlock {
         if (!pLevel.isClientSide()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
             if(blockEntity instanceof TradingStationBlockEntity) {
-                NetworkHooks.openScreen(((ServerPlayer)pPlayer), (TradingStationBlockEntity) blockEntity, pPos);
+                TradingStationBlockEntity tradingStationBlockEntity = (TradingStationBlockEntity) blockEntity;
+                        NetworkHooks.openScreen((ServerPlayer) pPlayer,tradingStationBlockEntity, tradingStationBlockEntity::sendToMenu);
             } else {
                 throw new IllegalStateException("Our Container provider is missing!");
             }

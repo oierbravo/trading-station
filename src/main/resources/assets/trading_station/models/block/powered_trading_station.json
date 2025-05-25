@@ -4,6 +4,6 @@
 	"textures": {
 		"base": "trading_station:block/powered_trading_station",
 		"back": "trading_station:block/powered_trading_station_back",
-		"particle": "trading_station:block/powered_trading_station_base"
+		"particle": "trading_station:block/powered_trading_station_back"
 	}
 }

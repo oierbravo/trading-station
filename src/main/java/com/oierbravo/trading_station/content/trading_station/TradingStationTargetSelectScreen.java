@@ -1,27 +1,29 @@
 package com.oierbravo.trading_station.content.trading_station;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.oierbravo.mechanical_lemon_ui.foundation.gui.widget.IconButton;
+import com.oierbravo.mechanical_lemon_ui.register.LibIcons;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
-import com.oierbravo.trading_station.foundation.gui.BasicButton;
 import com.oierbravo.trading_station.foundation.util.ModLang;
-import com.oierbravo.trading_station.network.packets.GhostItemSyncC2SPacket;
+import com.oierbravo.trading_station.network.packets.RecipeClearC2SPacket;
 import com.oierbravo.trading_station.network.packets.RecipeSelectC2SPacket;
 import com.oierbravo.trading_station.registrate.ModMessages;
 import com.oierbravo.trading_station.registrate.ModRecipes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,15 +59,18 @@ public class TradingStationTargetSelectScreen extends Screen {
     protected int topPos;
 
     private BlockPos blockPos;
+
+    private IconButton backButton;
+    private IconButton clearButton;
+
     protected TradingStationTargetSelectScreen(Component pTitle) {
         super(pTitle);
     }
     public TradingStationTargetSelectScreen(ITradingStationBlockEntity pBlockEntity, BlockPos pBlockPos) {
-        this(ModLang.translate("select_target.title"));
+        this(ModLang.translate("select_target.title").component());
         this.blockEntity = pBlockEntity;
         this.blockPos = pBlockPos;
-        //this.allPossibleRecipes = ModRecipes.getAllOutputs(pBlockEntity.getLevel(),pBlockEntity.getBiome(),pBlockEntity.getTraderType());
-        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine(Minecraft.getInstance().level,pBlockEntity.getBiome(),pBlockEntity.getTraderType());
+        this.allPossibleRecipes = ModRecipes.getAllRecipesForMachine((Level) Minecraft.getInstance().level, (BlockEntity) pBlockEntity);
         resetDisplayedTargets();
 
     }
@@ -81,17 +86,26 @@ public class TradingStationTargetSelectScreen extends Screen {
         this.titleLabelY = 4;
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
-        addRenderableWidget(new BasicButton(getGuiLeft() - 25, getGuiTop() + 1, 25, 20, Component.literal("<--"), (button) -> {
+
+        backButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 1, LibIcons.ARROW_LEFT);
+        backButton.withCallback(() -> {
             Minecraft.getInstance().popGuiLayer();
-        }));
-        addRenderableWidget(new BasicButton(getGuiLeft() - 25, getGuiTop() + 30, 25, 20, ModLang.translate("select_target.clear"), (button) -> {
-            ModMessages.sendToServer(new GhostItemSyncC2SPacket(ItemStack.EMPTY,getBlockPos()));
+        });
+        backButton.setToolTip(ModLang.translate("select_target.back").component());
+        addRenderableWidget(backButton);
+
+        clearButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 30, LibIcons.TRASH);
+        clearButton.withCallback(() -> {
+            ModMessages.sendToServer(new RecipeClearC2SPacket(getBlockPos()));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
             Minecraft.getInstance().popGuiLayer();
-        }) );
+        });
+        clearButton.setToolTip(ModLang.translate("select_target.clear").component());
+        addRenderableWidget(clearButton);
+
     }
 
-    public int getGuiLeft() { return leftPos; }
+    public int getGuiLeft() { return leftPos - 25; }
     public int getGuiTop() { return topPos; }
     @Override
     public void tick() {
@@ -105,7 +119,6 @@ public class TradingStationTargetSelectScreen extends Screen {
             }
         super.tick();
     }
-
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         renderBackground(pGuiGraphics);
@@ -118,12 +131,9 @@ public class TradingStationTargetSelectScreen extends Screen {
         renderLabels(pGuiGraphics, pMouseX, pMouseY);
 
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-
     }
-
-
     protected void renderLabels(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
-        pGuiGraphics.drawString(font, this.title.getString(), this.titleLabelX + getGuiLeft(), this.titleLabelY + getGuiTop(), 4210752);
+        pGuiGraphics.drawString(this.font,this.title.getString(), (float)this.titleLabelX + getGuiLeft(), (float)this.titleLabelY + getGuiTop(), 4210752,false);
     }
     private void renderSelectedRecipe(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, int pLastDisplayedIndex) {
         LinkedList<TradingRecipe> displayedRecipes = getDisplayedRecipes();
@@ -133,6 +143,7 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
+
             if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId()))
                 pGuiGraphics.blit(TEXTURE, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
         }
@@ -146,13 +157,15 @@ public class TradingStationTargetSelectScreen extends Screen {
             TradingRecipe target = allPossibleRecipes.get(index);
             int xStart = getGuiLeft() + targetBoxLeftPosOffset + firstDisplayedIndex % COLUMNS * TARGET_BOX_SIZE + 1;
             int yStart = getGuiTop() + targetBoxTopPosOffset + (firstDisplayedIndex / COLUMNS) * TARGET_BOX_SIZE + 3;
-           // if(target.getId().toString().equals(this.blockEntity.getTargetedRecipeId())){
-           //     blit(pPoseStack, xStart, yStart, 0, imageHeight + 19, TARGET_BOX_SIZE, TARGET_BOX_SIZE);
-           // }
-            renderFloatingItem(target.getResultItem(), xStart, yStart );
+            renderFloatingItem(pGuiGraphics, target.getResult(), xStart, yStart );
 
             if (pMouseX >= xStart - 1 && pMouseX <= xStart + 16 && pMouseY >= yStart - 1 && pMouseY <= yStart + 16) {
-                pGuiGraphics.renderTooltip(font, target.getResultItem(), pMouseX, pMouseY);
+                ItemStack result = target.getResult();
+                CompoundTag tag = result.getOrCreateTag();
+
+                tag.putString("tradingRecipeId",target.getId().toString());
+                result.setTag(tag);
+                pGuiGraphics.renderTooltip(this.font,result, pMouseX, pMouseY);
             }
         }
     }
@@ -161,17 +174,9 @@ public class TradingStationTargetSelectScreen extends Screen {
         return displayedRecipes;
     }
 
-
-    private void renderFloatingItem(ItemStack pItemStack, int pX, int pY) {
+    private void renderFloatingItem(GuiGraphics pGuiGraphics,ItemStack pItemStack, int pX, int pY) {
         RenderSystem.applyModelViewMatrix();
-        /*setBlitOffset(2000);
-        itemRenderer.blitOffset = 2000.0f;
-
-        itemRenderer.renderAndDecorateItem(pItemStack, pX, pY);
-        itemRenderer.renderGuiItemDecorations(font, pItemStack, pX, pY);
-
-        setBlitOffset(0);
-        itemRenderer.blitOffset = 0.0f;*/
+        pGuiGraphics.renderFakeItem(pItemStack, pX, pY);
     }
 
 
@@ -180,13 +185,13 @@ public class TradingStationTargetSelectScreen extends Screen {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        pGuiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+        pGuiGraphics.fillGradient( 0, 0, this.width, this.height, -1072689136, -804253680);
         pGuiGraphics.blit(TEXTURE, getGuiLeft(), getGuiTop(), 0, 0, imageWidth, imageHeight);
     }
 
     private void renderScrollbar(GuiGraphics pGuiGraphics) {
         int scrollPosition = (int) (43.0f * scrollOffset);
-        pGuiGraphics.blit(TEXTURE, getGuiLeft() + scrollBarXOffset, getGuiTop() + scrollBarYOffset + scrollPosition, 0, imageHeight + 1  + (isScrollBarActive() ? 0 : 9), 7,9);
+        pGuiGraphics.blit( TEXTURE,getGuiLeft() + scrollBarXOffset, getGuiTop() + scrollBarYOffset + scrollPosition, 0, imageHeight + 1  + (isScrollBarActive() ? 0 : 9), 7, 9);
     }
 
     @Override
@@ -202,7 +207,6 @@ public class TradingStationTargetSelectScreen extends Screen {
 
             if (boxX > 0 && boxX <= TARGET_BOX_SIZE + 1 && boxY > 0 && boxY <= TARGET_BOX_SIZE + 1 && isValidRecipeIndex(index)) {
                 TradingRecipe recipe = getDisplayedRecipes().get(index);
-                //ModMessages.sendToServer(new GhostItemSyncC2SPacket(itemStack,getBlockPos()));
                 ModMessages.sendToServer(new RecipeSelectC2SPacket(recipe.getId(),getBlockPos()));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
                 Minecraft.getInstance().popGuiLayer();

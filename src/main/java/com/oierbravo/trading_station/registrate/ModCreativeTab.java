@@ -14,24 +14,17 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ModCreativeTab {
 
+public class ModCreativeTab {
     private static final DeferredRegister<CreativeModeTab> TAB_REGISTER =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TradingStation.MODID);
 
     public static final RegistryObject<CreativeModeTab> MAIN_TAB = TAB_REGISTER.register("main",
             () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.trading_station:main"))
-                    .icon(TradingStationRegistrate.BLOCK::asStack)
-                    .displayItems((pParameters, pOutput) -> {
-                        for (RegistryEntry<Block> entry : TradingStation.registrate().getAll(Registries.BLOCK)) {
-                            pOutput.accept(entry.get());
-                        }
-                        for (RegistryEntry<Item> entry : TradingStation.registrate().getAll(Registries.ITEM)) {
-                            pOutput.accept(entry.get());
-                        }
-                    })
+                    .title(Component.translatable("itemGroup.trading_station"))
+                    .icon(ModBlocks.TRADING_STATION::asStack)
                     .build());
+
 
     public static CreativeModeTab getBaseTab() {
         return MAIN_TAB.get();
@@ -41,4 +34,3 @@ public class ModCreativeTab {
         TAB_REGISTER.register(modEventBus);
     }
 }
-
