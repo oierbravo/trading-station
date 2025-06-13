@@ -1,11 +1,11 @@
 package com.oierbravo.trading_station.content.trading_station;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.oierbravo.mechanicals_ui.foundation.gui.widget.IconButton;
-import com.oierbravo.mechanicals_ui.register.LibIcons;
+import com.oierbravo.mechanicals.foundation.gui.MechanicalIcons;
+import com.oierbravo.mechanicals.foundation.gui.widget.IconButton;
+import com.oierbravo.trading_station.ModLang;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.component.TradingRecipeComponent;
-import com.oierbravo.trading_station.ModLang;
 import com.oierbravo.trading_station.network.packets.data.RecipeClearSyncPayload;
 import com.oierbravo.trading_station.network.packets.data.RecipeSelectSyncPayload;
 import com.oierbravo.trading_station.registrate.ModGuiTextures;
@@ -89,14 +89,14 @@ public class TradingStationTargetSelectScreen extends AbstractSimiScreen {
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
 
-        backButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 1, LibIcons.ARROW_LEFT);
+        backButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 1, MechanicalIcons.ARROW_LEFT);
         backButton.withCallback(() -> {
             Minecraft.getInstance().popGuiLayer();
         });
         backButton.setToolTip(ModLang.translate("select_target.back").component());
         addRenderableWidget(backButton);
 
-        clearButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 30, LibIcons.TRASH);
+        clearButton = new IconButton(getGuiLeft() - 20, getGuiTop() + 30, MechanicalIcons.TRASH);
         clearButton.withCallback(() -> {
             ModMessages.sendToServer(new RecipeClearSyncPayload(getBlockPos()));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));

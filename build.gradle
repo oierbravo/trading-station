@@ -82,6 +82,11 @@ neoForge {
 }
 
 sourceSets.main {
+    java {
+        if (!kubejs_enabled.toBoolean()) {
+            exclude 'com/oierbravo/' + mod_id + '/compat/kubejs/**'
+        }
+    }
     resources {
         srcDir 'src/generated/resources'
         exclude '.cache/'

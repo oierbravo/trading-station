@@ -1,16 +1,16 @@
 package com.oierbravo.trading_station.content.trading_station;
 
+import com.oierbravo.mechanicals.foundation.gui.MechanicalGUITextures;
+import com.oierbravo.mechanicals.foundation.gui.MechanicalIcons;
+import com.oierbravo.mechanicals.foundation.gui.widget.EnergyDisplay;
+import com.oierbravo.mechanicals.foundation.gui.widget.IconButton;
+import com.oierbravo.mechanicals.foundation.gui.widget.ProgressArrow;
+import com.oierbravo.mechanicals.foundation.gui.widget.ToggleIconButton;
 import com.oierbravo.mechanicals.foundation.ingredient.CountableIngredient;
 import com.oierbravo.mechanicals_ui.foundation.gui.menu.AbstractSimiContainerScreen;
-import com.oierbravo.mechanicals_ui.foundation.gui.widget.EnergyDisplay;
-import com.oierbravo.mechanicals_ui.foundation.gui.widget.IconButton;
-import com.oierbravo.mechanicals_ui.foundation.gui.widget.ProgressArrow;
-import com.oierbravo.mechanicals_ui.foundation.gui.widget.ToggleIconButton;
 import com.oierbravo.mechanicals_ui.foundation.utility.FakeItemRenderer;
-import com.oierbravo.mechanicals_ui.register.LibGuiTextures;
-import com.oierbravo.mechanicals_ui.register.LibIcons;
-import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.ModLang;
+import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.network.packets.data.LockInputSyncPayload;
 import com.oierbravo.trading_station.network.packets.data.RedstoneModeSyncPayload;
 import com.oierbravo.trading_station.registrate.ModGuiTextures;
@@ -29,7 +29,7 @@ import java.util.Optional;
 
 public class TradingStationScreen extends AbstractSimiContainerScreen<TradingStationMenu> {
     private static final ModGuiTextures BG = ModGuiTextures.TRADING_STATION;
-    protected static final LibGuiTextures PLAYER = LibGuiTextures.PLAYER_INVENTORY;
+    protected static final MechanicalGUITextures PLAYER = MechanicalGUITextures.PLAYER_INVENTORY;
 
     protected int imageWidth = 176;
     protected int imageHeight = 176;
@@ -70,7 +70,7 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
         clearWidgets();
 
 
-        confirmButton = new IconButton(leftPos + 30 + BG.width - 33, topPos + BG.height - 24, LibIcons.CHECK);
+        confirmButton = new IconButton(leftPos + 30 + BG.width - 33, topPos + BG.height - 24, MechanicalIcons.CHECK);
         confirmButton.withCallback(() -> {
             minecraft.player.closeContainer();
         });
@@ -79,8 +79,8 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
         addRenderableWidget(confirmButton);
 
         ScreenElement[] lockButtonIcons = new ScreenElement[2];
-        lockButtonIcons[0] = LibIcons.LOCK_OPEN;
-        lockButtonIcons[1] = LibIcons.LOCK_CLOSE;
+        lockButtonIcons[0] = MechanicalIcons.LOCK_OPEN;
+        lockButtonIcons[1] = MechanicalIcons.LOCK_CLOSE;
 
         MutableComponent[] lockButtonLabels = new MutableComponent[2];
         lockButtonLabels[0] = ModLang.translate("screen.lock.lock").component();
@@ -102,7 +102,7 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
         addRenderableWidget(lockButton);
 
 
-        targetButton = new IconButton(leftPos + BG.width/2 + 10, topPos + BG.height - 10, LibIcons.SEARCH);
+        targetButton = new IconButton(leftPos + BG.width/2 + 10, topPos + BG.height - 10, MechanicalIcons.SEARCH);
         targetButton.withCallback(() -> {
 
             TradingStationTargetSelectScreen screen = new TradingStationTargetSelectScreen( this.menu.contentHolder, this.menu.contentHolder.getBlockPos());
@@ -115,9 +115,9 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
         addRenderableWidget(targetButton);
 
         ScreenElement[] redstoneButtonIcons = new ScreenElement[3];
-        redstoneButtonIcons[0] = LibIcons.REDSTONE_IGNORE;
-        redstoneButtonIcons[1] = LibIcons.REDSTONE_LOW;
-        redstoneButtonIcons[2] = LibIcons.REDSTONE_HIGH;
+        redstoneButtonIcons[0] = MechanicalIcons.REDSTONE_IGNORE;
+        redstoneButtonIcons[1] = MechanicalIcons.REDSTONE_LOW;
+        redstoneButtonIcons[2] = MechanicalIcons.REDSTONE_HIGH;
 
         MutableComponent[] redstoneButtonLabels = new MutableComponent[3];
         redstoneButtonLabels[0] = ModLang.translate("screen.redstone.ignored").component();
@@ -149,7 +149,7 @@ public class TradingStationScreen extends AbstractSimiContainerScreen<TradingSta
 
     }
     protected void drawExclamation(GuiGraphics pGuiGraphics,int pX, int pY){
-        ScreenElement exclamationElement = LibIcons.TRIANGLE_EXCLAMATION_ORANGE;
+        ScreenElement exclamationElement = MechanicalIcons.TRIANGLE_EXCLAMATION_ORANGE;
         exclamationElement.render(pGuiGraphics, pX, pY);
 
     }
