@@ -3,10 +3,6 @@ package com.oierbravo.trading_station.foundation.util;
 import com.oierbravo.mechanical_lemon_ui.foundation.utility.Lang;
 import com.oierbravo.mechanical_lemon_ui.foundation.utility.LangBuilder;
 import com.oierbravo.trading_station.TradingStation;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-
-import java.util.Locale;
 
 public class ModLang extends Lang {
     public ModLang() {

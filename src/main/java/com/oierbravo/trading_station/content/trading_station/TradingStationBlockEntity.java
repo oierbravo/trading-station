@@ -1,6 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station;
 
-import com.oierbravo.mechanical_lemon_lib.jade.IHavePercent;
+import com.oierbravo.mechanicals.jade.IHavePercent;
 import com.oierbravo.trading_station.content.trading_recipe.IHaveMachineId;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.network.packets.ItemStackSyncS2CPacket;
@@ -25,8 +25,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,7 +40,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class TradingStationBlockEntity extends BlockEntity  implements MenuProvider, ITradingStationBlockEntity, IHaveMachineId, IHavePercent {

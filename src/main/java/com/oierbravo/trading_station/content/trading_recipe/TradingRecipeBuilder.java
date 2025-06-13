@@ -1,9 +1,8 @@
 package com.oierbravo.trading_station.content.trading_recipe;
 
 
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.BaseRecipeBuilder;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.IBaseRecipeParams;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirementType;
+import com.oierbravo.mechanicals.foundation.recipe.BaseRecipeBuilder;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirementType;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;

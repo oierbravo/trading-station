@@ -1,7 +1,7 @@
 package com.oierbravo.trading_station.foundation.gui;
 
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirementType;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirement;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirementType;
 import com.oierbravo.mechanical_lemon_ui.foundation.utility.Color;
 import com.oierbravo.mechanical_lemon_ui.foundation.utility.FakeItemRenderer;
 import com.oierbravo.trading_station.content.trading_recipe.MachineRequirement;

@@ -1,16 +1,14 @@
 package com.oierbravo.trading_station.content.trading_recipe;
 
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.*;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.BiomeRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.MaxHeightRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.requirements.MinHeightRequirement;
+import com.oierbravo.mechanicals.foundation.recipe.*;
+import com.oierbravo.mechanicals.foundation.recipe.requirements.BiomeRequirement;
+import com.oierbravo.mechanicals.foundation.recipe.requirements.MaxHeightRequirement;
+import com.oierbravo.mechanicals.foundation.recipe.requirements.MinHeightRequirement;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.registrate.ModRecipes;
-import dev.latvian.mods.kubejs.recipe.schema.RecipeOptional;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -24,7 +22,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,10 +64,6 @@ public class TradingRecipe extends BaseRecipe<SimpleContainer, TradingRecipe.Tra
         return false;
     }
 
-    @Override
-    public ResourceLocation getId() {
-        return super.getId();
-    }
 
     @Override
     public boolean matches(@NotNull SimpleContainer pContainer, Level pLevel) {
@@ -100,6 +93,11 @@ public class TradingRecipe extends BaseRecipe<SimpleContainer, TradingRecipe.Tra
     @Override
     public NonNullList<Ingredient> getIngredients() {
         return itemIngredients;
+    }
+
+    @Override
+    public ResourceLocation getId() {
+        return this.id;
     }
 
     @Override

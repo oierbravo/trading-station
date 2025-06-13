@@ -5,16 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
 import com.oierbravo.trading_station.registrate.*;
 import com.tterrag.registrate.Registrate;
-import com.tterrag.registrate.util.entry.RegistryEntry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.world.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.util.Lazy;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -58,7 +54,6 @@ public class TradingStation
         ModMessages.register();
 
         ModMenus.register();
-        modEventBus.addListener(this::addCreative);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> TradingStationClient.onCtorClient(modEventBus, forgeEventBus));
 
@@ -68,13 +63,7 @@ public class TradingStation
         });
 
     }
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == ModCreativeTab.MAIN_TAB.getKey()){
-            for (RegistryEntry<Item> entry : TradingStation.registrate().getAll(Registries.ITEM)) {
-                event.accept(entry.get());
-            }
-        }
-    }
+
     public static void gatherData(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
         if (event.includeClient()) {

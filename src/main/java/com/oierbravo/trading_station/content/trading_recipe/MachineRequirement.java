@@ -1,12 +1,9 @@
 package com.oierbravo.trading_station.content.trading_recipe;
 
 import com.google.gson.JsonObject;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirementType;
-import com.oierbravo.mechanical_lemon_lib.utility.LibLang;
-import com.oierbravo.trading_station.foundation.util.ModLang;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirement;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirementType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;

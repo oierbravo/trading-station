@@ -1,10 +1,10 @@
 package com.oierbravo.trading_station.compat.jei;
 
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirement;
-import com.oierbravo.mechanical_lemon_lib.foundation.recipe.RecipeRequirementType;
-import com.oierbravo.mechanical_lemon_lib.utility.Components;
-import com.oierbravo.mechanical_lemon_lib.utility.LibLang;
 import com.oierbravo.mechanical_lemon_ui.foundation.utility.Color;
+import com.oierbravo.mechanical_lemon_ui.foundation.utility.Components;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirement;
+import com.oierbravo.mechanicals.foundation.recipe.RecipeRequirementType;
+import com.oierbravo.mechanicals.utility.LibLang;
 import com.oierbravo.trading_station.TradingStation;
 import com.oierbravo.trading_station.content.trading_recipe.TradingRecipe;
 import com.oierbravo.trading_station.foundation.util.ModLang;

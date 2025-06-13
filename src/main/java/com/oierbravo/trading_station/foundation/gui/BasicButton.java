@@ -1,6 +1,5 @@
 package com.oierbravo.trading_station.foundation.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 

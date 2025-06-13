@@ -1,6 +1,6 @@
 package com.oierbravo.trading_station.content.trading_station.powered;
 
-import com.oierbravo.mechanical_lemon_lib.foundation.energy.AbstractEnergyStorage;
+import com.oierbravo.mechanicals.foundation.energy.AbstractEnergyStorage;
 import com.oierbravo.trading_station.content.trading_station.TradingStationBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
